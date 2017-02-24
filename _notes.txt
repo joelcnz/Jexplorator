@@ -1,0 +1,77 @@
+The D Guy (Jexplorator)
+
+eg ‘dub —-build=unittest’
+
+To run the game:
+export DYLD_LIBRARY_PATH=libs
+./jex
+
+Problems:
+1. Pressed 'e' from play mode. And it crashed strait away.
+	play
+	play
+	edit
+	edit
+	Bus error: 10
+	$
+2. While editing the program crashed. Save often.
+
+
+Please read:
+Don't save over test.bin. Run the game, load a level, use [P] to place players to save.
+
+Looks like you have to run it from the terminal.
+
+Steps:
+Press [T] for terminal
+Enter ‘cat’ for list of projects
+Enter ‘l 1’ for arena level
+Enter ’t’ to go out of the terminal
+Click for full screen, faster
+Press [E] and play
+
+Mouse (edit):
+P - place where the guys popup	
+B for paint brush (right click if you have a mouse plugged in - - the track pad doesn’t work)
+J - Jeep (add and remove)
+LSystem + 1 for front painting layer
+LSystem + 2 for normal painting layer
+LSystem + 3 for back painting layer
+W - wipe layers (dark brick for back layer)
+G - count the number of tiles the cursor is over
+Num1, Num2 & Num3 - choose which tile
+LSystem + L - load current project
+LSystem + S - save current project
+E - toggle edit/play
+LSystem + Return - reset level.
+
+LSystem + esc to quit
+
+t - for terminal
+
+Guys:
+Left player - A - left, D right, W - up (tap), S - down (tap)
+Right player - Left - left, Right right, Up - up (tap), Down - down (tap) - - cursor keys
+I’ve got less holding keys down to avoid key clashing, (a pro for multi computers).
+
+Jerminal:
+h - for help
+cat - list projects
+load # - load from cat list
+save <file name> - save project
+create # # - create a new project
+t - quit terminal
+
+Code:
+		import std.algorithm;
+		import std.range;
+		g_bullits = g_bullits.filter!(a => a.bullitState != BullitState.dead).array;
+
+		//foreach_reverse(i, bullit; g_bullits) {
+		//	with(bullit) {
+		//		process;
+				//if (bullitState == BullitState.dead)
+					//g_bullits.remove(i);
+					//g_bullits = g_bullits[0 .. i] ~ g_bullits[i + 1 .. $];
+		//	}
+		//}

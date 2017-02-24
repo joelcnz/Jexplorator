@@ -34,7 +34,8 @@ public:
 
 		float fx, fy;
 		int ix, iy;
-		FILE* pfile = stdc.fopen(std.string.toStringz(fileName), "rb");
+		import std.string;
+		FILE* pfile = stdc.fopen(toStringz(fileName), "rb");
 		
 		int ver;
 		fread(&ver, 1, ver.sizeof, pfile); // read version
@@ -160,13 +161,14 @@ public:
 				pos = resetPos;
 				portal.scrn = portal.resetPosScrn;
 			}
-		g_timer.countDownTime = g_timer.countDownStartTime;
+		g_timer.countDownTimer = g_timer.countDownStartTime;
 		g_inputJex.addToHistory("Game reset!");
 	}
 
 	bool saveCampain() {
 		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Campain...`).to!dstring);
-		FILE* pfile = stdc.fopen(std.string.toStringz(_fileName), "wb");
+		import std.string;
+		FILE* pfile = stdc.fopen(toStringz(_fileName), "wb");
 		int ver = 8; // version
 		fwrite(&ver, 1, ver.sizeof, pfile); // write version
 		writeln("version: ", ver);
@@ -194,7 +196,7 @@ public:
 				iy = portal.resetPosScrn.y; // 
 				fwrite(&ix, 1, ix.sizeof, pfile);
 				fwrite(&iy, 1, iy.sizeof, pfile);
-				writeln("ST screen (portal.resetPosScrn): ", ix, ' ', iy);
+				writeln("ST screen [portal.resetPosScrn]: ", ix, ' ', iy);
 
 				fx = pos.x;
 				fy = pos.y;
@@ -210,7 +212,7 @@ public:
 
 				int sdiamonds = dashBoard.diamonds; // s save 6
 				fwrite(&sdiamonds, 1, sdiamonds.sizeof, pfile);
-				writeln("guy diamonds (diamonds): ", sdiamonds);
+				writeln("guy diamonds [diamonds]: ", sdiamonds);
 
 				// 6.1
 				int stotalDiamonds = dashBoard.totalDiamonds;
@@ -295,10 +297,14 @@ public:
 		return true;
 	}
 
-	//#unittest - How do I used this?
+	//#unittest - 'dub --build=unittest'
 	unittest {
 		g_screens = new Screen[][](2, 3);
-		assert(g_screen[1][2].tiles[0][0] == TileName.brick);
+
+		g_screens[1][2].tiles.length = 1;
+		g_screens[1][2].tiles[0].length = 2;
+
+		assert(g_screens[1][2].tiles[0][1].tileName == TileName.brick);
 	}
 
 	void oldVersions(FILE* pfile, int ver) {

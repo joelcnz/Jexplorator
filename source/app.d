@@ -18,7 +18,7 @@ module main;
 
 import base;
 
-Time timeGuy;
+//Time timeGuy;
 Clock clock;
 
 dstring[] discList;
@@ -42,14 +42,17 @@ int main(string[] args)
 		g_window.close;
 	}
 
+	scope(exit)
+		g_setup.shutDown;
+
 	getDiscList;
 
 	auto blackPlastic = new RectangleShape;
 	blackPlastic.size = Vector2f(320, 320);
 
-	Menu mainMenu;
-	mainMenu.setup;
-	MainMenu mret = MainMenu.doLoop;
+	Menus menus;
+	menus.setup;
+	MenuSelect mret = MenuSelect.doLoop;
 
 	while(g_window.isOpen())
 	{
@@ -63,18 +66,18 @@ int main(string[] args)
 			}
 		}
 
-		if (mret == MainMenu.doLoop) {
-			mret = mainMenu.process;
+		if (mret == MenuSelect.doLoop) {
+			mret = menus.process;
 			final switch(mret) {
-				case MainMenu.start:
+				case MenuSelect.start:
 					g_mode = Mode.play;
 					break;
-				case MainMenu.edit:
+				case MenuSelect.edit:
 					g_mode = Mode.edit;
 					break;
-				case MainMenu.doLoop:
+				case MenuSelect.doLoop:
 					continue;
-				case MainMenu.quit:
+				case MenuSelect.quit:
 					g_window.close();
 					break;
 			}
@@ -85,7 +88,7 @@ int main(string[] args)
 		}
 
 		if (Keyboard.isKeyPressed(Keyboard.Key.LSystem) && lkeys[Letter.w].keyTrigger) {
-			mret = MainMenu.doLoop;
+			mret = MenuSelect.doLoop;
 			continue;
 		}
 			
@@ -303,26 +306,43 @@ int main(string[] args)
 						default: break;
 						case "h", "help":
 						foreach(line; ["Help:",
+									   "h - for this help",
+									   "cls - clear history"
 									   "t - exit terminal",
-									   "exit to exit to OS",
+									   "exit/quit to exit to OS",
 									   "cat - list projects",
 									   "l/load # - load project (see 'cat')",
 									   "save <name> - save current project",
 									   "d/remove/delete # - delete project (see 'cat')",
 									   "create # # - start a new project",
 									   "reset",
-									   "goscreen # #",
+									   "go # #",
 									   "info/i - data for debuging",
-									   "time - set count down time",
 									   "bullitproof/b - can shoot each other",
-									   "hide # - hide player eg hide 1 for p1"])
+									   "hide # - hide player eg hide 1 for p1",
+									   "race # - set and start a countdown timer"])
 							g_inputJex.addToHistory(line.to!dstring);
+						break;
+						case "cls":
+							g_inputJex.clearHistory;
+						break;
+						case "race":
+							if (dargs.length == 2) {
+								auto timer = processValue(dargs[1]);
+								g_timer.setup(timer);
+								if (timer == 0) { //#What ever can the problem here b!?
+									g_timer.setup(1_000);
+									g_inputJex.addToHistory("Count down timer is reset"d);
+								} else {
+									g_inputJex.addToHistory(text("Race set (", timer, " seconds)").to!dstring);
+								}
+							}
 						break;
 						case "hide":
 							if (dargs.length == 2 &&
-								(dargs[1].to!int == 1 ||
-								dargs[1].to!int == 2)) {
-								int player = dargs[1].to!int - 1;
+								(processValue(dargs[1]) == 1 ||
+								 processValue(dargs[1]) == 2)) {
+								int player = processValue(dargs[1]) - 1;
 								if (g_guys[player].hide == Hide.inview)
 									g_guys[player].hide = Hide.hidden;
 								else
@@ -340,14 +360,6 @@ int main(string[] args)
 								g_guys[0].bullitProof = true;
 								g_guys[1].bullitProof = true;
 								g_inputJex.addToHistory("Bullit proof on! (can't shoot each other)"d);
-							}
-						break;
-						case "time": // start time that counts down
-							if (dargs.length == 2) {
-								int tmp = processValue(dargs[1]);
-								if (tmp != 1)
-									g_timer.countDownStartTime = tmp;
-								g_inputJex.addToHistory("Time set!"d);
 							}
 						break;
 						case "reset":
@@ -376,7 +388,7 @@ int main(string[] args)
 									addToHistory("campain set to 'test.bin'"d);
 								}
 							break;
-							case "goscreen":
+							case "go":
 								if (dargs.length == 3) {
 									int sdx, sdy; // screens dimentions
 									sdx = processValue(dargs[1]); //dargs[1].to!int;
@@ -420,26 +432,31 @@ int main(string[] args)
 							case "d", "remove", "delete":
 								g_campain.setFileName("backup.bin");
 								g_campain.saveCampain;
-								int select = dargs[1].to!int - 1;
+							int select = processValue(dargs[1]) - 1;
 								if (select >= 0 && select < discList.length) {
 									addToHistory(text("Removing: ", discList[select]).to!dstring);
-									std.file.remove(discList[select].to!string);
+									import std.file;
+									remove(discList[select].to!string);
 								}
 							break;
 							case "info", "i":
 								//#why do I need to put format in instead of text (the ': ' gets removed with text)
 								foreach(i, guy; g_guys)
 									with(guy) {
-										addToHistory(text((i == 0 ? "Left" : "Right"), " Guy").to!dstring);
+										addToHistory(text((i == 0 ? "Left" : "Right"), " Guy \\/").to!dstring);
 										addToHistory(text("ST position screen (resetPos): ", resetPos).to!dstring);
 										addToHistory(format("ST which screen (portal.resetScrn): %s", portal.resetPosScrn).to!dstring);
 										addToHistory(text("guy place on screen (pos): ", pos).to!dstring);
 										addToHistory(format("Which screen [portal.scrn]: %s", portal.scrn).to!dstring);
-										addToHistory(text("Diamonds: (diamonds)", dashBoard.diamonds).to!dstring);
+										addToHistory(text("Diamonds (diamonds): ", dashBoard.diamonds).to!dstring);
+										import std.range;
+										addToHistory("-".replicate(7).to!dstring);
 									}
+								addToHistory("Other stuff \\/"d);
+								addToHistory(text("Campain: ", g_campain.fileName).to!dstring);
 								addToHistory(text("g_scrnDim: ", g_scrnDim).to!dstring);
 							break;
-							case "exit":
+							case "exit", "quit":
                                 addToHistory("Exiting to OS..."d, terminal);
 								g_window.close();
 							break;

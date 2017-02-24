@@ -1,0 +1,31 @@
+﻿<Properties StartupItem="Guys.dproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="../source/base.d">
+    <Files>
+      <File FileName="../source/campain.d" Line="1" Column="1" />
+      <File FileName="../source/menu.d" Line="1" Column="1" />
+      <File FileName="../source/display.d" Line="45" Column="18" />
+      <File FileName="../source/mouse.d" Line="1" Column="1" />
+      <File FileName="../source/guy.d" Line="314" Column="11" />
+      <File FileName="../source/mover.d" Line="1" Column="1" />
+      <File FileName="../source/dashboard.d" Line="1" Column="1" />
+      <File FileName="../source/escaped.d" Line="1" Column="1" />
+      <File FileName="../source/mission.d" Line="1" Column="1" />
+      <File FileName="../source/jsound.d" Line="1" Column="1" />
+      <File FileName="../_notes.txt" Line="1" Column="1" />
+      <File FileName="../source/jeep.d" Line="1" Column="1" />
+      <File FileName="../source/bullit.d" Line="1" Column="1" />
+      <File FileName="../source/jeepbullit.d" Line="1" Column="1" />
+      <File FileName="../source/score.d" Line="1" Column="1" />
+      <File FileName="../source/setup.d" Line="1" Column="1" />
+      <File FileName="../source/portal.d" Line="1" Column="1" />
+      <File FileName="../source/app.d" Line="450" Column="18" />
+      <File FileName="../source/base.d" Line="18" Column="13" />
+      <File FileName="../source/countdown.d" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

@@ -5,16 +5,17 @@ import std.stdio;
 import std.conv;
 import std.string;
 
-import jext.base;
-import portal, mouse, guy, campain, score, jsound, countdown, setup, display;
+import jext.base, dini.dini, misc.base;
+import portal, mouse, guy, campain, score, countdown, setup, display;
 import /+ jxjexting, jxinputjex, +/ jeep, bullit, mover, jeepbullit, escaped, mission,
-    dashboard, menu;
+    dashboard, menu, infomation;
 
 import dsfml.graphics;
 import dsfml.audio;
 import dsfml.window;
 
 Setup g_setup;
+Info g_info;
 
 enum Hide {inview, hidden}
 
@@ -27,15 +28,19 @@ JSound[] g_jsounds; // g_jsounds[Snd.shootJeep].playSnd;
 Clock g_clock;
 CountDown g_timer;
 
+bool g_gameOver;
+
 enum Climbing {no, up, down}
 
 const g_graceStartTime = 200;
 
 enum Dying {alive, inRocket, dyingUp, dyingDown}
 
+/+
 void gh(string message = "got here") { // g and h beside each other on the keyboard
 	writeln(message);
 }
++/
 
 enum JBullit {terminated, current}
 
@@ -48,12 +53,13 @@ enum GunDucked {notDucked, ducked}
 
 Sprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight;
 
-enum DisplayType {escaped, mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw,
+enum DisplayType {escaped, mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw, info,
 	portalNoBorderLayerNormalDraw, editLayer, guyDraw, playBorder, jeepDraw, bullitsDraw, jeepBullitDraw}
 
 Display g_display;
 
-enum MainMenu {quit, edit, start, doLoop}
+enum Menu {main, campain}
+enum MenuSelect {quit, edit, start, doLoop}
 
 //#made template instead of normal functions
 float makeSquare(T : float)(T a) {

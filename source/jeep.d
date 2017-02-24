@@ -86,7 +86,6 @@ public:
 
 							_action = Action.shooting;
 						}
-						
 						//right
 						if (checkAccross(guy, g_spriteSize) == true && _dir.x > 0 && guy.pos.x > pos.x + g_spriteSize) {
 							_jeepBullit.fire(this, guy, scrn, Vector2f(pos.x + g_spriteSize, pos.y + 2), Vector2f(dir.x * 2, 0));

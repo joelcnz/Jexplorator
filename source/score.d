@@ -15,19 +15,15 @@ struct Score {
 	}
 	
 	string winner() {
-		string result;
-		int left = getGuyScore(PortalSide.left),
+		immutable 
+			left = getGuyScore(PortalSide.left),
 			right = getGuyScore(PortalSide.right);
 
 		if (left == right)
-			result = "It's a Draw!";
+			return "It's a Draw!";
 		else if (left > right)
-			result = "Left player Wins!";
+			return "Left player Wins!";
 		else
-			result = "Right player Wins!";
-		
-		return result;
+			return "Right player Wins!";
 	}
-	
-	
 }

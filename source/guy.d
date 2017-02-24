@@ -14,7 +14,7 @@
 //# bit funny
 import base;
 
-class Guy: Mover {
+class Guy : Mover {
 private:
 	int _id, _other;
 	Sprite[] _framesForward;
@@ -309,6 +309,11 @@ public:
 
 			return;
 		}
+
+		if (g_gameOver) {
+			return;
+		}
+
 		processTestPoints(_pos);
 
 		//#rocket
@@ -648,9 +653,11 @@ public:
 
 		// key down
 		if (Keyboard.isKeyPressed(_keys[Key.down])) {
+			
+			
 			if ((hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + g_spriteSize), [TileName.ladder]) ||
 				hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y - 1), [TileName.ladder])) &&
-				! hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + 1), _blocks))
+				! hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + 2), _blocks))
 				_climbing = Climbing.down,
 				_jumping = Jumping.no;
 			else {

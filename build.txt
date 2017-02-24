@@ -1,0 +1,4 @@
+What a donkey!
+
+Joels-MacBook-Pro:DGuy joelcnz$ dmd ../JextLib/source/jext/*.d source/*.d ../MiscLib/source/misc/*.d ../OtherPeoples/DSFML/src/dsfml/audio/*.d ../OtherPeoples/DSFML/src/dsfml/graphics/*.d ../OtherPeoples/DSFML/src/dsfml/system/*.d ../OtherPeoples/DSFML/src/dsfml/window/*.d ../IniLib/source/dini/*.d -I../IniLib/source/dini -ofrun
+source/base.d(8): Error: module dini.dini from file ../IniLib/source/dini/dini.d must be imported with 'import dini.dini;'

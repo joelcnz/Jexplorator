@@ -1,9 +1,33 @@
+//#load settings from file
 //#why do I need the cast!?
 import base,  jext.base;
 
 struct Setup {
+	string _currentCampainFileName;
+	string _settingsFileName;
+
+	void loadFile() {
+	    auto ini = Ini.Parse(_settingsFileName);
+
+	    _currentCampainFileName = ini["settings"].getKey("currentCampainFileName");
+	}
+	
+	void saveFile() {
+		import std.stdio;
+		
+		auto _file = File(_settingsFileName, "w");
+		_file.writeln("[settings]");
+		_file.writeln(format("currentCampainFileName=%s", _currentCampainFileName));
+	}
+		
 	 int setup() {
-		jext.setup.setup;
+		import jext.setup;
+		if (jext.setup.setup != 0)
+			writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
+		
+
+		//#load settings from file
+		
 
 		g_jsounds.length = 0;
 		g_jsounds ~= JSound("pop.wav");
@@ -90,7 +114,10 @@ struct Setup {
 		
 		g_scrnDim = Vector2i(0,0);
 		
-		g_campain.setFileName("test.bin");
+		_settingsFileName = "settings.ini";
+		loadFile;
+
+		g_campain.setFileName(_currentCampainFileName);
 		if (! g_campain.loadCampain) { //#load campaign here! 
 			throw new Exception("File error. Fatal error!");
 		}
@@ -111,4 +138,9 @@ struct Setup {
 
 		return 0;
 	} // setup
+	
+	void shutDown() {
+		_currentCampainFileName = g_campain.fileName;
+		saveFile;
+	}
 }

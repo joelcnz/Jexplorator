@@ -1,0 +1,24 @@
+﻿<Properties StartupItem="dub.json">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Default" PreferredExecutionTarget="plain" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="source/app.d">
+    <Files>
+      <File FileName="source/setup.d" Line="123" Column="3" />
+      <File FileName="source/menu.d" Line="1" Column="1" />
+      <File FileName="../JextLib/source/jext/base.d" Line="1" Column="1" />
+      <File FileName="../IniLib/source/ini/README" Line="1" Column="1" />
+      <File FileName="../MiscLib/source/misc/base.d" Line="1" Column="1" />
+      <File FileName="dub.json" Line="1" Column="1" />
+      <File FileName="../JextLib/source/jext/input.d" Line="1" Column="1" />
+      <File FileName="source/guy.d" Line="1" Column="1" />
+      <File FileName="source/app.d" Line="311" Column="21" />
+      <File FileName="source/base.d" Line="1" Column="1" />
+      <File FileName="source/jeep.d" Line="1" Column="1" />
+      <File FileName="../JextLib/source/jext/sound.d" Line="1" Column="1" />
+      <File FileName="source/mouse.d" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

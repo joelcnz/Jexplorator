@@ -263,6 +263,7 @@ struct MouseInput {
 				if (kReturn.keyTrigger) {
 					g_guys[0].reset;
 					g_guys[1].reset;
+					
 					writeln("Game level reset!");
 				}
 			} // system key

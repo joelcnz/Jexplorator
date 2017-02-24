@@ -41,6 +41,9 @@ public:
 	void display(DisplayType display) {
 		with(DisplayType)
 			final switch(display) {
+				case info:
+				//	g_info.draw;
+				break;
 				case escaped:
 					_escaped.draw;
 				break;

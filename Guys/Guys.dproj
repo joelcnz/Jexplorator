@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D6271570-40DE-48B4-961F-912FB1A04147}</ProjectGuid>
+    <Compiler>DMD2</Compiler>
+    <PreferOneStepBuild>true</PreferOneStepBuild>
+    <UseDefaultCompiler>true</UseDefaultCompiler>
+    <IncrementalLinking>true</IncrementalLinking>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug</OutputPath>
+    <ObjectsDirectory>obj/Debug</ObjectsDirectory>
+    <LinkinThirdPartyLibraries>false</LinkinThirdPartyLibraries>
+    <UnittestMode>false</UnittestMode>
+    <OutputName>Guys</OutputName>
+    <Target>Executable</Target>
+    <Externalconsole>true</Externalconsole>
+    <DebugLevel>0</DebugLevel>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="BeforeExecute" command="dub" workingdir="/Users/joelcnz/jpro/dpro2/DGuy" externalConsole="True" pauseExternalConsole="True" />
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release</OutputPath>
+    <ObjectsDirectory>obj/Release</ObjectsDirectory>
+    <LinkinThirdPartyLibraries>false</LinkinThirdPartyLibraries>
+    <UnittestMode>false</UnittestMode>
+    <OutputName>Guys</OutputName>
+    <Target>Executable</Target>
+    <Externalconsole>true</Externalconsole>
+    <DebugLevel>0</DebugLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unittest|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Unittest</OutputPath>
+    <ObjectsDirectory>obj/Unittest</ObjectsDirectory>
+    <LinkinThirdPartyLibraries>false</LinkinThirdPartyLibraries>
+    <UnittestMode>true</UnittestMode>
+    <OutputName>Guys</OutputName>
+    <Target>Executable</Target>
+    <Externalconsole>true</Externalconsole>
+    <DebugLevel>0</DebugLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\source\bullit.d">
+      <Link>bullit.d</Link>
+    </Compile>
+    <Compile Include="..\source\display.d">
+      <Link>display.d</Link>
+    </Compile>
+    <Compile Include="..\source\countdown.d">
+      <Link>countdown.d</Link>
+    </Compile>
+    <Compile Include="..\source\jsound.d">
+      <Link>jsound.d</Link>
+    </Compile>
+    <Compile Include="..\source\score.d">
+      <Link>score.d</Link>
+    </Compile>
+    <Compile Include="..\source\app.d">
+      <Link>app.d</Link>
+    </Compile>
+    <Compile Include="..\source\base.d">
+      <Link>base.d</Link>
+      <DependentUpon>bullit.d</DependentUpon>
+    </Compile>
+    <Compile Include="..\source\campain.d">
+      <Link>campain.d</Link>
+    </Compile>
+    <Compile Include="..\source\guy.d">
+      <Link>guy.d</Link>
+    </Compile>
+    <Compile Include="..\source\mouse.d">
+      <Link>mouse.d</Link>
+    </Compile>
+    <Compile Include="..\source\portal.d">
+      <Link>portal.d</Link>
+    </Compile>
+    <Compile Include="..\source\setup.d">
+      <Link>setup.d</Link>
+    </Compile>
+    <Compile Include="..\source\jeep.d">
+      <Link>jeep.d</Link>
+    </Compile>
+    <Compile Include="..\source\mover.d">
+      <Link>mover.d</Link>
+    </Compile>
+    <Compile Include="..\source\jeepbullit.d">
+      <Link>jeepbullit.d</Link>
+    </Compile>
+    <Compile Include="..\source\escaped.d">
+      <Link>escaped.d</Link>
+    </Compile>
+    <Compile Include="..\source\mission.d">
+      <Link>mission.d</Link>
+    </Compile>
+    <Compile Include="..\source\dashboard.d">
+      <Link>dashboard.d</Link>
+    </Compile>
+    <Compile Include="..\source\menu.d">
+      <Link>menu.d</Link>
+    </Compile>
+    <Compile Include="..\source\info.d">
+      <Link>info.d</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

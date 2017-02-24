@@ -1,0 +1,16 @@
+{
+    "name": "jex",
+    "description": "A Poorly Programmed Production. Presenting: Jexplorator!",
+    "copyright": "Copyright © 2013, Jeremy",
+	"lflags-osx" : ["-L../DSFMLlibs"],
+
+    "sourcePaths" : ["source",
+                     "../JextLib/source",
+                     "../MiscLib/source",
+                     "../IniLib/source"],
+    "dependencies": 
+    {
+        "dsfml:graphics": "~>2.1",
+		"dsfml:audio": "~>2.1"
+    }
+}
