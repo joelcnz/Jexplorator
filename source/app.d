@@ -307,7 +307,7 @@ int main(string[] args)
 						case "h", "help":
 						foreach(line; ["Help:",
 									   "h - for this help",
-									   "cls - clear history"
+									   "cls - clear history",
 									   "t - exit terminal",
 									   "exit/quit to exit to OS",
 									   "cat - list projects",

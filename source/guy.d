@@ -450,7 +450,7 @@ public:
 					//bool onTop;
 					//if (hitOther)
 					//	onTop = true;
-					_pos = Vector2f(_pos.x - 1, _pos.y);
+					_pos = Vector2f(_pos.x - 2, _pos.y);
 					//if (onTop == false && hitOther)
 					//	_pos = Vector2f(_pos.x + 1, _pos.y);
 					if (_pos.x < 0) {
@@ -485,7 +485,7 @@ public:
 					bool onTop;
 					//if (hitOther)
 					//	onTop = true;
-					_pos = Vector2f(_pos.x + 1, _pos.y);
+					_pos = Vector2f(_pos.x + 2, _pos.y);
 					//if (onTop == false && hitOther)
 					//	_pos = Vector2f(_pos.x - 1, _pos.y);
 					if (_pos.x + g_spriteSize > 10 * g_spriteSize) {
@@ -542,7 +542,7 @@ public:
 		
 		// climbing up
 		if (_climbing == Climbing.up) {
-			_pos = Vector2f(_pos.x, _pos.y - 1);
+			_pos = Vector2f(_pos.x, _pos.y - 2);
 			
 			if (_pos.y < 0) { // if edge of screen
 				if (_portal.scrn.y - 1 >= 0) {
@@ -558,7 +558,7 @@ public:
 			}
 			//if (hitOther || 
 			if (hits(topLeft, _blocks) || hits(topRight, _blocks))
-				_pos = Vector2f(_pos.x, _pos.y + 1); // back track
+				_pos = Vector2f(_pos.x, _pos.y + 2); // back track
 			else {
 				_climbingPreFrame++;
 				if (_climbingPreFrame == 10)
@@ -575,11 +575,11 @@ public:
 		if ((_climbing == Climbing.up || _climbing == Climbing.down) && ! Keyboard.isKeyPressed(_keys[Key.left]) && ! Keyboard.isKeyPressed(_keys[Key.right])) {
 			if (! hits(leftTop + Vector2f(1,0), [TileName.ladder]) &&
 				! hits(leftBottom + Vector2f(1,0), [TileName.ladder]))
-					_pos = Vector2f(_pos.x + 1, _pos.y);
+					_pos = Vector2f(_pos.x + 2, _pos.y);
 
 			if (! hits(rightTop + Vector2f(-1, 0), [TileName.ladder]) &&
 				! hits(rightBottom + Vector2f(-1, 0), [TileName.ladder]))
-				_pos = Vector2f(_pos.x - 1, _pos.y);
+				_pos = Vector2f(_pos.x - 2, _pos.y);
 		}
 		
 		// move up if block on feet
@@ -587,12 +587,12 @@ public:
 			hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize - 1), _blocks)) &&
 			! hits(_pos + Vector2f(0, g_spriteSize - 2), _blocks) &&
 				! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize - 2), _blocks)) {
-			_pos += Vector2f(0, -1);
+			_pos += Vector2f(0, -2);
 		}
 
 		// climbing down
 		if (_climbing == Climbing.down) {
-			_pos += Vector2f(0, 1);
+			_pos += Vector2f(0, 2);
 			
 			if (_pos.y + g_spriteSize >= 10 * g_spriteSize) { // if edge of screen
 				if (_portal.scrn.y + 1 < g_scrnDim.y) {
@@ -606,7 +606,7 @@ public:
 
 			//#320 didn't work
 			if (hits(bottomLeft, _blocks) || hits(bottomRight, _blocks)) {
-				_pos += Vector2f(0, -1); // back track
+				_pos += Vector2f(0, -2); // back track
 				//_climbing = Climbing.no;
 			}
 			else {
@@ -630,7 +630,7 @@ public:
 	 				hits(bottomRight, _blocks))
 					leap = true;
 
-				_pos += Vector2f(0, 1);
+				_pos += Vector2f(0, 2);
 				immutable other = (_id == 0 ? 1 : 0);
 				if (hitOther)
 					with(g_guys[other]) {
@@ -640,7 +640,7 @@ public:
 							 checkForLadder)
 							leap = true;
 					}
-				_pos += Vector2f(0, -1);
+				_pos += Vector2f(0, -2);
 				if (leap) {
 					g_jsounds[Snd.leap].playSnd;
 					_stateUpDown = StateUpDown.rising;
@@ -653,7 +653,6 @@ public:
 
 		// key down
 		if (Keyboard.isKeyPressed(_keys[Key.down])) {
-			
 			
 			if ((hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + g_spriteSize), [TileName.ladder]) ||
 				hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y - 1), [TileName.ladder])) &&
@@ -688,7 +687,7 @@ public:
 					// if ladder under but not on it, then move down
 					if (! checkForLadder) {
 						_stateUpDown = StateUpDown.falling;
-						_pos += Vector2f(0, 1);
+						_pos += Vector2f(0, 2);
 						if (_pos.y + g_spriteSize >= 10 * g_spriteSize) { // if edge of screen
 							if (_portal.scrn.y + 1 < g_scrnDim.y) {
 								_pos.y = 0;
@@ -724,15 +723,15 @@ public:
 							with(_portal) {
 								scrn = Vector2i(scrn.x, scrn.y - 1);
 							}
-							_risingCount += g_spriteSize - 2;
+							_risingCount += g_spriteSize - 4;
 							doGrace;
 						}
 					} else {
-							_pos += Vector2f(0, -1);
+							_pos += Vector2f(0, -2);
 					}
 				}
 
-				_risingCount++;
+				_risingCount += 2;
 				if (_risingCount >= g_spriteSize * 2) {
 					_risingCount = 0;
 					_stateUpDown = StateUpDown.gliding;
@@ -744,7 +743,7 @@ public:
 				 hits(topRight + Vector2f(0, 1), _blocks)) &&
 				! hits(topLeft + Vector2f(0, 2), _blocks) &&
 				! hits(topRight + Vector2f(0, 2), _blocks))
-				_pos += Vector2f(0, 1);
+				_pos += Vector2f(0, 2);
 		} // rising
 
 		// Moving at jump max height

@@ -122,7 +122,7 @@ struct Setup {
 			throw new Exception("File error. Fatal error!");
 		}
 
-		g_window.setFramerateLimit(150);
+		g_window.setFramerateLimit(60);
 
 		g_timer.setup;
 

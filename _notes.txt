@@ -1,6 +1,8 @@
 The D Guy (Jexplorator)
 
-eg ‘dub —-build=unittest’
+`git push`
+
+eg ‘dub —-build=unittest’ or is it jusr `dub test`
 
 To run the game:
 export DYLD_LIBRARY_PATH=libs
