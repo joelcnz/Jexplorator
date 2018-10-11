@@ -9,6 +9,7 @@ private:
 	JeepBullit _jeepBullit;
 	Jeep _jeep;
 	Escaped _escaped;
+	string _verse;
 public:
 	void setPortalEditLayer(Layer layer) pure nothrow {
 		_layer = layer;
@@ -36,6 +37,11 @@ public:
 
 	void setEscaped(Escaped escaped) pure nothrow {
 		_escaped = escaped;
+	}
+
+	void setVerse(in string verse) {
+		_verse = verse;
+		g_letterBase.setText(_verse);
 	}
 
 	void display(DisplayType display) {
@@ -76,6 +82,10 @@ public:
 				break;
 				case playBorder:
 					_portal.draw(Border.yes);
+				break;
+				case viewVerse:
+					g_letterBase.draw;
+					//displayGameText(_verse);
 				break;
 			}
 	}

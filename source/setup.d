@@ -1,6 +1,6 @@
+//#new 21 3 2017
 //#load settings from file
-//#why do I need the cast!?
-import base,  jext.base;
+import base,  jec;
 
 struct Setup {
 	string _currentCampainFileName;
@@ -15,28 +15,37 @@ struct Setup {
 	void saveFile() {
 		import std.stdio;
 		
-		auto _file = File(_settingsFileName, "w");
-		_file.writeln("[settings]");
-		_file.writeln(format("currentCampainFileName=%s", _currentCampainFileName));
+		auto file = File(_settingsFileName, "w");
+		file.writeln("[settings]");
+		file.writeln(format("currentCampainFileName=%s", _currentCampainFileName));
 	}
 		
 	 int setup() {
-		import jext.setup;
-		if (jext.setup.setup != 0)
-			writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
-		
+		import jec: setup;
 
-		//#load settings from file
+		if (int retType = jec.setup != 0) {
+			writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
+
+			return retType;
+		}
+
+		writeln("Loading Bible..");
+		{
+			scope(exit)
+				writeln("Bible loaded");
+			loadBible(ESV);
+		}
 		
+		//#load settings from file
 
 		g_jsounds.length = 0;
-		g_jsounds ~= JSound("pop.wav");
-		g_jsounds ~= JSound("plop.wav");
-		g_jsounds ~= JSound("leap.wav");
-		g_jsounds ~= JSound("shoot2.wav");
-		g_jsounds ~= JSound("blowup.wav");
-		g_jsounds ~= JSound("shootJeep.wav");
-		g_jsounds ~= JSound("hush.wav"); // rocket sound
+		g_jsounds ~= new JSound("pop.wav");
+		g_jsounds ~= new JSound("plop.wav");
+		g_jsounds ~= new JSound("leap.wav");
+		g_jsounds ~= new JSound("shoot2.wav");
+		g_jsounds ~= new JSound("blowup.wav");
+		g_jsounds ~= new JSound("shootJeep.wav");
+		g_jsounds ~= new JSound("hush.wav"); // rocket sound
 
 		g_window = new RenderWindow(VideoMode(640, 480), "Welcome to Jexplorator");
 	
@@ -45,11 +54,16 @@ struct Setup {
 		
 		g_inputJex = new InputJex(/* position */ Vector2f(330, 480 - 15),
 								  /* font size */ 12,
-								  /* header */ "-h for help: ",
+								  /* header */ "h for help: ",
 								  /* Type (oneLine, or history) */ InputType.history);
 		
 		g_inputJex.addToHistory(""d);
+		g_inputJex.edge = false; //#new 21 3 2017
 		
+		g_letterBase = new LetterManager("lemgreen32.bmp", 8, 17, // "lemblue.png"
+				Square(0,0, 20 * 32,10 * 32));
+		assert(g_letterBase, "Error loading bmp");
+
 		g_texture = new Texture;
 		if (! g_texture.loadFromFile("infc.png"))
 			return -1;

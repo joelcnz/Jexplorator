@@ -21,7 +21,7 @@ public:
 		void countDownStartTime(float countDownStartTime0) { _countDownStartTime = countDownStartTime0; }
 	}
 
-	void setup(int totalSeconds = 1_000) {
+	void setup(int totalSeconds = 10_000) {
 		_timeGoingUp = new Text(""d, g_font, 10);
 		_timeGoingUp.position(Vector2f(0, 480 - 20)); // 10 * g_spriteSize + 10));
 		_timeGoingDown = new Text(""d, g_font, 10);

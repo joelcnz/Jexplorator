@@ -1,3 +1,6 @@
+//#here
+//#work here
+//#get rid of the jeeps!
 //#why do I need to put format in instead of text (the ': ' gets removed with text)
 //#no I didn't do this my self
 //#to hide or not to hide
@@ -21,7 +24,7 @@ import base;
 //Time timeGuy;
 Clock clock;
 
-dstring[] discList;
+dstring[] discList, missionsList;
 
 void getDiscList() {
 	import std.range;
@@ -31,6 +34,20 @@ void getDiscList() {
 	discList.length = 0;
 	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).enumerate(1)) {
 		discList ~= name.to!dstring;
+		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
+	}
+}
+
+//listMissions("Explore");
+void listMissions(in string campain) {
+	import std.range;
+	import std.file;
+	import std.conv;
+	import std.path: buildPath;
+	g_inputJex.addToHistory("List of missions:"d);
+	discList.length = 0;
+	foreach(i, string name; dirEntries(buildPath("campains", campain), "*.{ini}", SpanMode.shallow).enumerate(1)) {
+		missionsList ~= name.to!dstring;
 		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
 	}
 }
@@ -54,6 +71,8 @@ int main(string[] args)
 	menus.setup;
 	MenuSelect mret = MenuSelect.doLoop;
 
+	listMissions("Explore");
+
 	while(g_window.isOpen())
 	{
 		Event event;
@@ -63,6 +82,8 @@ int main(string[] args)
 			if(event.type == event.EventType.Closed)
 			{
 				g_window.close();
+
+				return 0;
 			}
 		}
 
@@ -119,7 +140,7 @@ int main(string[] args)
 		
 		g_mouse.process;
 
-		import std.algorithm;
+		import std.algorithm: map, filter, each;
 		import std.range;
 
 		if (g_mode == Mode.play) {
@@ -132,11 +153,13 @@ int main(string[] args)
 		}
 
 		g_bullits = g_bullits.map!((a) { a.process; return a; }).array;
-		g_bullits = g_bullits.filter!(a => a.bullitState != BullitState.terminated).array;
+		import std.conv: asOriginalType;
+		g_bullits = g_bullits.filter!(a => a.bullitState.asOriginalType != BullitState.terminated).array;
 
 		//foreach(portal; g_portals[0 .. 2])
 		//	portal.process;
 		g_portals[0 .. 2] = g_portals[0 .. 2].map!((a) { a.process; return a; }).array;
+		//g_portals[0 .. 2] = g_portals[0 .. 2].each!(a => a.process).array; //#each - not work
 
 		g_window.clear();
 
@@ -144,7 +167,7 @@ int main(string[] args)
 			foreach(jeep; g_jeeps) {
 				// screens
 				if (inScreen(jeep.scrn)) {
-					bool[] screens = getScreens(jeep.scrn);
+					auto screens = getScreens(jeep.scrn);
 					if (screens[PortalSide.left] || (g_mode == Mode.edit && screens[PortalSide.editor])) {
 						g_display.setJeep(jeep);
 						g_display.display(DisplayType.jeepDraw);
@@ -175,7 +198,7 @@ int main(string[] args)
 		void doBullitsDraw() {
 			foreach(bullit; g_bullits)
 				if (inScreen(bullit.scrn)) {
-					bool[] screens = getScreens(bullit.scrn);
+					auto screens = getScreens(bullit.scrn);
 					if (screens[PortalSide.left] || (g_mode == Mode.edit && screens[PortalSide.editor])) {
 						g_display.setBullit(bullit);
 						g_display.display(DisplayType.bullitsDraw);
@@ -303,10 +326,10 @@ int main(string[] args)
 					    str != "Jade")
 						str = textStr.toLower;
 					switch(str) {
-						default: break;
+						default: g_inputJex.addToHistory("Not recognized command."); break;
 						case "h", "help":
 						foreach(line; ["Help:",
-									   "h - for this help",
+									   "h/help - for this help",
 									   "cls - clear history",
 									   "t - exit terminal",
 									   "exit/quit to exit to OS",
@@ -316,14 +339,61 @@ int main(string[] args)
 									   "d/remove/delete # - delete project (see 'cat')",
 									   "create # # - start a new project",
 									   "reset",
-									   "go # #",
+									   "go # # - go strait to another screen",
 									   "info/i - data for debuging",
 									   "bullitproof/b - can shoot each other",
 									   "hide # - hide player eg hide 1 for p1",
-									   "race # - set and start a countdown timer"])
+									   "race # - set and start a countdown timer",
+									   "missions - list current campain missions",
+									   "*mission # - start misson",
+									   "ref <ref> - add verse to current screen"])
 							g_inputJex.addToHistory(line.to!dstring);
 						break;
-						case "cls":
+						//#work here
+						case "ref":
+							import std.string: join;
+							int sx = g_portals[PortalSide.editor].scrn.x,
+								sy = g_portals[PortalSide.editor].scrn.y;
+							auto verseRef = dargs[1 .. $].to!(string[]).join(" ");
+
+							g_screens[sy][sx].verseRef = verseRef;
+							string[] verses = g_bible.argReference(g_bible.argReferenceToArgs(verseRef)).split('\n')[0 .. $ - 1];
+							foreach(ver; verses)
+								g_inputJex.addToHistory(ver);
+						break;
+						case "missions":
+							listMissions("Explore");
+						break;
+						case "mission":
+							if (dargs.length == 2) {
+								int select = processValue(dargs[1]) - 1;
+								if (select >= 0 && select < missionsList.length) {
+									auto ini = Ini.Parse(missionsList[select].to!string);
+
+									string tmp;
+									try { tmp = ini["mission"].getKey("time"); g_timer.setup(tmp.to!int); } catch(Exception e) {}
+									try {
+										tmp = ini["mission"].getKey("building");
+										g_campain.setFileName(tmp.to!string);
+										if (! g_campain.loadCampain)
+											addToHistory(text("Failed loading: ", g_campain.fileName).to!dstring);
+										else {
+											g_mode = Mode.play;
+											g_terminal = false;
+										}
+									} catch(Exception e) {
+										addToHistory("Error!");
+									}
+									try {
+										tmp = ini["mission"].getKey("diamonds");
+										g_guys[/* both */ 0].dashBoard.totalDiamonds = tmp.to!int;
+									} catch(Exception e) {
+										
+									}
+								}
+							}
+						break;
+						case "cls", "clear":
 							g_inputJex.clearHistory;
 						break;
 						case "race":
@@ -331,7 +401,7 @@ int main(string[] args)
 								auto timer = processValue(dargs[1]);
 								g_timer.setup(timer);
 								if (timer == 0) { //#What ever can the problem here b!?
-									g_timer.setup(1_000);
+									g_timer.setup(10_000);
 									g_inputJex.addToHistory("Count down timer is reset"d);
 								} else {
 									g_inputJex.addToHistory(text("Race set (", timer, " seconds)").to!dstring);
@@ -378,6 +448,8 @@ int main(string[] args)
 								if (dargs.length == 3) {
 									g_campain.setFileName("backup.bin");
 									g_campain.saveCampain;
+
+									g_jeeps.length = 0; //#get rid of the jeeps!
 									int sdx, sdy; // screens dimentions
 									sdx = processValue(dargs[1]); //dargs[1].to!int;
 									sdy = processValue(dargs[2]); //dargs[2].to!int;
@@ -431,6 +503,7 @@ int main(string[] args)
 							break;
 							case "d", "remove", "delete":
 								g_campain.setFileName("backup.bin");
+								addToHistory("Deleted is saved to backup.bin");
 								g_campain.saveCampain;
 							int select = processValue(dargs[1]) - 1;
 								if (select >= 0 && select < discList.length) {
@@ -455,6 +528,10 @@ int main(string[] args)
 								addToHistory("Other stuff \\/"d);
 								addToHistory(text("Campain: ", g_campain.fileName).to!dstring);
 								addToHistory(text("g_scrnDim: ", g_scrnDim).to!dstring);
+								//#here
+								addToHistory(text("Screen name: ",
+									g_screens[g_portals[PortalSide.editor].scrn.y][
+											g_portals[PortalSide.editor].scrn.x].verseRef).to!dstring);
 							break;
 							case "exit", "quit":
                                 addToHistory("Exiting to OS..."d, terminal);
@@ -469,6 +546,12 @@ int main(string[] args)
 
 		if (g_mode == Mode.edit)
 			g_display.display(DisplayType.mouseDraw);
+		
+		if (g_mode == Mode.play && g_displayGameText == true) {
+			g_display.display(DisplayType.viewVerse);
+			g_doLetUpdate = false;
+			g_displayGameText = false;
+		}
 
 		g_timer.draw;
 

@@ -1,11 +1,14 @@
 The D Guy (Jexplorator)
 
+settings.ini should be like: currentCampain=Campains/Explore
+
+Need to define stuff better. bin files are buildings, campaigns are groups of levels, levels are things like; how much diamonds to collect (missions, really).
+
 `git push`
 
 eg ‘dub —-build=unittest’ or is it jusr `dub test`
 
 To run the game:
-export DYLD_LIBRARY_PATH=libs
 ./jex
 
 Problems:
@@ -29,12 +32,13 @@ Press [T] for terminal
 Enter ‘cat’ for list of projects
 Enter ‘l 1’ for arena level
 Enter ’t’ to go out of the terminal
-Click for full screen, faster
+Click for full screen, can be faster
 Press [E] and play
 
 Mouse (edit):
 P - place where the guys popup	
-B for paint brush (right click if you have a mouse plugged in - - the track pad doesn’t work)
+B - Select type of tile from mouse position. For paint brush (right click if you have a mouse plugged in - - the track pad doesn’t work)
+V - Put current tile down at mouse cursor position
 J - Jeep (add and remove)
 LSystem + 1 for front painting layer
 LSystem + 2 for normal painting layer

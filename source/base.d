@@ -1,3 +1,4 @@
+//#new (verse reference)
 //#made template instead of normal functions
 //#not used
 public:
@@ -5,10 +6,11 @@ import std.stdio;
 import std.conv;
 import std.string;
 
-import jext.base, dini.dini, misc.base;
+import jec, dini.dini, jmisc;
+import bible.base;
 import portal, mouse, guy, campain, score, countdown, setup, display;
 import /+ jxjexting, jxinputjex, +/ jeep, bullit, mover, jeepbullit, escaped, mission,
-    dashboard, menu, infomation;
+    dashboard, menu, infomation, gametext;
 
 import dsfml.graphics;
 import dsfml.audio;
@@ -16,6 +18,14 @@ import dsfml.window;
 
 Setup g_setup;
 Info g_info;
+
+LetterManager g_letterBase;
+bool g_displayGameText;
+
+immutable ESV = "esv";
+
+enum g_pixelsx = 2,
+	 g_pixelsy = 2;
 
 enum Hide {inview, hidden}
 
@@ -32,7 +42,7 @@ bool g_gameOver;
 
 enum Climbing {no, up, down}
 
-const g_graceStartTime = 200;
+const g_graceStartTime = 100;
 
 enum Dying {alive, inRocket, dyingUp, dyingDown}
 
@@ -54,7 +64,8 @@ enum GunDucked {notDucked, ducked}
 Sprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight;
 
 enum DisplayType {escaped, mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw, info,
-	portalNoBorderLayerNormalDraw, editLayer, guyDraw, playBorder, jeepDraw, bullitsDraw, jeepBullitDraw}
+	portalNoBorderLayerNormalDraw, editLayer, guyDraw, playBorder, jeepDraw, bullitsDraw,
+	jeepBullitDraw, viewVerse}
 
 Display g_display;
 
@@ -84,7 +95,7 @@ enum TileName {brick, darkBrick, brickLedge, ladder, piller, potPlant, oilDrum, 
 					
 		weakBrickBlow1, weakBrickBlow2, weakBrickBlow3, weakBrickBlow4, weakBrickBlow5, weakBrickBlow6, darkBrick2, jeepLeft,
 	u0,u1,u2,u3,u4,u5,u6,u7,u8,u9,u10, 
-	rail, light, picture1, picture2, hintArrow, pipe1, pipe2, pipe3, pipe4, a0, a1,a2,a3,a4,a5,a6,a7,a8,a9,
+	rail, light, picture1, picture2, hintArrow, pipe1, pipe2, pipe3, pipe4, disc, a1,a2,a3,a4,a5,a6,a7,a8,a9,
 	hanger, pipe5, pipe6, pipe7, pipe8, pipe9, pipe10,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,
 	jeepLeftBlow6, jeepLeftBlow5, jeepLeftBlow4, jeepLeftBlow3, jeepLeftBlow2, jeepLeftBlow1, end}
 
@@ -101,6 +112,7 @@ enum Border {yes,no}
 
 Campain g_campain;
 
+// Location of the sprites in the sprite image
 struct Location {
 	int x, y;
 }
@@ -117,7 +129,8 @@ struct Tile {
 }
 
 struct Screen {
-	Tile[][] tiles;
+	Tile[][] tiles;//#new (verse reference)
+	string verseRef;
 }
 Screen[][] g_screens;
 

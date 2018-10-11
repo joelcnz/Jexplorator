@@ -1,3 +1,7 @@
+//#bit junky
+//#should this be here
+//#working
+//#remed out diamonds print next line
 //#not work
 //#change here
 //#die
@@ -14,14 +18,16 @@
 //# bit funny
 import base;
 
-class Guy : Mover {
+class Guy: Mover {
 private:
-	int _id, _other;
+	int _id,
+		_other;
 	Sprite[] _framesForward;
 	Sprite[] _framesBackward;
 	Sprite[] _climb;
 	Sprite[] _plopping;
-	Sprite _gunAimLeft, _gunAimRight, _gunTriggerLeft, _gunTriggerRight, _squatAimLeft, _squatAimRight, _squatTriggerLeft, _squatTriggerRight,
+	Sprite _gunAimLeft, _gunAimRight, _gunTriggerLeft, _gunTriggerRight,
+		_squatAimLeft, _squatAimRight, _squatTriggerLeft, _squatTriggerRight,
 		_rocket;
 	Vector2f _rocketDir;
 	int _preFrame, _currentFrame, _risingCount, _glideCount;
@@ -61,6 +67,8 @@ private:
 	Vector2f _plopPoint;
 
 	Hide _hide;
+
+	enum Id {player1, player2}
 public:
 	@property {
 		int id() { return _id; }
@@ -114,7 +122,7 @@ public:
 
 		_dashBoard = DashBoard(this);
 
-		_other = (_id == 0 ? 1 : 0);
+		_other = (_id == Id.player1 ? Id.player2 : Id.player1);
 		_portal = portal;
 		_portal.scrn = Vector2i(0,0);
 		_keys = keys;
@@ -198,6 +206,8 @@ public:
 	}
 	
 	void reset() {
+		pos = _resetPos;
+		_portal.scrn = portal.resetPosScrn;
 		_rocketState = Rocket.sitting;
 		_dying = Dying.alive;
 		_rocketDir = Vector2f(0, 0);
@@ -205,6 +215,7 @@ public:
 		_briefing.status = MissionStatus.current;
 		_dashBoard.score = 0;
 		_dashBoard.diamonds = 0;
+		updateScreenVerseRef;
 	}
 
 	//#die
@@ -217,6 +228,7 @@ public:
 	
 	void doGrace() {
 		_portal.grace = g_graceStartTime;
+		updateScreenVerseRef;
 		//#change here
 		//foreach(jeep; g_jeeps) {
 		//	jeep.jeepBullit.jbullit = JBullit.dead;
@@ -250,17 +262,17 @@ public:
 		
 	bool checkForLadder() { //#if bottomLeft or bottomRight in on a ladder and not left in bottom, and not right bottom
 		with(TileName)
+			//return (hits(bottomLeft, [ladder]) || hits(bottomRight, [ladder]));
+			
 			return (hits(bottomLeft, [ladder]) || hits(bottomRight, [ladder])) &&
 				! hits(Vector2f(_pos.x, _pos.y + g_spriteSize - 1), [ladder]) &&
 				! hits(Vector2f(_pos.x + g_spriteSize - 1, _pos.y + g_spriteSize - 1), [ladder]);
 	}
 
 	bool hits(in Vector2f v, in TileName[] tileNames) {
-		auto name = getPos(v);
-		foreach(n; tileNames)
-			if (name == n)
-				return true;
-		return false;
+		import std.algorithm: canFind;
+
+		return tileNames.canFind(getPos(v));
 	}
 
 	//#this is stink, this can't go up in 'mover'
@@ -280,23 +292,31 @@ public:
 	}
 	
 	void doPosition() {
-		foreach(guy; _framesForward)
-			guy.position = _pos;
-		foreach(guy; _framesBackward)
-			guy.position = _pos;
-		foreach(guy; _climb)
-			guy.position = _pos;
-		foreach(guy; _plopping)
-			guy.position = _pos;
-		_gunAimLeft.position = _pos;
-		_gunAimRight.position = _pos;
-		_gunTriggerRight.position = _pos;
-		_gunTriggerLeft.position = _pos;
-		_squatAimRight.position = _pos;
-		_squatAimLeft.position = _pos;
-		_squatTriggerLeft.position = _pos;
-		_squatTriggerRight.position = _pos;
-		_rocket.position = _pos;
+		import std.array : array;
+		import std.algorithm : map;
+
+		(_framesForward ~
+		 _framesBackward ~ 
+		 _climb ~
+		 _plopping ~
+		 _gunAimLeft ~
+		 _gunAimRight ~
+		 _gunTriggerRight ~
+		 _gunTriggerLeft ~
+		 _squatAimRight ~
+		 _squatAimLeft ~
+		 _squatTriggerLeft ~
+		 _squatTriggerRight ~
+		 _rocket)
+		.map!((a) => a.position = _pos).array;
+	}
+
+	/// Is the player gun trigger pulled?
+	bool p1n2GunTrigger() {
+		if ((_id == Id.player1 && lkeys[Letter.z].keyTrigger) ||
+			(_id == Id.player2 && kSpace.keyTrigger))
+			return 	true;
+		return false;
 	}
 
 	void process() {
@@ -320,7 +340,7 @@ public:
 		if (_rocketState == Rocket.goingUp) {
 			_pos = _pos + _rocketDir;
 			_rocketDir.x = 0;
-			_rocketDir.y = _rocketDir.y - 0.01;
+			_rocketDir.y = _rocketDir.y - 0.02;
 
 			if (_pos.y < -g_spriteSize) {
 				_dashBoard.score = _dashBoard.score + 100;
@@ -346,11 +366,14 @@ public:
 			_dying = Dying.inRocket;
 		}
 
-		if (_climbing == Climbing.no)
-			if ((_id == 0 && lkeys[Letter.z].keyTrigger) ||
-				(_id == 1 && kSpace.keyTrigger)) {
-				//if (_gun == Gun.aiming) {
-					//setPitch(std.random.uniform(1f, 100f));
+		// shoot button pressed
+		if (_climbing == Climbing.no &&
+			_dying == Dying.alive &&
+			p1n2GunTrigger) {
+				if (_gun == Gun.aiming) {
+					import std.random;
+
+					g_jsounds[Snd.shoot].setPitch(0.8 + uniform(1f, 40f) / 100);
 					g_jsounds[Snd.shoot].playSnd;
 					_gun = Gun.trigger; // eg. shoot
 					float height;
@@ -359,14 +382,15 @@ public:
 					if (_gunDucked == GunDucked.ducked)
 						height = 12;
 					if (_facing == Facing.right) {
-						g_bullits ~= new Bullit(this, _portal.scrn, _pos + Vector2f(g_spriteSize - 2, height), Vector2f(2, 0));
+						g_bullits ~= new Bullit(this, _portal.scrn, _pos + Vector2f(g_spriteSize - 2, height),
+							Vector2f(g_pixelsx * 2, 0));
 					}
 					if (_facing == Facing.left) {
-						g_bullits ~= new Bullit(this, _portal.scrn, _pos + Vector2f(-2, height), Vector2f(-2, 0));
+						g_bullits ~= new Bullit(this, _portal.scrn, _pos + Vector2f(-2, height), Vector2f(-g_pixelsx * 2, 0));
 					}
-				//} else
-				//	_gun = Gun.aiming;
-			}
+				} else
+					_gun = Gun.aiming;
+		}
 
 		if (Keyboard.isKeyPressed(_keys[Key.left]) ||
 			Keyboard.isKeyPressed(_keys[Key.right]) ||
@@ -375,26 +399,13 @@ public:
 			_gunDucked = GunDucked.notDucked;
 		}
 
-		if (Keyboard.isKeyPressed(_keys[Key.down]) &&
-			! Keyboard.isKeyPressed(_keys[Key.left]) &&
-			! Keyboard.isKeyPressed(_keys[Key.right])) {
-			if (hits(bottomLeft, _blocks) ||
-				hits(bottomRight, _blocks) ||
-				checkForLadder) {
-				if  (_gunDucked != GunDucked.ducked)
-					_gun = Gun.aiming;
-				_gunDucked = GunDucked.ducked;
-			} else {
-				_gunDucked = GunDucked.notDucked;
-			}
-		}
-
 		//#Diamond collecting
 		if (hits(mid, [TileName.diamond])) {
 			g_jsounds[Snd.pop].playSnd;
 			_dashBoard.diamonds = _dashBoard.diamonds + 1;
 			_dashBoard.score = _dashBoard.score + 20;
-			g_inputJex.addToHistory(text(_id == 0 ? "UpL" : "UpR", " Diamonds: ", _dashBoard.diamonds).to!dstring);
+			//#remed out diamonds print next line
+			//g_inputJex.addToHistory(text(_id == Id.player1 ? "UpL" : "UpR", " Diamonds: ", _dashBoard.diamonds).to!dstring);
 			g_mouse.setTile(_portal, /* middle of guy tester: */ mid, TileName.gap);
 			_dashBoard.banner = "Diamond Collected"d;
 			if (g_score.allDiamondsQ) {
@@ -403,8 +414,19 @@ public:
 			}
 		}
 
+		//#working
+		if (hits(mid, [TileName.computer])) {
+			if (_id == 0) {
+				auto verse = g_screens[_portal.scrn.y][_portal.scrn.x].verseRef;
+				verse = g_bible.argReference(g_bible.argReferenceToArgs(verse));
+				//_dashBoard.banner = verse.to!dstring;
+				//displayGameText(verse);
+				g_displayGameText = true;
+			}
+		}
+
 		if (_dying == Dying.dyingDown) {
-			_pos += Vector2f(0, 2);
+			_pos += Vector2f(0, g_pixelsy * 2);
 			if (_pos.y >= g_spriteSize * 10f) {
 				//pos = resetPos;
 				pos = plopPoint;
@@ -417,9 +439,9 @@ public:
 		}
 
 		if (_dying == Dying.dyingUp) {
-			_pos += Vector2f(0, -2);
+			_pos += Vector2f(0, -g_pixelsy * 2);
 			_dyingCountUp++;
-			if (_dyingCountUp == g_spriteSize + g_spriteSize / 2)
+			if (_dyingCountUp == g_spriteSize)
 				_dying = Dying.dyingDown;
 		}
 		
@@ -441,7 +463,7 @@ public:
 					! hits(leftMid, _blocks) &&
 					! hits(leftBottom, _blocks)) {
 					_preFrame++;
-					if (_preFrame >= 10)
+					if (_preFrame >= 5)
 						_preFrame = 0,
 						_currentFrame++;
 					if (_currentFrame == 2)
@@ -450,7 +472,7 @@ public:
 					//bool onTop;
 					//if (hitOther)
 					//	onTop = true;
-					_pos = Vector2f(_pos.x - 2, _pos.y);
+					_pos = Vector2f(_pos.x - g_pixelsx, _pos.y);
 					//if (onTop == false && hitOther)
 					//	_pos = Vector2f(_pos.x + 1, _pos.y);
 					if (_pos.x < 0) {
@@ -460,11 +482,11 @@ public:
 								scrn = Vector2i(scrn.x - 1, scrn.y);
 							} // with
 							} else {
-								_pos = Vector2f(_pos.x + 1, _pos.y);
+								_pos = Vector2f(_pos.x + g_pixelsx, _pos.y);
 							}
 						doGrace;
 					}
-				processTestPoints(_pos);
+					processTestPoints(_pos);
 				}
 			}
 
@@ -476,7 +498,7 @@ public:
 					! hits(rightMid, _blocks) &&
 					! hits(rightBottom, _blocks)) {
 					_preFrame++;
-					if (_preFrame >= 10)
+					if (_preFrame >= 5)
 						_preFrame = 0,
 						_currentFrame++;
 					if (_currentFrame == 2)
@@ -495,7 +517,7 @@ public:
 								scrn = Vector2i(scrn.x + 1, scrn.y);
 							}
 						} else {
-							_pos = Vector2f(_pos.x - 1, _pos.y);
+							_pos = Vector2f(_pos.x - g_pixelsx, _pos.y);
 						}
 						doGrace;
 					}
@@ -509,14 +531,16 @@ public:
 
 		// key right
 		if (Keyboard.isKeyPressed(_keys[Key.right]) &&
-			! Keyboard.isKeyPressed(_keys[Key.left])) {
+			! Keyboard.isKeyPressed(_keys[Key.left]) &&
+			! p1n2GunTrigger) {
 			if (_gunDucked == GunDucked.notDucked)
 				moveRight;
 		}
 
 		// key left
 		if (Keyboard.isKeyPressed(_keys[Key.left]) &&
-			! Keyboard.isKeyPressed(_keys[Key.right])) {
+			! Keyboard.isKeyPressed(_keys[Key.right]) &&
+			! p1n2GunTrigger) {
 			if (_gunDucked == GunDucked.notDucked)
 				moveLeft;
 		}
@@ -542,7 +566,7 @@ public:
 		
 		// climbing up
 		if (_climbing == Climbing.up) {
-			_pos = Vector2f(_pos.x, _pos.y - 2);
+			_pos = Vector2f(_pos.x, _pos.y - g_pixelsy);
 			
 			if (_pos.y < 0) { // if edge of screen
 				if (_portal.scrn.y - 1 >= 0) {
@@ -558,10 +582,10 @@ public:
 			}
 			//if (hitOther || 
 			if (hits(topLeft, _blocks) || hits(topRight, _blocks))
-				_pos = Vector2f(_pos.x, _pos.y + 2); // back track
+				_pos = Vector2f(_pos.x, _pos.y + g_pixelsy); // back track
 			else {
 				_climbingPreFrame++;
-				if (_climbingPreFrame == 10)
+				if (_climbingPreFrame == 5)
 					_climbingPreFrame = 0,
 					_climbingFrame = (_climbingFrame == 1 ? 0 : 1);
 			}
@@ -579,7 +603,7 @@ public:
 
 			if (! hits(rightTop + Vector2f(-1, 0), [TileName.ladder]) &&
 				! hits(rightBottom + Vector2f(-1, 0), [TileName.ladder]))
-				_pos = Vector2f(_pos.x - 2, _pos.y);
+				_pos = Vector2f(_pos.x - g_pixelsx, _pos.y);
 		}
 		
 		// move up if block on feet
@@ -587,12 +611,12 @@ public:
 			hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize - 1), _blocks)) &&
 			! hits(_pos + Vector2f(0, g_spriteSize - 2), _blocks) &&
 				! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize - 2), _blocks)) {
-			_pos += Vector2f(0, -2);
+			_pos += Vector2f(0, -g_pixelsy);
 		}
 
 		// climbing down
 		if (_climbing == Climbing.down) {
-			_pos += Vector2f(0, 2);
+			_pos += Vector2f(0, g_pixelsy);
 			
 			if (_pos.y + g_spriteSize >= 10 * g_spriteSize) { // if edge of screen
 				if (_portal.scrn.y + 1 < g_scrnDim.y) {
@@ -606,12 +630,12 @@ public:
 
 			//#320 didn't work
 			if (hits(bottomLeft, _blocks) || hits(bottomRight, _blocks)) {
-				_pos += Vector2f(0, -2); // back track
+				_pos += Vector2f(0, -g_pixelsy); // back track
 				//_climbing = Climbing.no;
 			}
 			else {
 				_climbingPreFrame++;
-				if (_climbingPreFrame == 10)
+				if (_climbingPreFrame == 5)
 					_climbingPreFrame = 0,
 					_climbingFrame = (_climbingFrame == 1 ? 0 : 1);
 			}
@@ -624,25 +648,25 @@ public:
 		
 		if (_jumping == Jumping.yes) {
 			with(TileName) {
-				bool leap = false;
+				bool leap;
 				if (checkForLadder == true ||
 					hits(bottomLeft, _blocks) ||
 	 				hits(bottomRight, _blocks))
 					leap = true;
 
-				_pos += Vector2f(0, 2);
-				immutable other = (_id == 0 ? 1 : 0);
+				_pos += Vector2f(0, g_pixelsy);
+				immutable other = (_id == Id.player1 ? Id.player2 : Id.player1);
 				if (hitOther)
 					with(g_guys[other]) {
 						_pos.processTestPoints;
 						if (hits(bottomLeft,  _blocks) ||
-							 hits(bottomRight, _blocks) ||
+							hits(bottomRight, _blocks) ||
 							 checkForLadder)
 							leap = true;
 					}
-				_pos += Vector2f(0, -2);
+				_pos += Vector2f(0, -g_pixelsy);
 				if (leap) {
-					g_jsounds[Snd.leap].playSnd;
+					//g_jsounds[Snd.leap].playSnd;
 					_stateUpDown = StateUpDown.rising;
 					_risingCount = _glideCount = -1; //# bit funny
 					if (! hits(topLeft, _blocks) && ! hits(topRight, _blocks))
@@ -653,7 +677,6 @@ public:
 
 		// key down
 		if (Keyboard.isKeyPressed(_keys[Key.down])) {
-			
 			if ((hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + g_spriteSize), [TileName.ladder]) ||
 				hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y - 1), [TileName.ladder])) &&
 				! hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + 2), _blocks))
@@ -674,6 +697,22 @@ public:
 				hits(bottomLeft, _blocks)) {
 				moveRight;
 			}
+
+			if (! Keyboard.isKeyPressed(_keys[Key.left]) &&
+				! Keyboard.isKeyPressed(_keys[Key.right])) {
+				if (hits(bottomLeft, _blocks) ||
+					hits(bottomRight, _blocks) ||
+					checkForLadder) {
+					if  (_gunDucked != GunDucked.ducked)
+						_gun = Gun.aiming;
+					_gunDucked = GunDucked.ducked;
+					if (! checkForLadder)
+						_climbing = Climbing.no;
+					_pos = Vector2f(_pos.x, cast(int)_pos.y / cast(int)g_spriteSize * cast(int)g_spriteSize);
+				} else {
+					_gunDucked = GunDucked.notDucked;
+				}
+			}
 		}
 				
 		// falling
@@ -687,7 +726,7 @@ public:
 					// if ladder under but not on it, then move down
 					if (! checkForLadder) {
 						_stateUpDown = StateUpDown.falling;
-						_pos += Vector2f(0, 2);
+						_pos += Vector2f(0, g_pixelsy);
 						if (_pos.y + g_spriteSize >= 10 * g_spriteSize) { // if edge of screen
 							if (_portal.scrn.y + 1 < g_scrnDim.y) {
 								_pos.y = 0;
@@ -716,18 +755,18 @@ public:
 					if (_pos.y < 0) {
 						if (_portal.scrn.y - 1 < 0) {
 							_pos.y = 0;
-							doGrace;
+							doGrace; //#should this be here
 						}
 						else {
 							_pos.y = g_spriteSize * 9;
 							with(_portal) {
 								scrn = Vector2i(scrn.x, scrn.y - 1);
 							}
-							_risingCount += g_spriteSize - 4;
+							_risingCount += g_spriteSize - g_pixelsy * 2;
 							doGrace;
 						}
 					} else {
-							_pos += Vector2f(0, -2);
+							_pos += Vector2f(0, -g_pixelsy);
 					}
 				}
 
@@ -743,7 +782,7 @@ public:
 				 hits(topRight + Vector2f(0, 1), _blocks)) &&
 				! hits(topLeft + Vector2f(0, 2), _blocks) &&
 				! hits(topRight + Vector2f(0, 2), _blocks))
-				_pos += Vector2f(0, 2);
+				_pos += Vector2f(0, g_pixelsy);
 		} // rising
 
 		// Moving at jump max height
@@ -768,9 +807,9 @@ public:
 		}
 
 		auto posWas = _pos;
-		_pos = _id == 0 ? Vector2f(_pos.x, _pos.y) : Vector2f(_pos.x + _portal.pos.x, _pos.y);
+		_pos = _id == Id.player1 ? Vector2f(_pos.x, _pos.y) : Vector2f(_pos.x + _portal.pos.x, _pos.y);
 		
-		immutable other = (_id == 0 ? 1 : 0);
+		immutable other = (_id == Id.player1 ? Id.player2 : Id.player1);
 		if (g_guys[other]._portal.scrn == _portal.scrn) {
 			if (other == 1) {
 				with(g_guys[other]) {
@@ -888,4 +927,19 @@ public:
 
 		_pos = posWas;
 	}
+
+	void updateScreenVerseRef() {
+		if (_id != 0)
+			return;
+		import std.conv: to, text;
+
+		if (_portal.scrn.x >= 0 && _portal.scrn.x < g_scrnDim.x &&
+			_portal.scrn.y >= 0 && _portal.scrn.y < g_scrnDim.y) {
+			_dashBoard.banner = g_screens[_portal.scrn.y][_portal.scrn.x].verseRef.to!dstring;
+			g_display.setVerse(g_bible.argReference(
+					g_bible.argReferenceToArgs(g_screens[_portal.scrn.y][_portal.scrn.x].verseRef)));
+			g_doLetUpdate = true;
+		}
+	}
 }
+

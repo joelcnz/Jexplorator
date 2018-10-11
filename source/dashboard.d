@@ -20,14 +20,17 @@ Score points:
 +/
 struct DashBoard {
 private:
+	static int _totalDiamonds;
 	Text[] _lines;
 	int _score;
 	int _diamonds;
-	int _totalDiamonds;
 	Guy _guy;
 	dstring _banner;
 public:
 	@property {
+		static int totalDiamonds() { return _totalDiamonds; }
+		static void totalDiamonds(int totalDiamonds0) { _totalDiamonds = totalDiamonds0; }
+
 		dstring banner() { return _banner; }
 		void banner(dstring banner0) { _banner = banner0; }
 
@@ -36,9 +39,6 @@ public:
 
 		int diamonds() { return _diamonds; }
 		void diamonds(int diamonds0) { _diamonds = diamonds0; }
-
-		int totalDiamonds() { return _totalDiamonds; }
-		void totalDiamonds(int totalDiamonds0) { _totalDiamonds = totalDiamonds0; }
 	}
 
 	@disable this();
@@ -57,8 +57,8 @@ public:
 		int i;
 		_lines[i++].setString = _banner;
 		_lines[i++].setString = text("Score: ", score).to!dstring;
-		_lines[i++].setString = text("Diamonds ", diamonds, " of ", totalDiamonds - g_guys[_guy.id == 0 ? 1 : 0].dashBoard.diamonds).to!dstring;
-		version(timeStuff) _lines[i++].setString = text("Time: ", countDown).to!dstring;
+		_lines[i++].setString = text("Diamonds ", diamonds, " of ", totalDiamonds).to!dstring;
+		//version(timeStuff) _lines[i++].setString = text("Time: ", countDownTimer).to!dstring;
 	}
 
 	void draw() {

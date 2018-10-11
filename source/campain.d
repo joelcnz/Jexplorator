@@ -17,6 +17,8 @@ public:
 	}
 	
 	bool loadCampain() {
+		g_gameOver = false;
+
 		import std.file;
 		g_inputJex.addToHistory(text(`Loading "`, fileName.trim, `" Campain...`).to!dstring);
 		if (! exists(_fileName)) {
@@ -36,6 +38,12 @@ public:
 		int ix, iy;
 		import std.string;
 		FILE* pfile = stdc.fopen(toStringz(fileName), "rb");
+		scope(success) {
+			fclose(pfile);
+		}
+		scope(failure) {
+
+		}
 		
 		int ver;
 		fread(&ver, 1, ver.sizeof, pfile); // read version
@@ -46,9 +54,9 @@ public:
 			default:
 				oldVersions(pfile, ver);
 			break;
-			case 8:
+			case 9:
 				fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
-				fread(&iy, 1, iy.sizeof, pfile); 
+				fread(&iy, 1, iy.sizeof, pfile);
 				g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
 				writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
 				
@@ -104,21 +112,28 @@ public:
 				g_scrnDim = Vector2i(ix, iy);
 				g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
 				foreach(sy; 0 .. g_scrnDim.y)
-				foreach(sx; 0 .. g_scrnDim.x) {
-					g_screens[sy][sx].tiles.length = 10;
-					foreach(y; 0 .. 10)
-						g_screens[sy][sx].tiles[y].length = 10;
-				}
+					foreach(sx; 0 .. g_scrnDim.x) {
+						g_screens[sy][sx].tiles.length = 10;
+						foreach(y; 0 .. 10)
+							g_screens[sy][sx].tiles[y].length = 10;
+					}
 				writeln("g_scrnDim: ", g_scrnDim);
 				
 				foreach(sy; 0 .. g_scrnDim.y)
-					foreach(sx; 0 .. g_scrnDim.x)
+					foreach(sx; 0 .. g_scrnDim.x) {
+						int characters;
+						fread(&characters, 1, characters.sizeof, pfile);
+						char[] text;
+						text.length = characters;
+						fread(text.ptr, characters, char.sizeof, pfile);
+						g_screens[sy][sx].verseRef = text.idup;
 						foreach(cy; 0 .. 10)
 						foreach(cx; 0 .. 10) {
 							fread(&g_screens[sy][sx].tiles[cy][cx].tileNameBack, 1, g_screens[sy][sx].tiles[cy][cx].tileNameBack.sizeof, pfile); // back TileName
 							fread(&g_screens[sy][sx].tiles[cy][cx].tileName, 1, g_screens[sy][sx].tiles[cy][cx].tileName.sizeof, pfile); // mid TileName
 							fread(&g_screens[sy][sx].tiles[cy][cx].tileNameFront, 1, g_screens[sy][sx].tiles[cy][cx].tileNameFront.sizeof, pfile);// front TileName
 						}
+					}
 				//#jeep read
 				fread(&ix, 1, ix.sizeof, pfile);
 				//writeln("read number of jeeps: ", ix);
@@ -145,7 +160,6 @@ public:
 				}
 				break;
 		}
-		fclose(pfile);
 		
 		//resetGame;
 		
@@ -165,11 +179,16 @@ public:
 		g_inputJex.addToHistory("Game reset!");
 	}
 
-	bool saveCampain() {
+	bool saveCampain(in string backFileName = "") {
+		auto oldFileName = fileName;
+		if (backFileName != "")
+			setFileName(backFileName);
+		scope(exit)
+			setFileName(oldFileName);
 		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Campain...`).to!dstring);
 		import std.string;
 		FILE* pfile = stdc.fopen(toStringz(_fileName), "wb");
-		int ver = 8; // version
+		int ver = 9; // version
 		fwrite(&ver, 1, ver.sizeof, pfile); // write version
 		writeln("version: ", ver);
 
@@ -232,13 +251,18 @@ public:
 		fwrite(&ix, 1, ix.sizeof, pfile); // 8 how many screens width
 		fwrite(&iy, 1, iy.sizeof, pfile); // how many screens height
 		foreach(sy; 0 .. iy)
-			foreach(sx; 0 .. ix)
+			foreach(sx; 0 .. ix) {
+				auto verseRef = g_screens[sy][sx].verseRef.dup;
+				int len = cast(int)verseRef.length;
+				fwrite(&len, 1, len.sizeof, pfile);
+				fwrite(verseRef.ptr, len, char.sizeof, pfile);
 				foreach(cy; 0 .. 10)
 					foreach(cx; 0 .. 10) {
 						fwrite(&g_screens[sy][sx].tiles[cy][cx].tileNameBack,  1,  g_screens[sy][sx].tiles[cy][cx].tileNameBack.sizeof,  pfile);//back TileName
 						fwrite(&g_screens[sy][sx].tiles[cy][cx].tileName,      1,  g_screens[sy][sx].tiles[cy][cx].tileName.sizeof,      pfile);// mid TileName
 						fwrite(&g_screens[sy][sx].tiles[cy][cx].tileNameFront, 1,  g_screens[sy][sx].tiles[cy][cx].tileNameFront.sizeof, pfile);//front TileName
 					}
+			}
 		ix = cast(int)g_jeeps.length;
 		fwrite(&ix, 1, ix.sizeof, pfile);
 		writeln("number of jeeps (save) ", ix);
@@ -597,6 +621,104 @@ public:
 					foreach(y; 0 .. 10)
 						g_screens[sy][sx].tiles[y].length = 10;
 				}
+				writeln("g_scrnDim: ", g_scrnDim);
+				
+				foreach(sy; 0 .. g_scrnDim.y)
+					foreach(sx; 0 .. g_scrnDim.x)
+						foreach(cy; 0 .. 10)
+						foreach(cx; 0 .. 10) {
+							fread(&g_screens[sy][sx].tiles[cy][cx].tileNameBack, 1, g_screens[sy][sx].tiles[cy][cx].tileNameBack.sizeof, pfile); // back TileName
+							fread(&g_screens[sy][sx].tiles[cy][cx].tileName, 1, g_screens[sy][sx].tiles[cy][cx].tileName.sizeof, pfile); // mid TileName
+							fread(&g_screens[sy][sx].tiles[cy][cx].tileNameFront, 1, g_screens[sy][sx].tiles[cy][cx].tileNameFront.sizeof, pfile);// front TileName
+						}
+				//#jeep read
+				fread(&ix, 1, ix.sizeof, pfile);
+				//writeln("read number of jeeps: ", ix);
+				int i;
+				foreach(jeep; 0 .. ix) {
+					//writeln("jeep read ", jeep);
+					fread(&fx, 1, fx.sizeof, pfile);
+					fread(&fy, 1, fy.sizeof, pfile);
+					
+					fread(&ix, 1, ix.sizeof, pfile);
+					fread(&iy, 1, iy.sizeof, pfile);
+					g_jeeps ~= new Jeep(Vector2f(fx, fy), Vector2i(ix, iy)); //, g_portals[0], g_portals[1]);
+					
+					with(g_jeeps[$-1]) {
+						fread(&ix, 1, ix.sizeof, pfile);
+						facingNext = cast(Facing)ix;
+						
+						fread(&iy, 1, iy.sizeof, pfile);
+						facing = cast(Facing)iy;
+						
+						fread(&ix, 1, ix.sizeof, pfile);
+						action = cast(Action)ix;
+					}
+				}
+				break;
+			case 8:
+				fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
+				fread(&iy, 1, iy.sizeof, pfile);
+				g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
+				writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
+				
+				foreach(i, guy; g_guys) {
+					with(guy) {
+						writeln("Guy ", i);
+						
+						fread(&fx, 1, fx.sizeof, pfile); // 2 ST postion in screen
+						fread(&fy, 1, fy.sizeof, pfile);
+						resetPos = Vector2f(fx, fy);
+						writeln("ST position screen (resetPos): ", fx, ' ', fy);
+						
+						fread(&ix, 1, ix.sizeof, pfile); // 3 ST which screen
+						fread(&iy, 1, iy.sizeof, pfile);
+						portal.resetPosScrn = Vector2i(ix, iy);
+						writeln("ST which screen: (portal.resetPosScrn)", ix, ' ', iy);
+						
+						fread(&fx, 1, fx.sizeof, pfile); // 4 place on the screen
+						fread(&fy, 1, fy.sizeof, pfile);
+						pos = Vector2f(fx, fy);
+						writeln("guy place on screen (pos): ", fx, ' ', fy);
+						
+						fread(&ix, 1, ix.sizeof, pfile); // 5 which screen
+						fread(&iy, 1, iy.sizeof, pfile);
+						portal.scrn = Vector2i(ix, iy);
+						writeln("Which screen: (portal.scrn)", ix, ' ', iy);
+						
+						// 6
+						int sdiamonds = dashBoard.diamonds;
+						fread(&sdiamonds, 1, sdiamonds.sizeof, pfile);
+						dashBoard.diamonds = sdiamonds;
+						writeln("Diamonds (diamonds): ", dashBoard.diamonds);
+
+						// 6.1
+						int stotalDiamonds = dashBoard.totalDiamonds;
+						fread(&stotalDiamonds, 1, stotalDiamonds.sizeof, pfile);
+						dashBoard.totalDiamonds = stotalDiamonds;
+						writeln("Total Diamonds: ", dashBoard.totalDiamonds);
+					} // with
+				} // guy
+				//resetGame;
+				
+				// 7
+				/+
+				int total = g_score.totalDiamonds;
+				fread(&total, 1, total.sizeof, pfile);
+				g_score.totalDiamonds = total;
+				writeln("total Diamonds: ", g_score.totalDiamonds);
+				+/
+				
+				fread(&ix, 1, ix.sizeof, pfile); // how many screens width
+				fread(&iy, 1, iy.sizeof, pfile); // how many screens height
+				g_scrnDim = Vector2i(ix, iy);
+				g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
+				foreach(sy; 0 .. g_scrnDim.y)
+					foreach(sx; 0 .. g_scrnDim.x) {
+						g_screens[sy][sx].tiles.length = 10;
+						foreach(y; 0 .. 10)
+							g_screens[sy][sx].tiles[y].length = 10;
+					}
 				writeln("g_scrnDim: ", g_scrnDim);
 				
 				foreach(sy; 0 .. g_scrnDim.y)

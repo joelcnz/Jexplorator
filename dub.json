@@ -5,9 +5,11 @@
 	"lflags-osx" : ["-L../DSFMLlibs"],
 
     "sourcePaths" : ["source",
-                     "../JextLib/source",
-                     "../MiscLib/source",
-                     "../IniLib/source"],
+                     "../JecLib/source",
+                     "../JMiscLib/source",
+                     "../IniLib/source",
+                     "../BibleLib/source",
+                     "../arsdLib/source"],
     "dependencies": 
     {
         "dsfml:graphics": "~>2.1",

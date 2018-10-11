@@ -27,7 +27,7 @@ public:
 	this(Vector2f pos0, Vector2i scrn0) {
 		_pos = pos0;
 		scrn = scrn0;
-		_dir = Vector2f(-1, 0);
+		_dir = Vector2f(-g_pixelsx, 0);
 		_action = Action.leftRight;
 		_turnCount = 20;
 		_jeepBullit = new JeepBullit;
@@ -101,20 +101,22 @@ public:
 				// left
 				if (_pos.x < 0 || hits(_pos + Vector2f(-1,0), g_blocks ~ TileName.spikes) ||
 					! hits(_pos + Vector2f(0, g_spriteSize), g_blocks ~ TileName.ladder) ||
-					(_dir.x < 0 && onOtherBefore)) {
+					(_dir.x < 0 && onOtherBefore && onOtherBefore._dir.x > 0)) {
 					_facingNext = Facing.right;
-					_pos = _pos + Vector2f(1, 0);
-					_dir = Vector2f(1, 0);
-					_turnCount = 20;
+					_pos = _pos + Vector2f(g_pixelsx, 0);
+					_dir = Vector2f(g_pixelsx, 0);
+					_turnCount = 10;
 					_action = Action.turning;
-					if (onOtherBefore && onOtherBefore.action != Action.blowingUp && onOtherBefore.action != Action.destroyed) {
+					if (onOtherBefore && onOtherBefore.action != Action.blowingUp &&
+						onOtherBefore.action != Action.destroyed) {
 						with(onOtherBefore) {
 							_facing = Facing.right;
 							_facingNext = Facing.left;
-							_turnCount = 20;
+							_turnCount = 10;
 							onOtherBefore._action = Action.turning;
-							//_pos = _pos + Vector2f(-1, 0);
-							_dir = Vector2f(-1, 0);
+							//_pos = _pos + Vector2f(-g_pixelsx, 0);
+							_dir = Vector2f(-g_pixelsx, 0);
+							onOtherBefore = null;
 						}
 					}
 				}
@@ -122,20 +124,21 @@ public:
 				// right
 				if (_pos.x + g_spriteSize - 1 >= g_spriteSize * 10 || hits(_pos + Vector2f(g_spriteSize, 0), g_blocks ~ TileName.spikes) ||
 					! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize), g_blocks ~ TileName.ladder) ||
-					(_dir.x > 0 && onOtherBefore)) {
+					(_dir.x > 0 && onOtherBefore && onOtherBefore._dir.x < 0)) {
 					_facingNext = Facing.left;
-					_pos = _pos - Vector2f(1, 0);
-					_dir = Vector2f(-1, 0);
-					_turnCount = 20;
+					_pos = _pos - Vector2f(g_pixelsx, 0);
+					_dir = Vector2f(-g_pixelsx, 0);
+					_turnCount = 10;
 					_action = Action.turning;
-					if (onOtherBefore && onOtherBefore.action != Action.blowingUp && onOtherBefore.action != Action.destroyed) {
+					if (onOtherBefore && onOtherBefore.action != Action.blowingUp &&
+						onOtherBefore.action != Action.destroyed) {
 						with(onOtherBefore) {
 							_facing = Facing.left;
 							_facingNext = Facing.right;
-							_turnCount = 20;
+							_turnCount = 10;
 							_action = Action.turning;
 							//_pos = _pos + Vector2f(1, 0);
-							_dir = Vector2f(1, 0);
+							_dir = Vector2f(g_pixelsx, 0);
 						}
 					}
 				}
@@ -150,16 +153,16 @@ public:
 			break;
 			case Action.turning:
 				if ((_turnCount--) < 0)
-					_turnCount = 20,
+					_turnCount = 10,
 					_facing = _facingNext,
 					_action = Action.leftRight;
 			break;
 			case Action.falling:
-				_pos += Vector2f(0, 1);
+				_pos += Vector2f(0, g_pixelsy);
 				if (hits(_pos + Vector2f(0, g_spriteSize), g_blocks ~ TileName.ladder) ||
 					hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize), g_blocks ~ TileName.ladder) ||
 					hitOtherJeep) {
-					_stunCount = 20;
+					_stunCount = 5;
 					_action = Action.stunned;
 				}
 			break;
@@ -171,7 +174,7 @@ public:
 			break;
 			case Action.blowingUp:
 				_blowUpFrameTiming++;
-				if (_blowUpFrameTiming == 10) {
+				if (_blowUpFrameTiming == 5) {
 					_blowUpFrameTiming = 0,
 					_blowUpFrame++;
 					if (_blowUpFrame == 6)

@@ -253,7 +253,29 @@ struct MouseInput {
 				}
 
 				if (lkeys[Letter.s].keyTrigger) {
+					import std.file: exists;
+					import std.path: buildPath;
+					import std.conv: to;
+					import std.string: format;
+
+					auto fileName = g_campain.fileName;
+					int id;
+					bool quit = false;
+					do {
+						if (id == 100) {
+							id = 0;
+							import std.stdio: writeln;
+							
+							writeln("Warning: You have exceeded 100 back up saves! - writing to id 000");
+
+							quit = true;
+						}
+						fileName = buildPath("BackUpSaves",
+											 format("%s%02d.bin", g_campain.fileName[2 .. $ - 4], id));
+					 	id++;
+					} while(exists(fileName) && quit == false);
 					g_campain.saveCampain;
+					g_campain.saveCampain(fileName); //#should use copy(g_campain.fileName, fileName);
 				}
 		
 				if (lkeys[Letter.l].keyTrigger) {
@@ -261,8 +283,11 @@ struct MouseInput {
 				}
 
 				if (kReturn.keyTrigger) {
+					g_campain.loadCampain;
 					g_guys[0].reset;
 					g_guys[1].reset;
+					g_timer.doStart;
+					g_mode = Mode.play;
 					
 					writeln("Game level reset!");
 				}

@@ -1,6 +1,6 @@
 import base;
 
-struct Info {
+struct GameInfo {
 private:
 	string _levelLocation;
 	string _levelName;

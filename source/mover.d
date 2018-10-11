@@ -12,10 +12,10 @@ public:
 		void pos(Vector2f pos0) { _pos = pos0; }
 	
 		auto dir() { return _dir; }
-		void dir(Vector2f dir0) { _dir = dir0; };
+		void dir(Vector2f dir0) { _dir = dir0; }
 
 		auto scrn() { return _scrn; }
-		void scrn(Vector2i scrn0) { _scrn = scrn0; };
+		void scrn(Vector2i scrn0) { _scrn = scrn0; }
 	}
 
 	TileName getPos(in Vector2f v, Layer layer = Layer.normal) {

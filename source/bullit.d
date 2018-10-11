@@ -56,10 +56,10 @@ public:
 						jeep.action != Action.blowingUp && jeep.action != Action.destroyed &&
 						_pos.x >= jeep.pos.x && _pos.x < jeep.pos.x + g_spriteSize &&
 						_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + g_spriteSize &&
-						! (jeep.facing == Facing.right &&
+						! (jeep.facing.asOriginalType == Facing.right &&
 							_pos.x >= jeep.pos.x && _pos.x < jeep.pos.x + 14 &&
 							_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + 14) &&
-						! (jeep.facing == Facing.left &&
+						! (jeep.facing.asOriginalType == Facing.left &&
 							_pos.x >= jeep.pos.x + 18 && _pos.x < jeep.pos.x + 32 &&
 							_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + 14)) {
 						with(g_jsounds[Snd.blowup])
