@@ -52,8 +52,10 @@ void listMissions(in string campain) {
 	}
 }
 
-int main(string[] args)
-{
+int main(string[] args) {
+	scope(exit)
+		"\n# #\n# #\n # \n# #\n# #\n".writeln;
+
 	if (g_setup.setup != 0) {
 		gh("Aborting...");
 		g_window.close;
