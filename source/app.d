@@ -26,14 +26,19 @@ Clock clock;
 
 dstring[] discList, missionsList;
 
-void getDiscList() {
+void getDiscList(in bool show = false) {
 	import std.range;
 	import std.file;
 	import std.conv;
-	g_inputJex.addToHistory("List of project files"d);
+	import std.algorithm;
+	import std.string;
+
+	if (show)
+		g_inputJex.addToHistory("List of project files"d);
 	discList.length = 0;
-	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).enumerate(1)) {
+	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).array.sort!"a.toLower < b.toLower".enumerate(1)) {
 		discList ~= name.to!dstring;
+		if (show)
 		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
 	}
 }
@@ -359,7 +364,11 @@ int main(string[] args) {
 							auto verseRef = dargs[1 .. $].to!(string[]).join(" ");
 
 							g_screens[sy][sx].verseRef = verseRef;
-							string[] verses = g_bible.argReference(g_bible.argReferenceToArgs(verseRef)).split('\n')[0 .. $ - 1];
+							//auto getVerses = g_bible.argReference(g_bible.argReferenceToArgs(verseRef));
+							auto getVerses = g_bible.argReference(g_bible.getReference(verseRef.split));
+							string[] verses;
+							if (getVerses.length)
+								verses = getVerses.split('\n')[0 .. $ - 1];
 							foreach(ver; verses)
 								g_inputJex.addToHistory(ver);
 						break;
@@ -476,7 +485,7 @@ int main(string[] args) {
 								} // if == 3
 							break;
 							case "cat":
-								getDiscList;
+								getDiscList(/* show */ true);
 							break;
 							case "l", "load":
 							if (dargs.length == 2) {
