@@ -12,7 +12,11 @@ public:
 
 	void setup(Guy guy) {
 		_guy = guy;
-		auto lines = ["Your mission is to"d, "score the most points", "and to get away in the rocket", "", "Press "d ~ (_guy.id == 0 ? "Z"d : "Space"d) ~ " to continue"d];
+		auto lines = ["Your mission is to"d,
+			"score the most points",
+			"and to get away in the rocket",
+			"",
+			"Press "d ~ (_guy.id == 0 ? "Z"d : "Space"d) ~ " to continue"d];
 		foreach(i, line; lines) {
 			_lines ~= new Text(line, g_font, 16);
 			with(_lines[$ - 1]) {

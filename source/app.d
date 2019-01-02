@@ -1,3 +1,4 @@
+//#see help.txt
 //#here
 //#work here
 //#get rid of the jeeps!
@@ -36,10 +37,11 @@ void getDiscList(in bool show = false) {
 	if (show)
 		g_inputJex.addToHistory("List of project files"d);
 	discList.length = 0;
-	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).array.sort!"a.toLower < b.toLower".enumerate(1)) {
+	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).
+			array.sort!"a.toLower < b.toLower".enumerate(1)) {
 		discList ~= name.to!dstring;
 		if (show)
-		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
+			g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
 	}
 }
 
@@ -49,9 +51,12 @@ void listMissions(in string campain) {
 	import std.file;
 	import std.conv;
 	import std.path: buildPath;
+	import std.algorithm: sort;
+
 	g_inputJex.addToHistory("List of missions:"d);
 	discList.length = 0;
-	foreach(i, string name; dirEntries(buildPath("campains", campain), "*.{ini}", SpanMode.shallow).enumerate(1)) {
+	foreach(i, string name; dirEntries(buildPath("campains", campain), "*.{ini}", SpanMode.shallow).
+			array.sort!"a.toLower < b.toLower".enumerate(1)) {
 		missionsList ~= name.to!dstring;
 		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
 	}
@@ -79,6 +84,8 @@ int main(string[] args) {
 	MenuSelect mret = MenuSelect.doLoop;
 
 	listMissions("Explore");
+
+	bool showingBible = false;
 
 	while(g_window.isOpen())
 	{
@@ -268,6 +275,21 @@ int main(string[] args) {
 
 				if (! g_terminal) {
 					with(g_portals[PortalSide.editor]) {
+						if (! showingBible) {
+							if (g_keys[Keyboard.Key.B].keyTrigger) {
+								g_display.setVerse(g_bible.argReference(
+									g_bible.getReference(
+										g_screens[scrn.y][scrn.x].verseRef.split)));
+								
+								g_doLetUpdate = showingBible = true;
+								writeln("Verse(s): ", g_screens[scrn.y][scrn.x].verseRef.split);
+							}
+						}
+						if (showingBible) {
+							if (g_keys[Keyboard.Key.B].keyTrigger)
+								showingBible = false;
+						}
+
 						if (kup.keyTrigger) {
 							if (scrn.y > 0)
 								scrn = scrn + Vector2i(0, -1);
@@ -335,26 +357,11 @@ int main(string[] args) {
 					switch(str) {
 						default: g_inputJex.addToHistory("Not recognized command."); break;
 						case "h", "help":
-						foreach(line; ["Help:",
-									   "h/help - for this help",
-									   "cls - clear history",
-									   "t - exit terminal",
-									   "exit/quit to exit to OS",
-									   "cat - list projects",
-									   "l/load # - load project (see 'cat')",
-									   "save <name> - save current project",
-									   "d/remove/delete # - delete project (see 'cat')",
-									   "create # # - start a new project",
-									   "reset",
-									   "go # # - go strait to another screen",
-									   "info/i - data for debuging",
-									   "bullitproof/b - can shoot each other",
-									   "hide # - hide player eg hide 1 for p1",
-									   "race # - set and start a countdown timer",
-									   "missions - list current campain missions",
-									   "*mission # - start misson",
-									   "ref <ref> - add verse to current screen"])
-							g_inputJex.addToHistory(line.to!dstring);
+						//#see help.txt
+						import std.string;
+						foreach(line; File("help.txt").byLine) {
+							g_inputJex.addToHistory(line.stripLeft);
+						}
 						break;
 						//#work here
 						case "ref":
@@ -393,7 +400,7 @@ int main(string[] args) {
 											g_terminal = false;
 										}
 									} catch(Exception e) {
-										addToHistory("Error!");
+										addToHistory("Error, no building!");
 									}
 									try {
 										tmp = ini["mission"].getKey("diamonds");
@@ -401,6 +408,7 @@ int main(string[] args) {
 									} catch(Exception e) {
 										
 									}
+									try { tmp = ini["mission"].getKey("start"); } catch(Exception e) {}
 								}
 							}
 						break;
@@ -488,23 +496,24 @@ int main(string[] args) {
 								getDiscList(/* show */ true);
 							break;
 							case "l", "load":
-							if (dargs.length == 2) {
-								g_campain.setFileName("backup.bin");
-								g_campain.saveCampain;
-								addToHistory("Back up saved (backup.bin)"d);
+								import std.ascii: isDigit;
+								if (dargs.length == 2 && dargs[1][0].isDigit) {
+									g_campain.setFileName("backup.bin");
+									g_campain.saveCampain;
+									addToHistory("Back up saved (backup.bin)"d);
 
-								//int select = dargs[1].to!int - 1;
-								//int select = processValue(dargs[1].to!string).to!int - 1;
-								int select = processValue(dargs[1]) - 1;
-								if (select >= 0 && select < discList.length) {
-									addToHistory(text("Loading as: ", discList[select]).to!dstring);
-									g_campain.setFileName(discList[select].to!string);
-								} else {
-									addToHistory(text(select + 1, " is invaild input.").to!dstring);
+									//int select = dargs[1].to!int - 1;
+									//int select = processValue(dargs[1].to!string).to!int - 1;
+									int select = processValue(dargs[1]) - 1;
+									if (select >= 0 && select < discList.length) {
+										addToHistory(text("Loading as: ", discList[select]).to!dstring);
+										g_campain.setFileName(discList[select].to!string);
+									} else {
+										addToHistory(text(select + 1, " is invaild input.").to!dstring);
+									}
+									if (! g_campain.loadCampain)
+										addToHistory(text("Failed loading: ", g_campain.fileName).to!dstring);
 								}
-								if (! g_campain.loadCampain)
-									addToHistory(text("Failed loading: ", g_campain.fileName).to!dstring);
-							}
 							break;
 							case "s", "save":
 								if (dargs.length == 2) {
@@ -574,6 +583,10 @@ int main(string[] args) {
 					g_window.draw(blackPlastic);
 				}
 			}
+		} else {
+			// not play
+			if (showingBible)
+				g_display.display(DisplayType.viewVerse);
 		}
 
 	    g_window.display();

@@ -417,8 +417,13 @@ public:
 		//#working
 		if (hits(mid, [TileName.computer])) {
 			if (_id == 0) {
-				auto verse = g_screens[_portal.scrn.y][_portal.scrn.x].verseRef;
-				verse = g_bible.argReference(g_bible.argReferenceToArgs(verse));
+				//auto verse = g_screens[_portal.scrn.y][_portal.scrn.x].verseRef;
+				//verse = g_bible.argReference(g_bible.argReferenceToArgs(verse));
+				//auto getVerses = g_bible.argReference(g_bible.getReference(verseRef.split));
+				//auto verse = g_bible.argReference(
+				//	g_bible.getReference(
+				//			g_screens[_portal.scrn.y][_portal.scrn.x].verseRef.split));
+				//writeln("(", verse, ")");
 				//_dashBoard.banner = verse.to!dstring;
 				//displayGameText(verse);
 				g_displayGameText = true;
@@ -936,8 +941,11 @@ public:
 		if (_portal.scrn.x >= 0 && _portal.scrn.x < g_scrnDim.x &&
 			_portal.scrn.y >= 0 && _portal.scrn.y < g_scrnDim.y) {
 			_dashBoard.banner = g_screens[_portal.scrn.y][_portal.scrn.x].verseRef.to!dstring;
+			//g_display.setVerse(g_bible.argReference(
+			//		g_bible.argReferenceToArgs(g_screens[_portal.scrn.y][_portal.scrn.x].verseRef)));
 			g_display.setVerse(g_bible.argReference(
-					g_bible.argReferenceToArgs(g_screens[_portal.scrn.y][_portal.scrn.x].verseRef)));
+					g_bible.getReference(
+							g_screens[_portal.scrn.y][_portal.scrn.x].verseRef.split)));
 			g_doLetUpdate = true;
 		}
 	}

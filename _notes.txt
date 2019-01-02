@@ -1,4 +1,9 @@
-The D Guy (Jexplorator)
+-= Jexplorater =-
+
+24 11 2018 \#/
+Use ex screen. Going through the verses on vixploreJoel.bin [for vixplore.bin) (always going right, and up at each end). Use B in edit mode to show screen verse.
+
+I'm not sure on the spelling of the name of this game.
 
 settings.ini should be like: currentCampain=Campains/Explore
 
@@ -6,7 +11,7 @@ Need to define stuff better. bin files are buildings, campaigns are groups of le
 
 `git push`
 
-eg ‘dub —-build=unittest’ or is it jusr `dub test`
+eg ‘dub —-build=unittest’ or is it just `dub test`
 
 To run the game:
 ./jex

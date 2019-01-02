@@ -61,7 +61,7 @@ struct Setup {
 		g_inputJex.edge = false; //#new 21 3 2017
 		
 		g_letterBase = new LetterManager("lemgreen32.bmp", 8, 17, // "lemblue.png"
-				Square(0,0, 20 * 32,10 * 32));
+				Square(0,0, 20 * 32,28 * 32));
 		assert(g_letterBase, "Error loading bmp");
 
 		g_texture = new Texture;
