@@ -5,7 +5,7 @@ Use ex screen. Going through the verses on vixploreJoel.bin [for vixplore.bin) (
 
 I'm not sure on the spelling of the name of this game.
 
-settings.ini should be like: currentCampain=Campains/Explore
+settings.ini should be like: currentCampaign=Campaign/Explore
 
 Need to define stuff better. bin files are buildings, campaigns are groups of levels, levels are things like; how much diamonds to collect (missions, really).
 
@@ -41,6 +41,7 @@ Click for full screen, can be faster
 Press [E] and play
 
 Mouse (edit):
+S - Show verse(s), if any
 P - place where the guys popup	
 B - Select type of tile from mouse position. For paint brush (right click if you have a mouse plugged in - - the track pad doesn’t work)
 V - Put current tile down at mouse cursor position

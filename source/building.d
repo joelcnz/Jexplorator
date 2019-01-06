@@ -1,3 +1,5 @@
+module building;
+
 // Old total diamonds (g_score.totalDiamonds) is not used
 //#Forget g_score total diamonds
 //#for if you load a smaller project from a bigger one
@@ -6,7 +8,7 @@ import stdc = core.stdc.stdio;
 
 import base;
 
-struct Campain {
+struct Building {
 private:
 	string _fileName;
 public:
@@ -16,11 +18,11 @@ public:
 		_fileName = fileName;
 	}
 	
-	bool loadCampain() {
+	bool loadBuilding() {
 		g_gameOver = false;
 
 		import std.file;
-		g_inputJex.addToHistory(text(`Loading "`, fileName.trim, `" Campain...`).to!dstring);
+		g_inputJex.addToHistory(text(`Loading "`, fileName.trim, `" Building...`).to!dstring);
 		if (! exists(_fileName)) {
 			g_inputJex.addToHistory(text(`File "`, fileName.trim, `" does not exist!`).to!dstring);
 			return false;
@@ -160,7 +162,7 @@ public:
 		
 		//resetGame;
 		
-		g_inputJex.addToHistory("Campain loaded!"d);
+		g_inputJex.addToHistory("Building loaded!"d);
 		
 		return true;
 	}
@@ -176,13 +178,13 @@ public:
 		g_inputJex.addToHistory("Game reset!");
 	}
 
-	bool saveCampain(in string backFileName = "") {
+	bool saveBuilding(in string backFileName = "") {
 		auto oldFileName = fileName;
 		if (backFileName != "")
 			setFileName(backFileName);
 		scope(exit)
 			setFileName(oldFileName);
-		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Campain...`).to!dstring);
+		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Building...`).to!dstring);
 		import std.string;
 		FILE* pfile = stdc.fopen(toStringz(_fileName), "wb");
 		int ver = 10; // version

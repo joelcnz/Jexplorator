@@ -3,13 +3,13 @@
 import base,  jec;
 
 struct Setup {
-	string _currentCampainFileName;
+	string _currentBuildingFileName;
 	string _settingsFileName;
 
 	void loadFile() {
 	    auto ini = Ini.Parse(_settingsFileName);
 
-	    _currentCampainFileName = ini["settings"].getKey("currentCampainFileName");
+	    _currentBuildingFileName = ini["settings"].getKey("currentBuildingFileName");
 	}
 	
 	void saveFile() {
@@ -17,7 +17,7 @@ struct Setup {
 		
 		auto file = File(_settingsFileName, "w");
 		file.writeln("[settings]");
-		file.writeln(format("currentCampainFileName=%s", _currentCampainFileName));
+		file.writeln(format("currentBuildingFileName=%s", _currentBuildingFileName));
 	}
 		
 	 int setup() {
@@ -131,8 +131,8 @@ struct Setup {
 		_settingsFileName = "settings.ini";
 		loadFile;
 
-		g_campain.setFileName(_currentCampainFileName);
-		if (! g_campain.loadCampain) { //#load campaign here! 
+		g_building.setFileName(_currentBuildingFileName);
+		if (! g_building.loadBuilding) { //#load building here! 
 			throw new Exception("File error. Fatal error!");
 		}
 
@@ -154,7 +154,7 @@ struct Setup {
 	} // setup
 	
 	void shutDown() {
-		_currentCampainFileName = g_campain.fileName;
+		_currentBuildingFileName = g_building.fileName;
 		saveFile;
 	}
 }

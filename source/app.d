@@ -6,7 +6,7 @@
 //#no I didn't do this my self
 //#to hide or not to hide
 //#input
-//#load campain here!
+//#load building here!
 //#other stuff
 
 // To do's:
@@ -46,7 +46,7 @@ void getDiscList(in bool show = false) {
 }
 
 //listMissions("Explore");
-void listMissions(in string campain) {
+void listMissions(in string building) {
 	import std.range;
 	import std.file;
 	import std.conv;
@@ -55,7 +55,7 @@ void listMissions(in string campain) {
 
 	g_inputJex.addToHistory("List of missions:"d);
 	discList.length = 0;
-	foreach(i, string name; dirEntries(buildPath("campains", campain), "*.{ini}", SpanMode.shallow).
+	foreach(i, string name; dirEntries(buildPath("Campaigns", building), "*.{ini}", SpanMode.shallow).
 			array.sort!"a.toLower < b.toLower".enumerate(1)) {
 		missionsList ~= name.to!dstring;
 		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
@@ -276,7 +276,7 @@ int main(string[] args) {
 				if (! g_terminal) {
 					with(g_portals[PortalSide.editor]) {
 						if (! showingBible) {
-							if (g_keys[Keyboard.Key.B].keyTrigger) {
+							if (g_keys[Keyboard.Key.S].keyTrigger) {
 								g_display.setVerse(g_bible.argReference(
 									g_bible.getReference(
 										g_screens[scrn.y][scrn.x].verseRef.split)));
@@ -286,7 +286,7 @@ int main(string[] args) {
 							}
 						}
 						if (showingBible) {
-							if (g_keys[Keyboard.Key.B].keyTrigger)
+							if (g_keys[Keyboard.Key.S].keyTrigger)
 								showingBible = false;
 						}
 
@@ -392,9 +392,9 @@ int main(string[] args) {
 									try { tmp = ini["mission"].getKey("time"); g_timer.setup(tmp.to!int); } catch(Exception e) {}
 									try {
 										tmp = ini["mission"].getKey("building");
-										g_campain.setFileName(tmp.to!string);
-										if (! g_campain.loadCampain)
-											addToHistory(text("Failed loading: ", g_campain.fileName).to!dstring);
+										g_building.setFileName(tmp.to!string);
+										if (! g_building.loadBuilding)
+											addToHistory(text("Failed loading: ", g_building.fileName).to!dstring);
 										else {
 											g_mode = Mode.play;
 											g_terminal = false;
@@ -452,8 +452,8 @@ int main(string[] args) {
 							}
 						break;
 						case "reset":
-							g_campain.loadCampain;
-							g_campain.resetGame;
+							g_building.loadBuilding;
+							g_building.resetGame;
 							goto case "t";
 						case "Joel":
 						case "Sean":
@@ -465,18 +465,18 @@ int main(string[] args) {
 							break;
 							case "create":
 								if (dargs.length == 3) {
-									g_campain.setFileName("backup.bin");
-									g_campain.saveCampain;
+									g_building.setFileName("backup.bin");
+									g_building.saveBuilding;
 
 									g_jeeps.length = 0; //#get rid of the jeeps!
 									int sdx, sdy; // screens dimentions
 									sdx = processValue(dargs[1]); //dargs[1].to!int;
 									sdy = processValue(dargs[2]); //dargs[2].to!int;
 									addToHistory(format("Creating: width=%s, height=%s, Total: %s", sdx, sdy, sdx * sdy).to!dstring);
-									if (g_campain.createMap(sdx, sdy))
+									if (g_building.createMap(sdx, sdy))
 										addToHistory("Creating done"d);
-									g_campain.setFileName("test.bin");
-									addToHistory("campain set to 'test.bin'"d);
+									g_building.setFileName("test.bin");
+									addToHistory("building set to 'test.bin'"d);
 								}
 							break;
 							case "go":
@@ -498,8 +498,8 @@ int main(string[] args) {
 							case "l", "load":
 								import std.ascii: isDigit;
 								if (dargs.length == 2 && dargs[1][0].isDigit) {
-									g_campain.setFileName("backup.bin");
-									g_campain.saveCampain;
+									g_building.setFileName("backup.bin");
+									g_building.saveBuilding;
 									addToHistory("Back up saved (backup.bin)"d);
 
 									//int select = dargs[1].to!int - 1;
@@ -507,24 +507,24 @@ int main(string[] args) {
 									int select = processValue(dargs[1]) - 1;
 									if (select >= 0 && select < discList.length) {
 										addToHistory(text("Loading as: ", discList[select]).to!dstring);
-										g_campain.setFileName(discList[select].to!string);
+										g_building.setFileName(discList[select].to!string);
 									} else {
 										addToHistory(text(select + 1, " is invaild input.").to!dstring);
 									}
-									if (! g_campain.loadCampain)
-										addToHistory(text("Failed loading: ", g_campain.fileName).to!dstring);
+									if (! g_building.loadBuilding)
+										addToHistory(text("Failed loading: ", g_building.fileName).to!dstring);
 								}
 							break;
 							case "s", "save":
 								if (dargs.length == 2) {
-									g_campain.setFileName(dargs[1].to!string ~ ".bin");
-									g_campain.saveCampain;
+									g_building.setFileName(dargs[1].to!string ~ ".bin");
+									g_building.saveBuilding;
 								}
 							break;
 							case "d", "remove", "delete":
-								g_campain.setFileName("backup.bin");
+								g_building.setFileName("backup.bin");
 								addToHistory("Deleted is saved to backup.bin");
-								g_campain.saveCampain;
+								g_building.saveBuilding;
 							int select = processValue(dargs[1]) - 1;
 								if (select >= 0 && select < discList.length) {
 									addToHistory(text("Removing: ", discList[select]).to!dstring);
@@ -546,7 +546,7 @@ int main(string[] args) {
 										addToHistory("-".replicate(7).to!dstring);
 									}
 								addToHistory("Other stuff \\/"d);
-								addToHistory(text("Campain: ", g_campain.fileName).to!dstring);
+								addToHistory(text("Building: ", g_building.fileName).to!dstring);
 								addToHistory(text("g_scrnDim: ", g_scrnDim).to!dstring);
 								//#here
 								addToHistory(text("Screen name: ",

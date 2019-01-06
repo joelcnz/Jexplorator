@@ -8,8 +8,8 @@ import std.string;
 
 import jec, dini.dini, jmisc;
 import bible.base;
-import portal, mouse, guy, campain, score, countdown, setup, display;
-import /+ jxjexting, jxinputjex, +/ jeep, bullit, mover, jeepbullit, escaped, mission,
+import portal, mouse, guy, building, score, countdown, setup, display;
+import jeep, bullit, mover, jeepbullit, escaped, mission,
     dashboard, menu, infomation, gametext;
 
 import dsfml.graphics;
@@ -69,7 +69,7 @@ enum DisplayType {escaped, mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw,
 
 Display g_display;
 
-enum Menu {main, campain}
+enum Menu {main, building}
 enum MenuSelect {quit, edit, start, doLoop}
 
 //#made template instead of normal functions
@@ -110,7 +110,7 @@ Vector2i g_scrnDim;
 
 enum Border {yes,no}
 
-Campain g_campain;
+Building g_building;
 
 // Location of the sprites in the sprite image
 struct Location {

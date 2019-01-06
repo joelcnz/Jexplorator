@@ -34,7 +34,7 @@ public:
 			if (g_score.allDiamondsQ) // have yous collected all the diamonds
 				_lines[1].setString = "Your mission was a success!";
 			else
-				_lines[1].setString = "Your mission was a failure!";
+				_lines[1].setString = "Your mission failed!";
 		}
 	}
 

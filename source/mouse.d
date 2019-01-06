@@ -258,7 +258,7 @@ struct MouseInput {
 					import std.conv: to;
 					import std.string: format;
 
-					auto fileName = g_campain.fileName;
+					auto fileName = g_building.fileName;
 					int id;
 					bool quit = false;
 					do {
@@ -271,19 +271,19 @@ struct MouseInput {
 							quit = true;
 						}
 						fileName = buildPath("BackUpSaves",
-											 format("%s%02d.bin", g_campain.fileName[2 .. $ - 4], id));
+											 format("%s%02d.bin", g_building.fileName[2 .. $ - 4], id));
 					 	id++;
 					} while(exists(fileName) && quit == false);
-					g_campain.saveCampain;
-					g_campain.saveCampain(fileName); //#should use copy(g_campain.fileName, fileName);
+					g_building.saveBuilding;
+					g_building.saveBuilding(fileName); //#should use copy(g_building.fileName, fileName);
 				}
 		
 				if (lkeys[Letter.l].keyTrigger) {
-					g_campain.loadCampain;
+					g_building.loadBuilding;
 				}
 
 				if (kReturn.keyTrigger) {
-					g_campain.loadCampain;
+					g_building.loadBuilding;
 					g_guys[0].reset;
 					g_guys[1].reset;
 					g_timer.doStart;

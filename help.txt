@@ -14,6 +14,6 @@ Help:
                 bullitproof/b - can shoot each other
                        hide # - hide player eg hide 1 for p1
                        race # - set and start a countdown timer
-                     missions - list current campain missions
+                     missions - list current building missions
                    *mission # - start misson
                     ref <ref> - add verse to current screen

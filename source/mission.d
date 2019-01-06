@@ -6,6 +6,10 @@ private:
 	Text[] _lines;
 	MissionStatus _status;
 	Guy _guy;
+
+	string _briefing;
+	string _success;
+	string _failure;
 public:
 	@property MissionStatus status() { return  _status; }
 	@property void status(MissionStatus briefing0) { _status = briefing0; }

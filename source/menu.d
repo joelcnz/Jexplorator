@@ -22,13 +22,13 @@ public:
 					  "0. Exit",
 					  "1. Play",
 					  "2. Edit",
-					  "3. Campain",
+					  "3. Building",
 					  "",
 					  "Press a number to continue.."]);
 		_menu = Menu.main;
 	}
 
-	void campainSetup() {
+	void buildingSetup() {
 		string[] menu = ["* Jecsplorater *",
 						 "",
 						 "0. Cancel"];
@@ -43,7 +43,7 @@ public:
 
 		setupDisplay(menu);
 
-		_menu = Menu.campain;
+		_menu = Menu.building;
 	}
 
 	MenuSelect process() {
@@ -68,10 +68,10 @@ public:
 					}
 					
 					if (nkeys[Number.n3].keyTrigger) {
-						campainSetup;
+						buildingSetup;
 					}
 				break;
-				case Menu.campain:
+				case Menu.building:
 					if (nkeys[Number.n0].keyTrigger) {
 						setup;
 					}
