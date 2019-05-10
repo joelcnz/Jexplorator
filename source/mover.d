@@ -32,4 +32,10 @@ public:
 		else
 			return TileName.gap;
 	}
+
+	bool hits(in Vector2f v, in TileName[] tileNames, Layer layer = Layer.normal) {
+		import std.algorithm: canFind;
+
+		return tileNames.canFind(getPos(v, layer));
+	}
 }

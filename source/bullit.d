@@ -23,26 +23,6 @@ public:
 		_bullitState = BullitState.current;
 	}
 
-	bool hits(in Vector2f v, in TileName[] tileNames) {
-		auto name = getPos(v);
-		foreach(n; tileNames)
-			if (name == n)
-				return true;
-		return false;
-	}
-
-	version(none)
-	TileName getPos(in Vector2f v) {
-		if (v.x >= 0 && v.y >= 0 && v.x < g_spriteSize * 10 && v.y < g_spriteSize * 10) {
-			TileName tile = g_screens[_scrn.y][_scrn.x].tiles[cast(int)(v.y / g_spriteSize)][cast(int)(v.x / g_spriteSize)].tileName;
-			if (tile == TileName.ledge && v.y % g_spriteSize >= 16)
-				return TileName.gap;
-			return tile;
-		}
-		else
-			return TileName.gap;
-	}
-
 	void process() {
 		final switch(_bullitState) {
 			case BullitState.current:

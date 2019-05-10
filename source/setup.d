@@ -121,9 +121,9 @@ struct Setup {
 		g_guys.length = 0;
 		with(Keyboard.Key) {
 			g_guys ~= new Guy(0, g_portals[PortalSide.left],
-				[W, D, S, A]);
+				[W, D, S, A, Z]);
 			g_guys ~= new Guy(1, g_portals[PortalSide.right],
-				[Up, Right, Down, Left]);
+				[Up, Right, Down, Left, Space]);
 		}
 		
 		g_scrnDim = Vector2i(0,0);

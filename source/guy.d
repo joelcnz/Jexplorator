@@ -1,3 +1,4 @@
+//#out of bounds error
 //#bit junky
 //#should this be here
 //#working
@@ -115,7 +116,7 @@ public:
 
 	//override void scrn
 
-	this(int id, Portal portal, Keyboard.Key[] keys) {
+	this(int id, Portal portal, Keyboard.Key[] keys) { // if (g_keys[ _keys[Key.shoot] g_keys[keys[Key.shoot]].keyTrigger].keyTrigger)
 		_id = id;
 
 		_hide = Hide.inview;
@@ -260,19 +261,13 @@ public:
 		return false;
 	}
 		
-	bool checkForLadder() { //#if bottomLeft or bottomRight in on a ladder and not left in bottom, and not right bottom
+	bool isLadder() { //#if bottomLeft or bottomRight in on a ladder and not left in bottom, and not right bottom
 		with(TileName)
 			//return (hits(bottomLeft, [ladder]) || hits(bottomRight, [ladder]));
 			
 			return (hits(bottomLeft, [ladder]) || hits(bottomRight, [ladder])) &&
 				! hits(Vector2f(_pos.x, _pos.y + g_spriteSize - 1), [ladder]) &&
 				! hits(Vector2f(_pos.x + g_spriteSize - 1, _pos.y + g_spriteSize - 1), [ladder]);
-	}
-
-	bool hits(in Vector2f v, in TileName[] tileNames) {
-		import std.algorithm: canFind;
-
-		return tileNames.canFind(getPos(v));
 	}
 
 	//#this is stink, this can't go up in 'mover'
@@ -313,10 +308,7 @@ public:
 
 	/// Is the player gun trigger pulled?
 	bool p1n2GunTrigger() {
-		if ((_id == Id.player1 && lkeys[Letter.z].keyTrigger) ||
-			(_id == Id.player2 && kSpace.keyTrigger))
-			return 	true;
-		return false;
+		return g_keys[ _keys[Key.shoot] ].keyTrigger;
 	}
 
 	void process() {
@@ -392,9 +384,9 @@ public:
 					_gun = Gun.aiming;
 		}
 
-		if (Keyboard.isKeyPressed(_keys[Key.left]) ||
-			Keyboard.isKeyPressed(_keys[Key.right]) ||
-			Keyboard.isKeyPressed(_keys[Key.up])) {
+		if (g_keys[ _keys[Key.left] ].keyPressed ||
+			g_keys[ _keys[Key.right] ].keyPressed ||
+			g_keys[ _keys[Key.up] ].keyPressed) {
 			_gun = Gun.normal;
 			_gunDucked = GunDucked.notDucked;
 		}
@@ -535,23 +527,23 @@ public:
 			return;
 
 		// key right
-		if (Keyboard.isKeyPressed(_keys[Key.right]) &&
-			! Keyboard.isKeyPressed(_keys[Key.left]) &&
+		if (g_keys[ _keys[Key.right] ].keyPressed &&
+			! g_keys[ _keys[Key.left] ].keyPressed &&
 			! p1n2GunTrigger) {
 			if (_gunDucked == GunDucked.notDucked)
 				moveRight;
 		}
 
 		// key left
-		if (Keyboard.isKeyPressed(_keys[Key.left]) &&
-			! Keyboard.isKeyPressed(_keys[Key.right]) &&
+		if (g_keys[ _keys[Key.left] ].keyPressed &&
+			! g_keys[ _keys[Key.right] ].keyPressed &&
 			! p1n2GunTrigger) {
 			if (_gunDucked == GunDucked.notDucked)
 				moveLeft;
 		}
 				
-		if (Keyboard.isKeyPressed(_keys[Key.left]) ||
-			Keyboard.isKeyPressed(_keys[Key.right])) {
+		if (g_keys[ _keys[Key.left] ].keyPressed ||
+			g_keys[ _keys[Key.right] ].keyPressed) {
 			_stateWalking = StateWalking.walking;
 		} else {
 			_stateWalking = StateWalking.standingStill;
@@ -560,7 +552,7 @@ public:
 		}
 
 		// jump
-		if (Keyboard.isKeyPressed(_keys[Key.up])) {
+		if (g_keys[ _keys[Key.up] ].keyPressed) {
 			if (hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + g_spriteSize - 1), [TileName.ladder]) ||
 				hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y), [TileName.ladder]))
 				_climbing = Climbing.up,
@@ -601,7 +593,9 @@ public:
 			}
 		} // _climbing == Climing.up
 		
-		if ((_climbing == Climbing.up || _climbing == Climbing.down) && ! Keyboard.isKeyPressed(_keys[Key.left]) && ! Keyboard.isKeyPressed(_keys[Key.right])) {
+		if ((_climbing == Climbing.up || _climbing == Climbing.down) &&
+			! g_keys[ _keys[Key.left] ].keyPressed &&
+			! g_keys[ _keys[Key.right] ].keyPressed) {
 			if (! hits(leftTop + Vector2f(1,0), [TileName.ladder]) &&
 				! hits(leftBottom + Vector2f(1,0), [TileName.ladder]))
 					_pos = Vector2f(_pos.x + 2, _pos.y);
@@ -654,7 +648,7 @@ public:
 		if (_jumping == Jumping.yes) {
 			with(TileName) {
 				bool leap;
-				if (checkForLadder == true ||
+				if (isLadder == true ||
 					hits(bottomLeft, _blocks) ||
 	 				hits(bottomRight, _blocks))
 					leap = true;
@@ -666,7 +660,7 @@ public:
 						_pos.processTestPoints;
 						if (hits(bottomLeft,  _blocks) ||
 							hits(bottomRight, _blocks) ||
-							 checkForLadder)
+							 isLadder)
 							leap = true;
 					}
 				_pos += Vector2f(0, -g_pixelsy);
@@ -681,7 +675,7 @@ public:
 		} // _jumping == Jumping.yes
 
 		// key down
-		if (Keyboard.isKeyPressed(_keys[Key.down])) {
+		if (g_keys[ _keys[Key.down] ].keyPressed) {
 			if ((hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + g_spriteSize), [TileName.ladder]) ||
 				hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y - 1), [TileName.ladder])) &&
 				! hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + 2), _blocks))
@@ -697,21 +691,21 @@ public:
 				moveLeft;
 			}
 
-			if (! Keyboard.isKeyPressed(_keys[Key.left]) &&
+			if (! g_keys[ _keys[Key.left] ].keyPressed &&
 				! hits(bottomPartLeft, _blocks) &&
 				hits(bottomLeft, _blocks)) {
 				moveRight;
 			}
 
-			if (! Keyboard.isKeyPressed(_keys[Key.left]) &&
-				! Keyboard.isKeyPressed(_keys[Key.right])) {
+			if (! g_keys[ _keys[Key.left] ].keyPressed &&
+				! g_keys[ _keys[Key.right] ].keyPressed) {
 				if (hits(bottomLeft, _blocks) ||
 					hits(bottomRight, _blocks) ||
-					checkForLadder) {
+					isLadder) {
 					if  (_gunDucked != GunDucked.ducked)
 						_gun = Gun.aiming;
 					_gunDucked = GunDucked.ducked;
-					if (! checkForLadder)
+					if (! isLadder)
 						_climbing = Climbing.no;
 					_pos = Vector2f(_pos.x, cast(int)_pos.y / cast(int)g_spriteSize * cast(int)g_spriteSize);
 				} else {
@@ -729,7 +723,10 @@ public:
 					! hits(bottomRight, _blocks)) {
 											
 					// if ladder under but not on it, then move down
-					if (! checkForLadder) {
+					if (! isLadder &&
+						! (hits(Vector2f(_pos.x + g_spriteSize / 2, _pos.y + g_spriteSize), [ladder]) &&
+							hits(Vector2f(_pos.x - 1, _pos.y + g_spriteSize), _blocks) &&
+							hits(Vector2f(_pos.x + g_spriteSize, _pos.y + g_spriteSize), _blocks))) {
 						_stateUpDown = StateUpDown.falling;
 						_pos += Vector2f(0, g_pixelsy);
 						if (_pos.y + g_spriteSize >= 10 * g_spriteSize) { // if edge of screen
@@ -950,4 +947,3 @@ public:
 		}
 	}
 }
-

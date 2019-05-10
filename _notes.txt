@@ -51,7 +51,7 @@ LSystem + 2 for normal painting layer
 LSystem + 3 for back painting layer
 W - wipe layers (dark brick for back layer)
 G - count the number of tiles the cursor is over
-Num1, Num2 & Num3 - choose which tile
+Num1, Num2 & Num3 - choose which tiles
 LSystem + L - load current project
 LSystem + S - save current project
 E - toggle edit/play

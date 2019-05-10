@@ -118,21 +118,21 @@ int main(string[] args) {
 			}
 		}
 
-		if (Keyboard.isKeyPressed(Keyboard.Key.LSystem) && Keyboard.isKeyPressed(Keyboard.Key.Q)) {
+		if (g_keys[Keyboard.Key.LSystem].keyPressed && g_keys[Keyboard.Key.Q].keyTrigger) {
 			g_window.close;
 		}
 
-		if (Keyboard.isKeyPressed(Keyboard.Key.LSystem) && lkeys[Letter.w].keyTrigger) {
+		if (g_keys[Keyboard.Key.LSystem].keyPressed && g_keys[Keyboard.Key.W].keyTrigger) {
 			mret = MenuSelect.doLoop;
 			continue;
 		}
 			
 		if (! g_terminal) {
-			if (g_mode != Mode.play && lkeys[Letter.t].keyTrigger) {
+			if (g_mode != Mode.play && g_keys[Keyboard.Key.T].keyTrigger) {
 				g_terminal = true;
 			}
 
-			if (lkeys[Letter.e].keyTrigger) {
+			if (g_keys[Keyboard.Key.E].keyTrigger) {
 				if (g_mode == Mode.edit) {
 					g_mode = Mode.play;
 					foreach(portal; 0 .. 2)
@@ -146,7 +146,7 @@ int main(string[] args) {
 				writeln(g_mode);
 			}
 
-			if (Keyboard.isKeyPressed(Keyboard.Key.F))
+			if (g_keys[Keyboard.Key.F].keyTrigger)
 				g_window.setVerticalSyncEnabled(true);
 			else
 				g_window.setVerticalSyncEnabled(false);
@@ -275,37 +275,39 @@ int main(string[] args) {
 
 				if (! g_terminal) {
 					with(g_portals[PortalSide.editor]) {
-						if (! showingBible) {
-							if (g_keys[Keyboard.Key.S].keyTrigger) {
-								g_display.setVerse(g_bible.argReference(
-									g_bible.getReference(
-										g_screens[scrn.y][scrn.x].verseRef.split)));
-								
-								g_doLetUpdate = showingBible = true;
-								writeln("Verse(s): ", g_screens[scrn.y][scrn.x].verseRef.split);
+						if (! (g_keys[Keyboard.Key.LSystem].keyPressed || g_keys[Keyboard.Key.RSystem].keyPressed)) {
+							if (! showingBible) {
+								if (g_keys[Keyboard.Key.S].keyTrigger) {
+									g_display.setVerse(g_bible.argReference(
+										g_bible.getReference(
+											g_screens[scrn.y][scrn.x].verseRef.split)));
+									
+									g_doLetUpdate = showingBible = true;
+									writeln("Verse(s): ", g_screens[scrn.y][scrn.x].verseRef.split);
+								}
 							}
-						}
-						if (showingBible) {
-							if (g_keys[Keyboard.Key.S].keyTrigger)
-								showingBible = false;
-						}
+							if (showingBible) {
+								if (g_keys[Keyboard.Key.S].keyTrigger)
+									showingBible = false;
+							}
+						} // if command key not pressed
 
-						if (kup.keyTrigger) {
+						if (g_keys[Keyboard.Key.Up].keyTrigger) {
 							if (scrn.y > 0)
 								scrn = scrn + Vector2i(0, -1);
 						}
 
-						if (kright.keyTrigger) {
+						if (g_keys[Keyboard.Key.Right].keyTrigger) {
 							if (scrn.x + 1 < g_scrnDim.x)
 								scrn = scrn + Vector2i(1, 0);
 						}
 
-						if (kdown.keyTrigger) {
+						if (g_keys[Keyboard.Key.Down].keyTrigger) {
 							if  (scrn.y + 1 < g_scrnDim.y)
 								scrn = scrn + Vector2i(0, 1);
 						}
 
-						if (kleft.keyTrigger) {
+						if (g_keys[Keyboard.Key.Left].keyTrigger) {
 							if  (scrn.x > 0)
 								scrn = scrn + Vector2i(-1, 0);
 						}
