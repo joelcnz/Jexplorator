@@ -1,6 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
+		"arsd-official": "4.0.1",
 		"dsfml": "2.1.1"
 	}
 }

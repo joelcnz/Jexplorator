@@ -11,9 +11,7 @@
 
 // To do's:
 /+
-Have an option of when you plop you pop back up right where you were. Would include the spike you hit is removed.
-
-Fix:
+To fix:
 Jeep going backward after loading the project
 
 
@@ -35,7 +33,7 @@ void getDiscList(in bool show = false) {
 	import std.string;
 
 	if (show)
-		g_inputJex.addToHistory("List of project files"d);
+		g_inputJex.addToHistory("List of building files"d);
 	discList.length = 0;
 	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).
 			array.sort!"a.toLower < b.toLower".enumerate(1)) {
@@ -47,6 +45,7 @@ void getDiscList(in bool show = false) {
 
 //listMissions("Explore");
 void listMissions(in string building) {
+	/+
 	import std.range;
 	import std.file;
 	import std.conv;
@@ -60,11 +59,20 @@ void listMissions(in string building) {
 		missionsList ~= name.to!dstring;
 		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
 	}
+	+/
 }
 
 int main(string[] args) {
 	scope(exit)
 		"\n# #\n# #\n # \n# #\n# #\n".writeln;
+
+	g_font = new Font;
+	g_font.loadFromFile("Fonts/DejaVuSans.ttf");
+	if (! g_font) {
+		import std.stdio;
+		writeln("Font not load");
+		return -1;
+	}
 
 	if (g_setup.setup != 0) {
 		gh("Aborting...");
@@ -83,9 +91,11 @@ int main(string[] args) {
 	menus.setup;
 	MenuSelect mret = MenuSelect.doLoop;
 
-	listMissions("Explore");
+	//listMissions("Explore");
 
 	bool showingBible = false;
+
+	updateProjectList("");
 
 	while(g_window.isOpen())
 	{
@@ -126,10 +136,13 @@ int main(string[] args) {
 			mret = MenuSelect.doLoop;
 			continue;
 		}
+
+		if (g_keys[Keyboard.Key.Escape].keyTrigger)
+			g_doGuiFile = false;
 			
-		if (! g_terminal) {
+		if (! g_jexTerminal && ! g_doGuiFile) {
 			if (g_mode != Mode.play && g_keys[Keyboard.Key.T].keyTrigger) {
-				g_terminal = true;
+				g_jexTerminal = true;
 			}
 
 			if (g_keys[Keyboard.Key.E].keyTrigger) {
@@ -158,12 +171,20 @@ int main(string[] args) {
 		import std.range;
 
 		if (g_mode == Mode.play) {
-			g_timer.process;
+			if (g_missionStage == MissionStage.briefing) {
+				if (kSpace.keyTrigger) {
+					g_timer.doStart;
+					g_missionStage = MissionStage.playing;
+				}
+			}
+			if (g_missionStage == MissionStage.playing) {
+				g_timer.process;
 
-			//foreach(jeep; g_jeeps)
-			//	if (inScreen(jeep.scrn))
-			//		jeep.process;
-			g_jeeps = g_jeeps.map!((a) { if (inScreen(a.scrn)) a.process; return a; }).array;
+				//foreach(jeep; g_jeeps)
+				//	if (inScreen(jeep.scrn))
+				//		jeep.process;
+				g_jeeps = g_jeeps.map!((a) { if (inScreen(a.scrn)) a.process; return a; }).array;
+			}
 		}
 
 		g_bullits = g_bullits.map!((a) { a.process; return a; }).array;
@@ -227,7 +248,7 @@ int main(string[] args) {
 		}
 
 		// Display
-		final switch(g_mode) {
+		break1: final switch(g_mode) {
 			case Mode.play:
 				//Draw back layer
 				foreach(ref portal; g_portals[0 .. 2]) {
@@ -245,7 +266,7 @@ int main(string[] args) {
 
 				foreach(i, ref guy; g_guys) {
 					with(guy) {
-						if (! g_terminal)
+						if (! g_jexTerminal && ! g_doGuiFile)
 							process;
 						g_display.setGuy(guy);
 						g_display.display(DisplayType.guyDraw);
@@ -264,8 +285,33 @@ int main(string[] args) {
 				foreach(ref portal; g_portals[0 .. 2]) {
 					portal.draw(Border.no, Layer.front);
 				}
+
+//				g_mainPopBanner.draw;
 			break;
 			case Mode.edit:
+				if (g_doGuiFile) {
+					g_guiFile.process(Point(g_mouse.pos.x, g_mouse.pos.y));
+					final switch(g_guiConfirm.process(Point(g_mouse.pos.x, g_mouse.pos.y))) with(FileAction) {
+						case nothing:
+						break;
+						case save:
+							.save;
+						break;
+						case load:
+							.load;
+						break;
+						case del:
+							.del;
+						break;
+						case rename:
+							.changeName;
+						break;
+					}
+					g_guiFile.draw;
+					g_guiConfirm.draw;
+
+					break break1;
+				}
 				foreach(layer; Layer.back .. Layer.front + cast(Layer)1) {
 					g_display.setPortalEditLayer(layer);
 					g_display.display(DisplayType.editLayer);
@@ -273,7 +319,7 @@ int main(string[] args) {
 
 				doJeepDraw;
 
-				if (! g_terminal) {
+				if (! g_jexTerminal && ! g_doGuiFile) {
 					with(g_portals[PortalSide.editor]) {
 						if (! (g_keys[Keyboard.Key.LSystem].keyPressed || g_keys[Keyboard.Key.RSystem].keyPressed)) {
 							if (! showingBible) {
@@ -312,6 +358,7 @@ int main(string[] args) {
 								scrn = scrn + Vector2i(-1, 0);
 						}
 					}
+					g_popLine.process;
 				}
 				break;
 		}
@@ -323,7 +370,7 @@ int main(string[] args) {
 				g_display.display(DisplayType.playBorder);
 			}
 		
-		if (g_terminal) {	
+		if (g_jexTerminal) {
 			int processValue(dstring s) {
 				string result = s.to!string;
 				import std.regex;
@@ -365,6 +412,10 @@ int main(string[] args) {
 							g_inputJex.addToHistory(line.stripLeft);
 						}
 						break;
+						case "g", "gui":
+							g_doGuiFile = true;
+							g_jexTerminal = false;
+						break;
 						//#work here
 						case "ref":
 							import std.string: join;
@@ -399,7 +450,7 @@ int main(string[] args) {
 											addToHistory(text("Failed loading: ", g_building.fileName).to!dstring);
 										else {
 											g_mode = Mode.play;
-											g_terminal = false;
+											g_jexTerminal = false;
 										}
 									} catch(Exception e) {
 										addToHistory("Error, no building!");
@@ -463,7 +514,7 @@ int main(string[] args) {
 							g_inputJex.addToHistory("Hello " ~ str ~ ", how are you?"d);
 							break;
 							case "t":
-								g_terminal = false;
+								g_jexTerminal = false;
 							break;
 							case "create":
 								if (dargs.length == 3) {
@@ -566,8 +617,11 @@ int main(string[] args) {
 			g_display.display(DisplayType.inputJexDraw);
 		} // terminal
 
-		if (g_mode == Mode.edit)
+		if (g_mode == Mode.edit) {
 			g_display.display(DisplayType.mouseDraw);
+			if (g_popLine._pban.show)
+				g_popLine.draw;
+		}
 		
 		if (g_mode == Mode.play && g_displayGameText == true) {
 			g_display.display(DisplayType.viewVerse);
@@ -585,14 +639,83 @@ int main(string[] args) {
 					g_window.draw(blackPlastic);
 				}
 			}
+
+			final switch(g_missionStage) with(MissionStage) {
+				case briefing:
+					g_display.display(DisplayType.mission);
+				break;
+				case playing:
+					if (g_guys[player1].escapeStatus == GuyEscapeStatus.escaped &&
+						g_guys[player2].escapeStatus == GuyEscapeStatus.escaped) {
+						g_campaign.setReport(/* win */ g_score.targetDiamondsQ);
+						g_missionStage = MissionStage.report;
+					}
+				break;
+				case report:
+					g_display.display(DisplayType.mission);
+				break;
+			}
 		} else {
 			// not play
 			if (showingBible)
 				g_display.display(DisplayType.viewVerse);
 		}
 
+		foreach(g; g_guys) {
+			if (g.escapeStatus == GuyEscapeStatus.outOfTime) {
+				g.banner.draw;
+			}
+		}
+
 	    g_window.display();
 	}
 
 	return 0;
+}
+
+void save() {
+	g_building.setFileName(g_fileRootName.to!string ~ ".bin");
+	g_building.saveBuilding;
+	g_currentProjectName = g_fileRootName.to!dstring;
+	updateProjectList("");
+}
+
+void load() {
+	g_building.setFileName("backup.bin");
+	g_building.saveBuilding;
+	jx.addToHistory("Back up saved (backup.bin)"d);
+	g_building.setFileName(g_fileRootName.to!string ~ ".bin");
+	if (! g_building.loadBuilding)
+		jx.addToHistory(text("Failed loading: ", g_building.fileName ~ ".bin").to!dstring);
+	else
+		g_currentProjectName = g_fileRootName;
+	updateProjectList("");
+}
+
+void del() {
+	if (g_fileRootName == g_currentProjectName) {
+		jx.addToHistory("Will not delete from current building..");
+		return;
+	}
+	g_building.setFileName("backup.bin");
+	jx.addToHistory("Deleted is saved to backup.bin");
+	g_building.saveBuilding;
+	import std.file;
+	try
+		remove(g_fileRootName.to!string ~ ".bin");
+	catch(Exception e)
+		jx.addToHistory("Removing file failier");
+	updateProjectList("");
+}
+
+void changeName() {
+	import std.file : rename;
+
+	try
+		rename(g_currentProjectName.to!string ~ ".bin", g_fileRootName.to!string ~ ".bin");
+	catch(Exception e)
+		jx.addToHistory("Renaming file failier: ", e.msg);
+	//g_currentProjectName = g_fileRootName;
+	g_building.setFileName(g_currentProjectName.to!string ~ ".bin");
+	updateProjectList("");
 }

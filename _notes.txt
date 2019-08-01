@@ -1,5 +1,7 @@
 -= Jexplorater =-
 
+Trouble shooting \/
+
 24 11 2018 \#/
 Use ex screen. Going through the verses on vixploreJoel.bin [for vixplore.bin) (always going right, and up at each end). Use B in edit mode to show screen verse.
 
@@ -87,3 +89,7 @@ Code:
 					//g_bullits = g_bullits[0 .. i] ~ g_bullits[i + 1 .. $];
 		//	}
 		//}
+
+Trouble shooting \/
+
+Delete with GUI not working! You can't delete the current building file.

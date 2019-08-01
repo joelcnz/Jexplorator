@@ -23,17 +23,19 @@ struct Setup {
 	 int setup() {
 		import jec: setup;
 
+		g_window = new RenderWindow(VideoMode(640, 480), "Welcome to Jexplorator");
+
 		if (int retType = jec.setup != 0) {
 			writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
 
 			return retType;
 		}
 
-		writeln("Loading Bible..");
+		writeln("Loading ", BibleVersion, " Bible..");
 		{
 			scope(exit)
 				writeln("Bible loaded");
-			loadBible(ESV);
+			loadBible(BibleVersion);
 		}
 		
 		//#load settings from file
@@ -46,12 +48,11 @@ struct Setup {
 		g_jsounds ~= new JSound("blowup.wav");
 		g_jsounds ~= new JSound("shootJeep.wav");
 		g_jsounds ~= new JSound("hush.wav"); // rocket sound
-
-		g_window = new RenderWindow(VideoMode(640, 480), "Welcome to Jexplorator");
 	
 		g_font = new Font;
 		g_font.loadFromFile("DejaVuSans.ttf");
 		
+		g_terminal = true;
 		g_inputJex = new InputJex(/* position */ Vector2f(330, 480 - 15),
 								  /* font size */ 12,
 								  /* header */ "h for help: ",
@@ -140,6 +141,9 @@ struct Setup {
 
 		g_timer.setup;
 
+		g_mainPopBanner.setup(["Welcome to Jexplorater","", "by Joel Ezra Christensen"],
+			/* pos */ Vector2f(0, 200), /* size */ Vector2f(640, 3 * 16 + 2 * 4));
+		g_popLine.set("Welcome to Jexplorater!");
 		/+
 		foreach(i, guy; g_guys)
 			g_escaped[i] = Escaped(guy);

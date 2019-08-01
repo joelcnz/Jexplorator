@@ -49,6 +49,12 @@ public:
 		if (cast(int)_countDownTimer == 0 && g_gameOver == false) {
 			writeln("Game over!");
 			g_gameOver = true;
+			foreach(g; g_guys)
+				if (g.escapeStatus != GuyEscapeStatus.playing) {
+					g.escapeStatus = GuyEscapeStatus.outOfTime;
+					g.banner.setText(["Time Out!"]);
+					g.banner.show;
+				}
 		}
 	}
 

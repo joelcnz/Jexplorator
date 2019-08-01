@@ -19,7 +19,7 @@
 //# bit funny
 import base;
 
-class Guy: Mover {
+class Guy : Mover {
 private:
 	int _id,
 		_other;
@@ -61,18 +61,22 @@ private:
 	GunDucked _gunDucked;
 	bool _bullitProof;
 
-	Escaped _escaped;
-	Mission _briefing;
+	GuyEscapeStatus _escapeStatus;
+	PopBanner _banner;
+	//Escaped _escaped;
+	//Mission _briefing;
 
 	DashBoard _dashBoard;
 	Vector2f _plopPoint;
 
 	Hide _hide;
 
-	enum Id {player1, player2}
+	//CountDown _clock;
 public:
 	@property {
 		int id() { return _id; }
+
+		ref PopBanner banner() { return _banner; }
 
 		Hide hide() { return _hide; }
 		void hide(Hide hide0) { _hide = hide0; }
@@ -81,10 +85,12 @@ public:
 
 		auto ref dashBoard() { return _dashBoard; } //#not sure about this
 
-		EscapeStatus escaped() { return _escaped.status; }
+		//EscapeStatus escaped() { return _escaped.status; }
 
-		MissionStatus briefing() { return _briefing.status; }
-		void briefing(MissionStatus briefing0) { _briefing.status = briefing0; }
+		//MissionStatus briefing() { return _briefing.status; }
+		//void briefing(MissionStatus briefing0) { _briefing.status = briefing0; }
+		GuyEscapeStatus escapeStatus() { return _escapeStatus; }
+		void escapeStatus(GuyEscapeStatus esc0) { _escapeStatus = esc0; }
 
 		Climbing climbing() { return _climbing; }
 		void dying(Climbing climbing0) { _climbing = climbing0; }
@@ -123,11 +129,10 @@ public:
 
 		_dashBoard = DashBoard(this);
 
-		_other = (_id == Id.player1 ? Id.player2 : Id.player1);
+		_other = (_id == player1 ? player2 : player1);
 		_portal = portal;
 		_portal.scrn = Vector2i(0,0);
 		_keys = keys;
-
 		bullitProof = true;
 		_resetPos = Vector2f(0,0);
 		portal.resetPosScrn = Vector2i(0,0);
@@ -198,8 +203,10 @@ public:
 		_rocketState = Rocket.sitting;
 		_rocketDir = Vector2f(0, 0);
 
-		_escaped.setup(this);
-		_briefing.setup(this);
+		//_escaped.setup(this);
+		//_briefing.setup(this);
+		
+		banner.setup([""], Vector2f(320 * id, 320 - 20), Vector2f(320,20));
 	}
 
 	void doResetPos(Vector2f resetPos) {
@@ -212,11 +219,13 @@ public:
 		_rocketState = Rocket.sitting;
 		_dying = Dying.alive;
 		_rocketDir = Vector2f(0, 0);
-		_escaped.status = EscapeStatus.notEscaped;
-		_briefing.status = MissionStatus.current;
+		//_escaped.status = EscapeStatus.notEscaped;
+		//_briefing.status = MissionStatus.current;
+		_escapeStatus = GuyEscapeStatus.start;
 		_dashBoard.score = 0;
 		_dashBoard.diamonds = 0;
 		updateScreenVerseRef;
+		_banner.show = false;
 	}
 
 	//#die
@@ -312,17 +321,16 @@ public:
 	}
 
 	void process() {
-		_escaped.process;
+		//_escaped.process;
 
 		_dashBoard.process; // needs to be in display
 
-		if (_briefing.status == MissionStatus.current) {
-			_briefing.process;
-
+		if (g_missionStage != MissionStage.playing) {
 			return;
 		}
 
 		if (g_gameOver) {
+			_banner.show;
 			return;
 		}
 
@@ -338,10 +346,11 @@ public:
 				_dashBoard.score = _dashBoard.score + 100;
 				_rocketState = Rocket.gone;
 				g_inputJex.addToHistory(g_score.winner.to!dstring);
-				_escaped.status = EscapeStatus.escaped;
-				//_dashBoard.banner = "Gotten away in rocket!"d;
-				if (g_guys[_other].escaped != EscapeStatus.escaped)
-					_dashBoard.banner = g_score.winner.to!dstring;
+				_escapeStatus = GuyEscapeStatus.escaped;
+				//_escaped.status = EscapeStatus.escaped;
+				_dashBoard.banner = "Gotten away in rocket!"d;
+				//if (g_guys[_other].escaped != EscapeStatus.escaped)
+				//	_dashBoard.banner = g_score.winner.to!dstring;					
 			}
 
 			return; //#doesn't seem to be needed
@@ -654,7 +663,7 @@ public:
 					leap = true;
 
 				_pos += Vector2f(0, g_pixelsy);
-				immutable other = (_id == Id.player1 ? Id.player2 : Id.player1);
+				immutable other = (_id == player1 ? player2 : player1);
 				if (hitOther)
 					with(g_guys[other]) {
 						_pos.processTestPoints;
@@ -797,21 +806,21 @@ public:
 
 	void draw(bool skip = false, bool text = true) {
 		if (text) {
-			if (_briefing.status == MissionStatus.current) {
-				_briefing.draw;
-			}
+//			if (_briefing.status == MissionStatus.current) {
+//				_briefing.draw;
+//			}
 
-			if (_escaped.status == EscapeStatus.escaped) {
-				_escaped.draw;
-			}
+//			if (_escaped.status == EscapeStatus.escaped) {
+//				_escaped.draw;
+//			}
 
 			_dashBoard.draw;
 		}
 
 		auto posWas = _pos;
-		_pos = _id == Id.player1 ? Vector2f(_pos.x, _pos.y) : Vector2f(_pos.x + _portal.pos.x, _pos.y);
+		_pos = _id == player1 ? Vector2f(_pos.x, _pos.y) : Vector2f(_pos.x + _portal.pos.x, _pos.y);
 		
-		immutable other = (_id == Id.player1 ? Id.player2 : Id.player1);
+		immutable other = (_id == player1 ? player2 : player1);
 		if (g_guys[other]._portal.scrn == _portal.scrn) {
 			if (other == 1) {
 				with(g_guys[other]) {

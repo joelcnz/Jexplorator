@@ -15,6 +15,7 @@ public:
 	@property void status(MissionStatus briefing0) { _status = briefing0; }
 
 	void setup(Guy guy) {
+		writeln("where am I?!");
 		_guy = guy;
 		auto lines = ["Your mission is to"d,
 			"score the most points",
@@ -34,12 +35,15 @@ public:
 
 	void process() {
 		// Press Space to continue
+		/+
 		if ((_guy.id == 0 && lkeys[Letter.z].keyTrigger) ||
 			(_guy.id == 1 && kSpace.keyTrigger))
 				_status = MissionStatus.done;
+			+/
 	}
 	
 	void draw() {
+		/+
 		foreach(line; _lines) {
 			if (_guy.id == 1)
 				line.position = line.position + Vector2f(320, 0);
@@ -47,5 +51,6 @@ public:
 			if (_guy.id == 1)
 				line.position = line.position - Vector2f(320, 0);
 		}
+		+/
 	}
 }

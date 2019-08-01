@@ -8,11 +8,11 @@
                      "../JecLib/source",
                      "../JMiscLib/source",
                      "../IniLib/source",
-                     "../BibleLib/source",
-                     "../arsdLib/source"],
+                     "../BibleLib/source"],
     "dependencies": 
     {
         "dsfml:graphics": "~>2.1",
-		"dsfml:audio": "~>2.1"
+        "dsfml:audio": "~>2.1",
+        "arsd-official:dom": "~>4.0.1"
     }
 }

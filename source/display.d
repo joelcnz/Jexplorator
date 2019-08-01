@@ -8,7 +8,7 @@ private:
 	Bullit _bullit;
 	JeepBullit _jeepBullit;
 	Jeep _jeep;
-	Escaped _escaped;
+	//Escaped _escaped;
 	string _verse;
 public:
 	void setPortalEditLayer(Layer layer) pure nothrow {
@@ -35,9 +35,9 @@ public:
 		_jeepBullit = jeepBullit;
 	}
 
-	void setEscaped(Escaped escaped) pure nothrow {
-		_escaped = escaped;
-	}
+	//void setEscaped(Escaped escaped) pure nothrow {
+	//	_escaped = escaped;
+	//}
 
 	void setVerse(in string verse) {
 		_verse = verse;
@@ -50,9 +50,9 @@ public:
 				case info:
 				//	g_info.draw;
 				break;
-				case escaped:
-					_escaped.draw;
-				break;
+				//case escaped:
+				//	_escaped.draw;
+				//break;
 				case bullitsDraw:
 					_bullit.draw;
 				break;
@@ -86,6 +86,9 @@ public:
 				case viewVerse:
 					g_letterBase.draw;
 					//displayGameText(_verse);
+				break;
+				case mission:
+					g_campaign.viewCurrent;
 				break;
 			}
 	}

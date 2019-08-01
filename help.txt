@@ -17,3 +17,4 @@ Help:
                      missions - list current building missions
                    *mission # - start misson
                     ref <ref> - add verse to current screen
+                        g/gui - Graphical User Interface

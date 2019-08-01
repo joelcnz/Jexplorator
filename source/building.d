@@ -1,5 +1,6 @@
 module building;
 
+//#bit of a hack
 // Old total diamonds (g_score.totalDiamonds) is not used
 //#Forget g_score total diamonds
 //#for if you load a smaller project from a bigger one
@@ -7,6 +8,10 @@ module building;
 import stdc = core.stdc.stdio;
 
 import base;
+
+//version = computersOutPut;
+//version = computerDataChange;
+//computerdata.txt
 
 struct Building {
 private:
@@ -16,6 +21,8 @@ public:
 	
 	void setFileName(in string fileName) {
 		_fileName = fileName;
+		import std.path : stripExtension;
+		g_currentProjectName = fileName.to!dstring.stripExtension;
 	}
 	
 	bool loadBuilding() {
@@ -105,7 +112,7 @@ public:
 						writeln("Score: ", score);
 					} // with
 				} // guy
-				
+
 				fread(&ix, 1, ix.sizeof, pfile); // how many screens width
 				fread(&iy, 1, iy.sizeof, pfile); // how many screens height
 				g_scrnDim = Vector2i(ix, iy);
@@ -118,6 +125,11 @@ public:
 					}
 				writeln("g_scrnDim: ", g_scrnDim);
 				
+				string[] computerData;
+				int cpos = 1;
+				version(computerDataChange) {
+					computerData = readText("computerdata.txt").split('\n');
+				}
 				foreach(sy; 0 .. g_scrnDim.y)
 					foreach(sx; 0 .. g_scrnDim.x) {
 						int characters;
@@ -125,13 +137,21 @@ public:
 						char[] text;
 						text.length = characters;
 						fread(text.ptr, characters, char.sizeof, pfile);
-						g_screens[sy][sx].verseRef = text.idup;
-						foreach(cy; 0 .. 10)
-						foreach(cx; 0 .. 10) {
-							fread(&g_screens[sy][sx].tiles[cy][cx].tileNameBack, 1, g_screens[sy][sx].tiles[cy][cx].tileNameBack.sizeof, pfile); // back TileName
-							fread(&g_screens[sy][sx].tiles[cy][cx].tileName, 1, g_screens[sy][sx].tiles[cy][cx].tileName.sizeof, pfile); // mid TileName
-							fread(&g_screens[sy][sx].tiles[cy][cx].tileNameFront, 1, g_screens[sy][sx].tiles[cy][cx].tileNameFront.sizeof, pfile);// front TileName
+						version(computersOutPut) {
+							writeln("[", sx, "][", sy, "]\n", text);
 						}
+						g_screens[sy][sx].verseRef = text.idup;
+						version(computerDataChange) {
+							g_screens[sy][sx].verseRef = computerData[cpos];
+							assert(cpos + 2 >= computerData.length, "Run out of data!");
+							cpos += 2;
+						}
+						foreach(cy; 0 .. 10)
+							foreach(cx; 0 .. 10) {
+								fread(&g_screens[sy][sx].tiles[cy][cx].tileNameBack, 1, g_screens[sy][sx].tiles[cy][cx].tileNameBack.sizeof, pfile); // back TileName
+								fread(&g_screens[sy][sx].tiles[cy][cx].tileName, 1, g_screens[sy][sx].tiles[cy][cx].tileName.sizeof, pfile); // mid TileName
+								fread(&g_screens[sy][sx].tiles[cy][cx].tileNameFront, 1, g_screens[sy][sx].tiles[cy][cx].tileNameFront.sizeof, pfile);// front TileName
+							}
 					}
 				//#jeep read
 				fread(&ix, 1, ix.sizeof, pfile);
@@ -174,16 +194,17 @@ public:
 				pos = resetPos;
 				portal.scrn = portal.resetPosScrn;
 			}
-		g_timer.countDownTimer = g_timer.countDownStartTime;
-		g_inputJex.addToHistory("Game reset!");
+		g_timer.setup(g_campaign._current._time);
+		//g_timer.countDownTimer = g_timer.countDownStartTime;
+		g_inputJex.addToHistory("Game mission reset!");
 	}
 
-	bool saveBuilding(in string backFileName = "") {
-		auto oldFileName = fileName;
-		if (backFileName != "")
-			setFileName(backFileName);
-		scope(exit)
-			setFileName(oldFileName);
+	bool saveBuilding() { //(in string backFileName = "") {
+		//auto oldFileName = fileName;
+		//if (backFileName != "")
+		//	setFileName(backFileName);
+		//scope(exit)
+		//	setFileName(oldFileName);
 		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Building...`).to!dstring);
 		import std.string;
 		FILE* pfile = stdc.fopen(toStringz(_fileName), "wb");
@@ -292,12 +313,39 @@ public:
 
 		fclose(pfile);
 		
+		import std.file: exists;
+		import std.path: buildPath, stripExtension;
+		import std.conv: to;
+		import std.string: format;
+
+		auto fileName = g_building.fileName;
+		int id;
+		bool quit = false;
+		do {
+			if (id == 100) {
+				id = 0;
+				import std.stdio: writeln;
+				
+				writeln("Warning: You have exceeded 100 back up saves! - writing to id 00");
+
+				quit = true;
+			}
+			fileName = buildPath("BackUpSaves",
+									format("%s_%02d.bin", g_building.fileName.stripExtension, id));
+			id++;
+		} while(exists(fileName) && quit == false);
+		if (g_building.fileName != "backup.bin") //#bit of a hack
+			g_popLine.set("Save: " ~ g_building.fileName.to!string ~ ", back up: " ~ fileName);
+		import std.file : copy;
+		copy(g_building.fileName, fileName);
+
+		g_inputJex.addToHistory("Copied '", g_building.fileName, "' to '", fileName, "'");
 		g_inputJex.addToHistory("Save done!");
 		
 		return true;
 	}
 	
-	bool createMap(int width, int height) {
+	bool createMap(int width, int height) {		
 		g_scrnDim = Vector2i(width, height);
 		g_screens = new Screen[][](height, width);
 		
@@ -321,6 +369,8 @@ public:
 						g_screens[sy][sx].tiles[y][x].tileName = TileName.gap;
 						g_screens[sy][sx].tiles[y][x].tileNameFront = TileName.gap;
 					}
+		g_popLine.set(text("Map created: ", width, " by ", height));
+
 		return true;
 	}
 

@@ -25,6 +25,8 @@ struct MouseInput {
 	RectangleShape _square;
 	RectangleShape _squareBlack;
 
+	auto pos() { return _pos; }
+
 	this(ref Portal portal) {
 		_drawBrush = new Sprite;
 		_drawBrush.position = Vector2f(0, g_spriteSize * 10 + 10);
@@ -98,7 +100,7 @@ struct MouseInput {
 	void process() {
 		_pos = Mouse.getPosition(g_window);
 
-		if (! g_terminal && g_mode == Mode.edit) {
+		if (! g_jexTerminal && ! g_doGuiFile && g_mode == Mode.edit) {
 
 			// keys by them selves
 			if (! Keyboard.isKeyPressed(Keyboard.Key.LSystem) && ! Keyboard.isKeyPressed(Keyboard.Key.RSystem)) {
@@ -253,29 +255,7 @@ struct MouseInput {
 				}
 
 				if (lkeys[Letter.s].keyTrigger) {
-					import std.file: exists;
-					import std.path: buildPath;
-					import std.conv: to;
-					import std.string: format;
-
-					auto fileName = g_building.fileName;
-					int id;
-					bool quit = false;
-					do {
-						if (id == 100) {
-							id = 0;
-							import std.stdio: writeln;
-							
-							writeln("Warning: You have exceeded 100 back up saves! - writing to id 000");
-
-							quit = true;
-						}
-						fileName = buildPath("BackUpSaves",
-											 format("%s%02d.bin", g_building.fileName[2 .. $ - 4], id));
-					 	id++;
-					} while(exists(fileName) && quit == false);
 					g_building.saveBuilding;
-					g_building.saveBuilding(fileName); //#should use copy(g_building.fileName, fileName);
 				}
 		
 				if (lkeys[Letter.l].keyTrigger) {
@@ -284,11 +264,14 @@ struct MouseInput {
 
 				if (kReturn.keyTrigger) {
 					g_building.loadBuilding;
-					g_guys[0].reset;
-					g_guys[1].reset;
+					g_building.resetGame;
+					/+	
+					g_building.loadBuilding;
+					g_guys[player1].reset;
+					g_guys[player2].reset;
 					g_timer.doStart;
 					g_mode = Mode.play;
-					
+					+/
 					writeln("Game level reset!");
 				}
 			} // system key
@@ -328,6 +311,8 @@ struct MouseInput {
 
 	// cursor
 	void draw() {
+		if (g_doGuiFile)
+			return;
 		if (_pos.x >= 0 && _pos.y >= 0 && _pos.x < 10 * g_spriteSize && _pos.y < 10 * g_spriteSize) {
 			foreach(y; 0 .. 10)
 				foreach(x; 0 .. 10) {

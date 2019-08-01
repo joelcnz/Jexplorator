@@ -4,7 +4,7 @@ struct Menus {
 private:
 	string[] _mainMenu;
 	Text[] _lines;
-	string[] _fileNames;
+	string[] _folderNames;
 	Menu _menu;
 public:
 	void setupDisplay(in string[] lines) {
@@ -17,33 +17,37 @@ public:
 	}
 
 	void setup() {
-		setupDisplay(["* Jexplorater *",
+		setupDisplay(["* Jecsplorater *",
 					  "",
 					  "0. Exit",
 					  "1. Play",
 					  "2. Edit",
-					  "3. Building",
+					  "3. Campaign",
 					  "",
 					  "Press a number to continue.."]);
 		_menu = Menu.main;
 	}
 
-	void buildingSetup() {
+	void campaignSetup() {
 		string[] menu = ["* Jecsplorater *",
 						 "",
 						 "0. Cancel"];
-
 		import std.file, std.range;
-		foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).enumerate(1)) {
-			_fileNames ~= name;
-			menu ~= text(i, ". ", name.trim);
+		int i = 1;
+		_folderNames.length = 0;
+		foreach(string name; dirEntries(buildPath("Campaigns"), SpanMode.shallow)) {
+			if (name.isDir) {
+				_folderNames ~= name;
+				menu ~= text(i, ". ", name.trim);
+				i += 1;
+			}
 		}
 
 		menu ~= ["", "Press a number to continue.."];
 
 		setupDisplay(menu);
 
-		_menu = Menu.building;
+		_menu = Menu.campaign;
 	}
 
 	MenuSelect process() {
@@ -68,12 +72,24 @@ public:
 					}
 					
 					if (nkeys[Number.n3].keyTrigger) {
-						buildingSetup;
+						campaignSetup;
 					}
 				break;
-				case Menu.building:
+				case Menu.campaign:
 					if (nkeys[Number.n0].keyTrigger) {
 						setup;
+					}
+					//if (g_keys[Keyboard.Key.1].keyTrigger) {
+					if (nkeys[Number.n1].keyTrigger) {
+						g_campaign.setup(_folderNames[0]);
+						g_campaign.enterPassWord;
+						writeln("Current mission: ", g_campaign._current);
+
+						g_missionStage = MissionStage.briefing;
+						setup;
+						g_building.resetGame;
+
+						return MenuSelect.start;
 					}
 				break;
 			}
@@ -97,4 +113,3 @@ public:
 		}
 	}
 }
-

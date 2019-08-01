@@ -5,24 +5,30 @@ public:
 import std.stdio;
 import std.conv;
 import std.string;
+import std.datetime.stopwatch;
 
 import jec, dini.dini, jmisc;
 import bible.base;
 import portal, mouse, guy, building, score, countdown, setup, display;
 import jeep, bullit, mover, jeepbullit, escaped, mission,
-    dashboard, menu, infomation, gametext;
+    dashboard, menu, infomation, gametext, popbanner, popline, campaign;
 
 import dsfml.graphics;
 import dsfml.audio;
 import dsfml.window;
 
+bool g_doGuiFile;
 Setup g_setup;
 Info g_info;
+PopLine g_popLine;
+Campaign g_campaign;
 
 LetterManager g_letterBase;
 bool g_displayGameText;
 
-immutable ESV = "esv";
+PopBanner g_mainPopBanner;
+
+immutable BibleVersion = "esv"; // "kjv";
 
 enum g_pixelsx = 2,
 	 g_pixelsy = 2;
@@ -30,13 +36,16 @@ enum g_pixelsx = 2,
 enum Hide {inview, hidden}
 
 enum MissionStatus {current, done} // current - displays text about the mission, done - in game
-enum EscapeStatus {escaped, notEscaped}
+//enum EscapeStatus {escaped, notEscaped}
+enum MissionStage {briefing, playing, report}
+MissionStage g_missionStage;
 
 enum Snd {pop, plop, leap, shoot, blowup, shootJeep, rocket}
 JSound[] g_jsounds; // g_jsounds[Snd.shootJeep].playSnd;
 
 Clock g_clock;
 CountDown g_timer;
+bool g_jexTerminal;
 
 bool g_gameOver;
 
@@ -63,14 +72,17 @@ enum GunDucked {notDucked, ducked}
 
 Sprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight;
 
-enum DisplayType {escaped, mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw, info,
+enum DisplayType {/*escaped,*/ mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw, info,
 	portalNoBorderLayerNormalDraw, editLayer, guyDraw, playBorder, jeepDraw, bullitsDraw,
-	jeepBullitDraw, viewVerse}
+	jeepBullitDraw, viewVerse, mission}
 
 Display g_display;
 
-enum Menu {main, building}
+enum Menu {main, campaign}
 enum MenuSelect {quit, edit, start, doLoop}
+enum GuyEscapeStatus {start, playing, escaped, outOfTime}
+enum {player1, player2}
+enum TimeStatus {going, stopped}
 
 //#made template instead of normal functions
 float makeSquare(T : float)(T a) {
@@ -198,4 +210,15 @@ bool inScreen(Vector2i scrn, bool jeep = false) {
 	if (! jeep && g_mode == Mode.edit && scrn == g_portals[PortalSide.editor].scrn)
 		return true;
 	return false;
+}
+
+void updateProjectList(in string folder) {
+    import std.file, std.string, std.path, std.algorithm, std.range;
+
+    string[] list;
+    foreach(i, string name; dirEntries(folder, "*.{bin}", SpanMode.shallow).array.sort!"a.toLower < b.toLower".enumerate(1)) {
+        list ~= text(i, ") ", name.stripExtension.baseName);
+    }
+    g_guiFile.getWedgets[WedgetNum.projects].list(["List of projects:"] ~ list);
+    g_guiFile.getWedgets[WedgetNum.current].list(["Current: " ~ g_currentProjectName.to!string]);
 }

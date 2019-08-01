@@ -15,6 +15,10 @@ struct Score {
 	bool allDiamondsQ() {
 		return getGuyDiamonds(PortalSide.left) + getGuyDiamonds(PortalSide.right) == g_guys[0].dashBoard.totalDiamonds;
 	}
+
+	bool targetDiamondsQ() {
+		return getGuyDiamonds(PortalSide.left) + getGuyDiamonds(PortalSide.right) >= g_campaign._current._diamonds;
+	}
 	
 	string winner() {
 		immutable 

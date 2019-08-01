@@ -1,5 +1,6 @@
-//#dummist possible error! (bullit not hitting the bady)
 module bullit;
+
+//#dummist possible error (bullit not hitting the bady)
 
 import base;
 

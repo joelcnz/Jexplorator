@@ -1,5 +1,6 @@
 import base;
 
+/+
 struct Escaped {
 private:
 	Text[] _lines;
@@ -52,3 +53,4 @@ public:
 		}
 	}
 }
++/
