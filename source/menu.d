@@ -2,6 +2,7 @@ import base;
 
 struct Menus {
 private:
+	bool _firstRun = true;
 	string[] _mainMenu;
 	Text[] _lines;
 	string[] _folderNames;
@@ -17,7 +18,15 @@ public:
 	}
 
 	void setup() {
-		setupDisplay(["* Jecsplorater *",
+		if (_firstRun)
+			setupDisplay(["* Jecsplorater *",
+						"",
+						"0. Exit",
+						"3. Campaign",
+						"",
+						"Press a number to continue.."]);
+		else
+			setupDisplay(["* Jecsplorater *",
 					  "",
 					  "0. Exit",
 					  "1. Play",
@@ -31,11 +40,18 @@ public:
 	void campaignSetup() {
 		string[] menu = ["* Jecsplorater *",
 						 "",
-						 "0. Cancel"];
+						 "*0. Cancel"];
 		import std.file, std.range;
 		int i = 1;
 		_folderNames.length = 0;
-		foreach(string name; dirEntries(buildPath("Campaigns"), SpanMode.shallow)) {
+
+		import std.range;
+		import std.file;
+		import std.conv;
+		import std.algorithm;
+		import std.string;
+		foreach(string name; dirEntries(buildPath("Campaigns"), SpanMode.shallow)
+			.array.sort!"a.toLower < b.toLower") {
 			if (name.isDir) {
 				_folderNames ~= name;
 				menu ~= text(i, ". ", name.trim);
@@ -61,14 +77,15 @@ public:
 				default:
 					break;
 				case Menu.main:
-					if (nkeys[Number.n1].keyTrigger) {
-						g_gameOver = false;
+					if (! _firstRun) {
+						if (nkeys[Number.n1].keyTrigger) {
+							g_gameOver = false;
 
-						return MenuSelect.start;
-					}
-					
-					if (nkeys[Number.n2].keyTrigger) {
-						return MenuSelect.edit;
+							return MenuSelect.start;
+						}
+						if (nkeys[Number.n2].keyTrigger) {
+							return MenuSelect.edit;
+						}
 					}
 					
 					if (nkeys[Number.n3].keyTrigger) {
@@ -76,25 +93,26 @@ public:
 					}
 				break;
 				case Menu.campaign:
-					if (nkeys[Number.n0].keyTrigger) {
+					if (nkeys[Number.n0].keyTrigger && ! _firstRun) {
 						setup;
-					}
-					//if (g_keys[Keyboard.Key.1].keyTrigger) {
-					if (nkeys[Number.n1].keyTrigger) {
-						g_campaign.setup(_folderNames[0]);
-						g_campaign.enterPassWord;
-						writeln("Current mission: ", g_campaign._current);
-
-						g_missionStage = MissionStage.briefing;
-						setup;
-						g_building.resetGame;
-
 						return MenuSelect.start;
 					}
+					foreach(i; 0 .. 10)
+						if (g_keys[Keyboard.Key.Num1 + i].keyTrigger && i < _folderNames.length) {
+							_firstRun = false;
+							g_campaign.setup(_folderNames[i]);
+							g_campaign.enterPassWord;
+							writeln("Current mission: ", g_campaign._current);
+
+							setup;
+							g_building.resetGame;
+
+							return MenuSelect.start;
+						}
 				break;
 			}
 
-		if (nkeys[Number.n0].keyTrigger) {
+		if (nkeys[Number.n0].keyTrigger || g_keys[Keyboard.Key.Escape].keyTrigger) {
 			g_window.close;
 		}
 

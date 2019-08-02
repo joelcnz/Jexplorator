@@ -44,7 +44,7 @@ Press [E] and play
 
 Mouse (edit):
 S - Show verse(s), if any
-P - place where the guys popup	
+LSystem + P - place where the guys popup (see key P)
 B - Select type of tile from mouse position. For paint brush (right click if you have a mouse plugged in - - the track pad doesn’t work)
 V - Put current tile down at mouse cursor position
 J - Jeep (add and remove)
@@ -57,7 +57,8 @@ Num1, Num2 & Num3 - choose which tiles
 LSystem + L - load current project
 LSystem + S - save current project
 E - toggle edit/play
-LSystem + Return - reset level.
+LSystem + Return - start mission.
+P - toggle between guys
 
 LSystem + esc to quit
 
@@ -92,4 +93,6 @@ Code:
 
 Trouble shooting \/
 
-Delete with GUI not working! You can't delete the current building file.
+Issue: Delete with GUI not working!
+Problem: You can't delete the current building file.
+Solution: load a different building, then delete the old one.

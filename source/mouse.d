@@ -24,6 +24,7 @@ struct MouseInput {
 	Layer _layer;
 	RectangleShape _square;
 	RectangleShape _squareBlack;
+	int _whichGuyStartPos;
 
 	auto pos() { return _pos; }
 
@@ -104,6 +105,11 @@ struct MouseInput {
 
 			// keys by them selves
 			if (! Keyboard.isKeyPressed(Keyboard.Key.LSystem) && ! Keyboard.isKeyPressed(Keyboard.Key.RSystem)) {
+
+				if (g_keys[Keyboard.Key.P].keyTrigger) {
+					_whichGuyStartPos = _whichGuyStartPos == player1 ? player2 : player1;
+					g_popLine.set(_whichGuyStartPos == player1 ? "Left guy Start spot" : "Right guy start spot");
+				}
 			
 				// get block from panel
 				if (_pos.x >= g_spriteSize && _pos.x < g_spriteSize + _tilesNumSelect.length * g_spriteSize &&
@@ -130,26 +136,6 @@ struct MouseInput {
 							g_jeeps ~= new Jeep(_pos.makeSquare, _portal.scrn);
 						}
 					}
-				}
-
-				if (lkeys[Letter.p].keyTrigger) {
-					auto spot = new RectangleShape;
-					with(spot)
-						spot.size = Vector2f(g_spriteSize, g_spriteSize),
-						fillColor = Color(255,255,255, 255),
-						outlineColor = Color(0,0,0, 0),
-						outlineThickness = 0;
-					bool inside;
-					foreach(i; 0 .. 2)
-						with(g_guys[i]) {
-							inside = placeGuy(this._portal.scrn, this._pos);
-							if (inside) {
-								resetPos = pos;
-								portal.resetPosScrn = portal.scrn;
-								writeln("pos = ", pos, " portal.scrn", portal.scrn);
-							}
-						}
-					spot.position = makeSquare(_pos);
 				}
 				
 				if (lkeys[Letter.g].keyTrigger) {
@@ -230,6 +216,29 @@ struct MouseInput {
 					}
 				}
 
+				if (lkeys[Letter.p].keyTrigger) {
+					/+
+					auto spot = new RectangleShape;
+					with(spot)
+						spot.size = Vector2f(g_spriteSize, g_spriteSize),
+						fillColor = Color(255,255,255, 255),
+						outlineColor = Color(0,0,0, 0),
+						outlineThickness = 0;
+					+/
+					bool inside;
+					foreach(i; 0 .. 2)
+						if (i == _whichGuyStartPos) with(g_guys[i]) {
+							inside = placeGuy(this._portal.scrn, this._pos);
+							if (inside) {
+								resetPos = pos;
+								portal.resetPosScrn = portal.scrn;
+								writeln("pos = ", pos, " portal.scrn", portal.scrn);
+								g_popLine.set((i == player1 ? "Player 1" : "Player 2") ~ " start position set");
+							}
+						}
+					//spot.position = makeSquare(_pos);
+				}
+
 				if (Keyboard.isKeyPressed(Keyboard.Key.Num1)) {
 					_layer = Layer.front;
 					
@@ -256,15 +265,19 @@ struct MouseInput {
 
 				if (lkeys[Letter.s].keyTrigger) {
 					g_building.saveBuilding;
+					g_popLine.set("Building saved.");
 				}
 		
 				if (lkeys[Letter.l].keyTrigger) {
 					g_building.loadBuilding;
+					g_popLine.set("Building loaded.");
 				}
 
 				if (kReturn.keyTrigger) {
 					g_building.loadBuilding;
 					g_building.resetGame;
+					g_campaign.setBriefing;
+					g_mode = Mode.play;
 					/+	
 					g_building.loadBuilding;
 					g_guys[player1].reset;

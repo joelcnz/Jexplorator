@@ -28,6 +28,7 @@ struct Campaign {
         _report;
 
     void setup(in string folderName) {
+        //g_building.setFileName(folderName);
         import std.file;
         int mid = 1;
         string fileName;        
@@ -109,7 +110,14 @@ struct Campaign {
 
     void setBriefing() {
         auto lines = _current._start.split("|");
-        _briefing.setup(lines, Vector2f(0, 0), Vector2f(640, lines.length * 18));
+        _briefing.setup(lines, Vector2f(0, 0), Vector2f(640, lines.length * 18 + 4));
+        g_missionStage = MissionStage.briefing;
+
+        g_building.setFileName = _current._building;
+        g_building.loadBuilding;
+        //g_currentProjectName = _current._building.to!dstring;
+        //g_fileRootName = to!dstring(_current._building);
+
         g_guys[player1].reset;
         g_guys[player2].reset;
     }
@@ -119,12 +127,10 @@ struct Campaign {
 
         if (win) {
             lines = _current._win.split("|");
-            lines ~= "";
-            if (_current._mission == _missions.length)
-                lines ~= "You have completed Explore!";
-            else {
-                lines ~= "Next Mission Password: " ~ _missions[/* next mission */ _current._mission]._password;
-            }
+//            mixin(trace("_current._mission"));
+  //          mixin(trace("_missions.length"));
+            if (_current._mission != _missions.length)
+                lines ~= ["", "Next Mission Password: " ~ _missions[/* next mission */ _current._mission]._password];
         } else
             lines = _current._lose.split("|");
 

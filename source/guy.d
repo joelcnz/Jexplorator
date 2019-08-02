@@ -409,9 +409,13 @@ public:
 			//g_inputJex.addToHistory(text(_id == Id.player1 ? "UpL" : "UpR", " Diamonds: ", _dashBoard.diamonds).to!dstring);
 			g_mouse.setTile(_portal, /* middle of guy tester: */ mid, TileName.gap);
 			_dashBoard.banner = "Diamond Collected"d;
-			if (g_score.allDiamondsQ) {
+			if (g_score.targetDiamondsQ) {
+				_dashBoard.banner = "Target diamonds collected!"d;
+				g_popLine.set = "Head for the exit!";
+			} else if (g_score.allDiamondsQ) {
 				//g_inputJex.addToHistory(g_score.winner.to!dstring);
 				_dashBoard.banner = "All diamonds collected!"d;
+				g_popLine.set = "Awesome!";
 			}
 		}
 

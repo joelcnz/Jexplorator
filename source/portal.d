@@ -61,7 +61,6 @@ public:
 	void drawLayer(Vector2i pos, Layer layer = Layer.normal) {
 		foreach(cy; 0 .. 10)
 			foreach(cx; 0 .. 10) {
-				//writeln("_scrn: ", _scrn, " cx, cy: ", Vector2i(cx,cy));
 				with(g_screens[_scrn.y][_scrn.x].tiles[cy][cx]) {
 					final switch(layer) {
 						case Layer.back:

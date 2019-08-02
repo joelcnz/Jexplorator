@@ -23,8 +23,25 @@ public:
 		_fileName = fileName;
 		import std.path : stripExtension;
 		g_currentProjectName = fileName.to!dstring.stripExtension;
+		mixin(trace("g_currentProjectName"));
 	}
 	
+	void resetGame() {
+		assert(loadBuilding, "Failed loading building");
+		foreach(ref guy; g_guys)
+			guy.reset;
+		/+
+			with(guy) {
+				dashBoard.diamonds = 0;
+				pos = resetPos;
+				portal.scrn = portal.resetPosScrn;
+			}
+		+/
+		g_timer.setup(g_campaign._current._time);
+		//g_timer.countDownTimer = g_timer.countDownStartTime;
+		g_inputJex.addToHistory("Game mission reset!");
+	}
+
 	bool loadBuilding() {
 		g_gameOver = false;
 
@@ -187,18 +204,6 @@ public:
 		return true;
 	}
 	
-	void resetGame() {
-		foreach(ref guy; g_guys)
-			with(guy) {
-				dashBoard.diamonds = 0;
-				pos = resetPos;
-				portal.scrn = portal.resetPosScrn;
-			}
-		g_timer.setup(g_campaign._current._time);
-		//g_timer.countDownTimer = g_timer.countDownStartTime;
-		g_inputJex.addToHistory("Game mission reset!");
-	}
-
 	bool saveBuilding() { //(in string backFileName = "") {
 		//auto oldFileName = fileName;
 		//if (backFileName != "")
@@ -389,9 +394,8 @@ public:
 		int ix, iy;
 		writeln("Old version ", ver);
 		switch(ver) {
-			default:
-			writeln("Error, version not accounted for!");
-			break;
+		default:
+			assert(0, "Error, version not accounted for!");
 		case 2:
 			fread(&g_scrnDim.x, 1, g_scrnDim.x.sizeof, pfile); // how many screens width
 			fread(&g_scrnDim.y, 1, g_scrnDim.y.sizeof, pfile); // how many screens height

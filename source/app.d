@@ -155,14 +155,17 @@ int main(string[] args) {
 				else
 					g_mode = Mode.edit;
 
-				g_inputJex.addToHistory(g_mode.to!dstring);
-				writeln(g_mode);
+				//g_inputJex.addToHistory(g_mode.to!dstring);
+				//writeln(g_mode);
 			}
 
-			if (g_keys[Keyboard.Key.F].keyTrigger)
+			if (g_keys[Keyboard.Key.F].keyTrigger) {
 				g_window.setVerticalSyncEnabled(true);
-			else
+				//writeln("Sync on");
+			} else {
 				g_window.setVerticalSyncEnabled(false);
+				//writeln("Sync off");
+			}
 		}
 		
 		g_mouse.process;
@@ -358,10 +361,11 @@ int main(string[] args) {
 								scrn = scrn + Vector2i(-1, 0);
 						}
 					}
-					g_popLine.process;
 				}
 				break;
 		}
+
+		g_popLine.process;
 		
 		// just draw border
 		if (g_mode == Mode.play)
@@ -619,9 +623,10 @@ int main(string[] args) {
 
 		if (g_mode == Mode.edit) {
 			g_display.display(DisplayType.mouseDraw);
-			if (g_popLine._pban.show)
-				g_popLine.draw;
 		}
+
+		if (g_popLine._pban.show)
+			g_popLine.draw;
 		
 		if (g_mode == Mode.play && g_displayGameText == true) {
 			g_display.display(DisplayType.viewVerse);
