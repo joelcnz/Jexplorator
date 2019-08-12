@@ -262,7 +262,7 @@ struct MouseInput {
 					g_portals[PortalSide.editor].draw(Border.no, Layer.back);
 					layerMessage;
 				}
-
+/+
 				if (lkeys[Letter.s].keyTrigger) {
 					g_building.saveBuilding;
 					g_popLine.set("Building saved.");
@@ -272,7 +272,7 @@ struct MouseInput {
 					g_building.loadBuilding;
 					g_popLine.set("Building loaded.");
 				}
-
++/
 				if (kReturn.keyTrigger) {
 					g_building.loadBuilding;
 					g_building.resetGame;

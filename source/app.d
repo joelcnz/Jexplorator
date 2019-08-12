@@ -23,7 +23,7 @@ import base;
 //Time timeGuy;
 Clock clock;
 
-dstring[] discList, missionsList;
+dstring[] discList;
 
 void getDiscList(in bool show = false) {
 	import std.range;
@@ -41,25 +41,6 @@ void getDiscList(in bool show = false) {
 		if (show)
 			g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
 	}
-}
-
-//listMissions("Explore");
-void listMissions(in string building) {
-	/+
-	import std.range;
-	import std.file;
-	import std.conv;
-	import std.path: buildPath;
-	import std.algorithm: sort;
-
-	g_inputJex.addToHistory("List of missions:"d);
-	discList.length = 0;
-	foreach(i, string name; dirEntries(buildPath("Campaigns", building), "*.{ini}", SpanMode.shallow).
-			array.sort!"a.toLower < b.toLower".enumerate(1)) {
-		missionsList ~= name.to!dstring;
-		g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
-	}
-	+/
 }
 
 int main(string[] args) {
@@ -90,8 +71,6 @@ int main(string[] args) {
 	Menus menus;
 	menus.setup;
 	MenuSelect mret = MenuSelect.doLoop;
-
-	//listMissions("Explore");
 
 	bool showingBible = false;
 
@@ -128,21 +107,14 @@ int main(string[] args) {
 			}
 		}
 
-		if (g_keys[Keyboard.Key.LSystem].keyPressed && g_keys[Keyboard.Key.Q].keyTrigger) {
-			g_window.close;
-		}
-
-		if (g_keys[Keyboard.Key.LSystem].keyPressed && g_keys[Keyboard.Key.W].keyTrigger) {
-			mret = MenuSelect.doLoop;
-			continue;
-		}
-
-		if (g_keys[Keyboard.Key.Escape].keyTrigger)
-			g_doGuiFile = false;
-			
-		if (! g_jexTerminal && ! g_doGuiFile) {
-			if (g_mode != Mode.play && g_keys[Keyboard.Key.T].keyTrigger) {
-				g_jexTerminal = true;
+		if (g_keys[Keyboard.Key.LSystem].keyPressed ||
+			g_keys[Keyboard.Key.RSystem].keyPressed) {
+			if (g_keys[Keyboard.Key.Q].keyTrigger)
+				g_window.close;
+		
+			if (g_keys[Keyboard.Key.W].keyTrigger) {
+				mret = MenuSelect.doLoop;
+				continue;
 			}
 
 			if (g_keys[Keyboard.Key.E].keyTrigger) {
@@ -157,6 +129,15 @@ int main(string[] args) {
 
 				//g_inputJex.addToHistory(g_mode.to!dstring);
 				//writeln(g_mode);
+			}
+		}
+
+		if (g_keys[Keyboard.Key.Escape].keyTrigger)
+			g_doGuiFile = false;
+			
+		if (! g_jexTerminal && ! g_doGuiFile) {
+			if (g_mode != Mode.play && g_keys[Keyboard.Key.T].keyTrigger) {
+				g_jexTerminal = true;
 			}
 
 			if (g_keys[Keyboard.Key.F].keyTrigger) {
@@ -187,6 +168,10 @@ int main(string[] args) {
 				//	if (inScreen(jeep.scrn))
 				//		jeep.process;
 				g_jeeps = g_jeeps.map!((a) { if (inScreen(a.scrn)) a.process; return a; }).array;
+				//void ifProcess(ref ) {
+				//	if (inScreen(a.scrn)) a.process; return a; }
+				//}
+				//g_jeeps = g_jeeps.each!(a => ifProcess(a)).array;
 			}
 		}
 
@@ -200,6 +185,23 @@ int main(string[] args) {
 		//g_portals[0 .. 2] = g_portals[0 .. 2].each!(a => a.process).array; //#each - not work
 
 		g_window.clear();
+
+		void doComputerBlow() {
+			foreach(computer; g_computers)
+				if (inScreen(computer.scrn)) {
+					auto screens = getScreens(computer.scrn);
+					if (screens[PortalSide.left]) {
+						g_display.setComputer(computer);
+						g_display.display(DisplayType.computerBlow);
+					}
+					if (screens[PortalSide.right]) {
+						g_computerBlowUp[computer._blowUpFrame].position = g_computerBlowUp[computer._blowUpFrame].position + Vector2f(320, 0);
+						g_display.setComputer(computer);
+						g_display.display(DisplayType.computerBlow);
+						g_computerBlowUp[computer._blowUpFrame].position = g_computerBlowUp[computer._blowUpFrame].position - Vector2f(320, 0);
+					}
+				}
+		}
 
 		void doJeepDraw() {
 			foreach(jeep; g_jeeps) {
@@ -276,6 +278,7 @@ int main(string[] args) {
 					}
 				}
 
+				doComputerBlow;
 				doJeepDraw;
 	//				foreach(jeep; g_jeeps) 
 	//					if (jeep.jeepBullit !is null && jeep.jeepBullit.jbullit == JBullit.alive) {
@@ -292,23 +295,43 @@ int main(string[] args) {
 //				g_mainPopBanner.draw;
 			break;
 			case Mode.edit:
+			/+
+				if (g_keys[Keyboard.Key.LSystem].keyPressed || g_keys[Keyboard.Key.RSystem].keyPressed) {
+					if (g_keys[Keyboard.Key.S].keyTrigger) {
+						g_guiConfirm.setQuestion(["Save '" ~ g_fileRootName.to!string ~ "'", "confirm yes/no?"]);
+						g_guiConfirm.setHideAll(false);
+						g_wedgetFile = WedgetFile.save;
+					}
+					if (g_keys[Keyboard.Key.L].keyTrigger) {
+						g_guiConfirm.setQuestion(["Load '" ~ g_fileRootName.to!string ~ "'", "confirm yes/no?"]);
+						g_guiConfirm.setHideAll(false);
+						g_wedgetFile = WedgetFile.load;
+					}
+				}
+			+/
 				if (g_doGuiFile) {
-					g_guiFile.process(Point(g_mouse.pos.x, g_mouse.pos.y));
-					final switch(g_guiConfirm.process(Point(g_mouse.pos.x, g_mouse.pos.y))) with(FileAction) {
-						case nothing:
-						break;
-						case save:
-							.save;
-						break;
-						case load:
-							.load;
-						break;
-						case del:
-							.del;
-						break;
-						case rename:
-							.changeName;
-						break;
+					Point pnt = Point(g_mouse.pos.x, g_mouse.pos.y);
+					g_guiFile.process(pnt);
+					g_guiConfirm.process(pnt);
+					if (g_stateConfirm == StateConfirm.yes) {
+						g_stateConfirm = StateConfirm.ask;
+						final switch(g_wedgetFile) with(WedgetFile) {
+							case projects:
+							case current:
+							break;
+							case save:
+								.save;
+							break;
+							case load:
+								.load;
+							break;
+							case del:
+								.del;
+							break;
+							case rename:
+								.changeName;
+							break;
+						}
 					}
 					g_guiFile.draw;
 					g_guiConfirm.draw;
@@ -428,46 +451,12 @@ int main(string[] args) {
 							auto verseRef = dargs[1 .. $].to!(string[]).join(" ");
 
 							g_screens[sy][sx].verseRef = verseRef;
-							//auto getVerses = g_bible.argReference(g_bible.argReferenceToArgs(verseRef));
 							auto getVerses = g_bible.argReference(g_bible.getReference(verseRef.split));
 							string[] verses;
 							if (getVerses.length)
 								verses = getVerses.split('\n')[0 .. $ - 1];
 							foreach(ver; verses)
 								g_inputJex.addToHistory(ver);
-						break;
-						case "missions":
-							listMissions("Explore");
-						break;
-						case "mission":
-							if (dargs.length == 2) {
-								int select = processValue(dargs[1]) - 1;
-								if (select >= 0 && select < missionsList.length) {
-									auto ini = Ini.Parse(missionsList[select].to!string);
-
-									string tmp;
-									try { tmp = ini["mission"].getKey("time"); g_timer.setup(tmp.to!int); } catch(Exception e) {}
-									try {
-										tmp = ini["mission"].getKey("building");
-										g_building.setFileName(tmp.to!string);
-										if (! g_building.loadBuilding)
-											addToHistory(text("Failed loading: ", g_building.fileName).to!dstring);
-										else {
-											g_mode = Mode.play;
-											g_jexTerminal = false;
-										}
-									} catch(Exception e) {
-										addToHistory("Error, no building!");
-									}
-									try {
-										tmp = ini["mission"].getKey("diamonds");
-										g_guys[/* both */ 0].dashBoard.totalDiamonds = tmp.to!int;
-									} catch(Exception e) {
-										
-									}
-									try { tmp = ini["mission"].getKey("start"); } catch(Exception e) {}
-								}
-							}
 						break;
 						case "cls", "clear":
 							g_inputJex.clearHistory;
@@ -628,6 +617,13 @@ int main(string[] args) {
 		if (g_popLine._pban.show)
 			g_popLine.draw;
 		
+		if (g_mode == Mode.play)
+			foreach(g; g_guys) {
+				if (g.escapeStatus == GuyEscapeStatus.outOfTime) {
+					g.banner.draw;
+				}
+			}
+
 		if (g_mode == Mode.play && g_displayGameText == true) {
 			g_display.display(DisplayType.viewVerse);
 			g_doLetUpdate = false;
@@ -638,6 +634,11 @@ int main(string[] args) {
 
 		//#to hide or not to hide
 		if (g_mode == Mode.play) {
+			foreach(cpu; g_computers) {
+				cpu.process;
+			}
+			g_computers = g_computers.filter!(e => e._cpuState != CPUState.rubble).array;
+
 			foreach(i, p; g_guys) {
 				if (p.hide == Hide.hidden) {
 					blackPlastic.position = Vector2f(i * 320, 0);
@@ -664,12 +665,6 @@ int main(string[] args) {
 			// not play
 			if (showingBible)
 				g_display.display(DisplayType.viewVerse);
-		}
-
-		foreach(g; g_guys) {
-			if (g.escapeStatus == GuyEscapeStatus.outOfTime) {
-				g.banner.draw;
-			}
 		}
 
 	    g_window.display();

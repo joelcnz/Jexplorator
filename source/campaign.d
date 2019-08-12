@@ -115,8 +115,6 @@ struct Campaign {
 
         g_building.setFileName = _current._building;
         g_building.loadBuilding;
-        //g_currentProjectName = _current._building.to!dstring;
-        //g_fileRootName = to!dstring(_current._building);
 
         g_guys[player1].reset;
         g_guys[player2].reset;
@@ -127,8 +125,6 @@ struct Campaign {
 
         if (win) {
             lines = _current._win.split("|");
-//            mixin(trace("_current._mission"));
-  //          mixin(trace("_missions.length"));
             if (_current._mission != _missions.length)
                 lines ~= ["", "Next Mission Password: " ~ _missions[/* next mission */ _current._mission]._password];
         } else

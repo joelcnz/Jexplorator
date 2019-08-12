@@ -1,4 +1,4 @@
--= Jexplorater =-
+-= Jecplorater =-
 
 Trouble shooting \/
 
@@ -7,7 +7,7 @@ Use ex screen. Going through the verses on vixploreJoel.bin [for vixplore.bin) (
 
 I'm not sure on the spelling of the name of this game.
 
-settings.ini should be like: currentCampaign=Campaign/Explore
+settings.ini should be like: currentBuildingFileName=./explore.bin
 
 Need to define stuff better. bin files are buildings, campaigns are groups of levels, levels are things like; how much diamonds to collect (missions, really).
 
@@ -19,28 +19,17 @@ To run the game:
 ./jex
 
 Problems:
-1. Pressed 'e' from play mode. And it crashed strait away.
-	play
-	play
-	edit
-	edit
-	Bus error: 10
-	$
-2. While editing the program crashed. Save often.
 
 
 Please read:
 Don't save over test.bin. Run the game, load a level, use [P] to place players to save.
 
-Looks like you have to run it from the terminal.
-
-Steps:
 Press [T] for terminal
 Enter ‘cat’ for list of projects
 Enter ‘l 1’ for arena level
 Enter ’t’ to go out of the terminal
 Click for full screen, can be faster
-Press [E] and play
+Press [command] + [E] and play
 
 Mouse (edit):
 S - Show verse(s), if any
@@ -96,3 +85,21 @@ Trouble shooting \/
 Issue: Delete with GUI not working!
 Problem: You can't delete the current building file.
 Solution: load a different building, then delete the old one.
+
+Issue: Want to remove a verse ref
+Solution: Just enter 'ref' in the j-terminal edit the current screen
+
+
+Steps:
+Jecsplorater:
+1. Run program
+2. Press 3 for campaigns
+3. Pick campaign
+4. For the password put in the password (put nothing for 1st mission, in which case - delete the artifact and press enter)
+5. At the start use WASD and Z, hit space to start
+6. Collect the said amount of diamonds (if any)
+7. Get away in a rocket
+8. Take note of the password for the next mission (if not last mission you've just completed)
+9. If you don’t make it, you can try again by pressing [command] + [E] (for edit mode) and press [command] + [return] to start again
+10. To go to next mission, press [command] + [W]
+11. Repeat from step 2

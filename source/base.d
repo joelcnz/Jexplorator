@@ -1,3 +1,4 @@
+//#computerBlow new
 //#new (verse reference)
 //#made template instead of normal functions
 //#not used
@@ -11,7 +12,8 @@ import jec, dini.dini, jmisc;
 import bible.base;
 import portal, mouse, guy, building, score, countdown, setup, display;
 import jeep, bullit, mover, jeepbullit, escaped, mission,
-    dashboard, menu, infomation, gametext, popbanner, popline, campaign;
+    dashboard, menu, infomation, gametext, popbanner, popline, campaign,
+	computer;
 
 import dsfml.graphics;
 import dsfml.audio;
@@ -40,7 +42,7 @@ enum MissionStatus {current, done} // current - displays text about the mission,
 enum MissionStage {briefing, playing, report}
 MissionStage g_missionStage;
 
-enum Snd {pop, plop, leap, shoot, blowup, shootJeep, rocket}
+enum Snd {pop, plop, leap, shoot, blowup, shootJeep, rocket, pop2}
 JSound[] g_jsounds; // g_jsounds[Snd.shootJeep].playSnd;
 
 Clock g_clock;
@@ -63,18 +65,23 @@ void gh(string message = "got here") { // g and h beside each other on the keybo
 
 enum JBullit {terminated, current}
 
+// for baddys (jeeps)
 enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed}
 
+enum CPUState {brandNew, rubble}
+bool g_gotTargetDiamonds = false;
+
+Computer[] g_computers;
 Bullit[] g_bullits;
 enum BullitState {alive, terminated, blowingUp}
 
 enum GunDucked {notDucked, ducked}
 
-Sprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight;
+Sprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight, g_computerBlowUp;
 
 enum DisplayType {/*escaped,*/ mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw, info,
 	portalNoBorderLayerNormalDraw, editLayer, guyDraw, playBorder, jeepDraw, bullitsDraw,
-	jeepBullitDraw, viewVerse, mission}
+	jeepBullitDraw, viewVerse, mission, computerBlow} //#computerBlow new
 
 Display g_display;
 
@@ -83,6 +90,12 @@ enum MenuSelect {quit, edit, start, doLoop}
 enum GuyEscapeStatus {start, playing, escaped, outOfTime}
 enum {player1, player2}
 enum TimeStatus {going, stopped}
+
+void setTile(Vector2i scrn, Vector2f pos, TileName tileName) {
+	g_screens[scrn.y][scrn.x].
+		tiles[cast(size_t)(pos.y / g_spriteSize)][cast(size_t)(pos.x / g_spriteSize)].tileName =
+			tileName;
+}
 
 //#made template instead of normal functions
 float makeSquare(T : float)(T a) {
@@ -193,10 +206,6 @@ bool[4] getScreens(Vector2i scrn) {
 	return result;
 }
 
-//bool inOneScreen(Vector2i scrn) {
-//	if (scrn == 
-//}
-
 bool inScreen(Vector2i scrn, bool jeep = false) {
 	version(none) {
 	writeln("jeep: ", scrn,
@@ -219,6 +228,6 @@ void updateProjectList(in string folder) {
     foreach(i, string name; dirEntries(folder, "*.{bin}", SpanMode.shallow).array.sort!"a.toLower < b.toLower".enumerate(1)) {
         list ~= text(i, ") ", name.stripExtension.baseName);
     }
-    g_guiFile.getWedgets[WedgetNum.projects].list(["List of projects:"] ~ list);
-    g_guiFile.getWedgets[WedgetNum.current].list(["Current: " ~ g_currentProjectName.to!string]);
+    g_guiFile.getWedgets[WedgetFile.projects].list(["List of projects:"] ~ list);
+    g_guiFile.getWedgets[WedgetFile.current].list(["Current: " ~ g_currentProjectName.to!string]);
 }

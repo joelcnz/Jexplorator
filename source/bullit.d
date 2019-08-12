@@ -31,6 +31,17 @@ public:
 				if (_pos.x < 0 || _pos.x > g_spriteSize * 10 || hits(_pos, g_blocks))
 					_bullitState = BullitState.blowingUp;
 
+				if (getPos(_pos) == TileName.computer && _pos.x - makeSquare(_pos.x) > 6 && 
+					_pos.x - makeSquare(_pos.x) < g_spriteSize - 7) {
+					with(g_jsounds[Snd.blowup])
+						setPitch(2),
+						playSnd;
+					g_computers ~= new Computer(_pos, scrn);
+					//with(g_computers[$ - 1])
+					//	g_mouse.setTile(_portal, pos, TileName.computerBlow6, Layer.normal);
+					_bullitState = BullitState.blowingUp;
+				}
+
 				//#dummist possible error (bullit not hitting the bady)
 				foreach(jeep; g_jeeps) {
 					if (jeep.scrn == _scrn &&

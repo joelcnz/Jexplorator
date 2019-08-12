@@ -3,6 +3,8 @@ counter goes up and up. Go to the landing pad and take a note of the time.
  +/
 module countdown;
 
+//#me know understand?! - says time out even you escaped
+
 import base;
 
 struct CountDown {
@@ -50,7 +52,7 @@ public:
 			writeln("Game over!");
 			g_gameOver = true;
 			foreach(g; g_guys)
-				if (g.escapeStatus != GuyEscapeStatus.playing) {
+				if (g.escapeStatus != GuyEscapeStatus.playing) { //#me know understand?! - says time out even you escaped
 					g.escapeStatus = GuyEscapeStatus.outOfTime;
 					g.banner.setText(["Time Out!"]);
 					g.banner.show;

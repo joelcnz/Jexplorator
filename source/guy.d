@@ -1,7 +1,6 @@
 //#out of bounds error
 //#bit junky
 //#should this be here
-//#working
 //#remed out diamonds print next line
 //#not work
 //#change here
@@ -206,7 +205,7 @@ public:
 		//_escaped.setup(this);
 		//_briefing.setup(this);
 		
-		banner.setup([""], Vector2f(320 * id, 320 - 20), Vector2f(320,20));
+		banner.setup([""], Vector2f(320 * id, 160), Vector2f(320,20));
 	}
 
 	void doResetPos(Vector2f resetPos) {
@@ -226,6 +225,8 @@ public:
 		_dashBoard.diamonds = 0;
 		updateScreenVerseRef;
 		_banner.show = false;
+		_stateUpDown = StateUpDown.nothing;
+		_jumping = Jumping.no;
 	}
 
 	//#die
@@ -409,9 +410,10 @@ public:
 			//g_inputJex.addToHistory(text(_id == Id.player1 ? "UpL" : "UpR", " Diamonds: ", _dashBoard.diamonds).to!dstring);
 			g_mouse.setTile(_portal, /* middle of guy tester: */ mid, TileName.gap);
 			_dashBoard.banner = "Diamond Collected"d;
-			if (g_score.targetDiamondsQ) {
+			if (g_score.targetDiamondsQ && g_gotTargetDiamonds == false) {
 				_dashBoard.banner = "Target diamonds collected!"d;
 				g_popLine.set = "Head for the exit!";
+				g_gotTargetDiamonds = true;
 			} else if (g_score.allDiamondsQ) {
 				//g_inputJex.addToHistory(g_score.winner.to!dstring);
 				_dashBoard.banner = "All diamonds collected!"d;
@@ -419,21 +421,12 @@ public:
 			}
 		}
 
-		//#working
-		if (hits(mid, [TileName.computer])) {
-			if (_id == 0) {
-				//auto verse = g_screens[_portal.scrn.y][_portal.scrn.x].verseRef;
-				//verse = g_bible.argReference(g_bible.argReferenceToArgs(verse));
-				//auto getVerses = g_bible.argReference(g_bible.getReference(verseRef.split));
-				//auto verse = g_bible.argReference(
-				//	g_bible.getReference(
-				//			g_screens[_portal.scrn.y][_portal.scrn.x].verseRef.split));
-				//writeln("(", verse, ")");
-				//_dashBoard.banner = verse.to!dstring;
-				//displayGameText(verse);
-				g_displayGameText = true;
-			}
+		if (hits(mid, [TileName.computerBlow6])) {
+			g_mouse.setTile(_portal, /* middle of guy tester: */ mid, TileName.computer);
 		}
+		
+		if (_dying == Dying.alive && hits(mid, [TileName.computer]))
+			g_displayGameText = true;
 
 		if (_dying == Dying.dyingDown) {
 			_pos += Vector2f(0, g_pixelsy * 2);
@@ -479,21 +472,16 @@ public:
 					if (_currentFrame == 2)
 						_currentFrame = 0;
 
-					//bool onTop;
-					//if (hitOther)
-					//	onTop = true;
 					_pos = Vector2f(_pos.x - g_pixelsx, _pos.y);
-					//if (onTop == false && hitOther)
-					//	_pos = Vector2f(_pos.x + 1, _pos.y);
 					if (_pos.x < 0) {
 						if (_portal.scrn.x - 1 >= 0) {
 							_pos.x = 10 * g_spriteSize - g_spriteSize;
 							with(_portal) {
 								scrn = Vector2i(scrn.x - 1, scrn.y);
 							} // with
-							} else {
-								_pos = Vector2f(_pos.x + g_pixelsx, _pos.y);
-							}
+						} else {
+							_pos = Vector2f(_pos.x + g_pixelsx, _pos.y);
+						}
 						doGrace;
 					}
 					processTestPoints(_pos);
@@ -944,8 +932,6 @@ public:
 	}
 
 	void updateScreenVerseRef() {
-		if (_id != 0)
-			return;
 		import std.conv: to, text;
 
 		if (_portal.scrn.x >= 0 && _portal.scrn.x < g_scrnDim.x &&

@@ -6,28 +6,28 @@ import std.algorithm : each;
 
 import base;
 
+/+
 struct PopLineMan {
-    PopLine _popLines;
+    PopLine[] _popLines;
     Vector2f _pos;
 
     void add(in string message) {
-        //Popline pl;
-        //pl.set(message);
-        //_popLines ~= pl;
+        Popline pl;
+        pl.set(message);
+        _popLines ~= pl;
     }
 
     void process() {
-        /+
-        foreach(ref pl; _popLines) {
+        foreach_reverse(ref pl; _popLines) {
             pl.process;
         }
         _popLines.filter!(pl => pl._pban.show);
         foreach(y, ref pl; _popLines) {
-            //pl._pban.setup(pl._pban., )
+            pl._pban.setup(pl._pban., );
         }
-        +/
     }
 }
++/
 
 struct PopLine {
     PopBanner _pban;
@@ -38,6 +38,7 @@ struct PopLine {
         _sw.reset;
         _sw.stop;
         _sw.start;
+        g_jsounds[Snd.pop2].playSnd;
     }
 
     void process() {

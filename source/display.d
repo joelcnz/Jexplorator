@@ -10,6 +10,7 @@ private:
 	Jeep _jeep;
 	//Escaped _escaped;
 	string _verse;
+	Computer _computer;
 public:
 	void setPortalEditLayer(Layer layer) pure nothrow {
 		_layer = layer;
@@ -42,6 +43,10 @@ public:
 	void setVerse(in string verse) {
 		_verse = verse;
 		g_letterBase.setText(_verse);
+	}
+
+	void setComputer(Computer computer) {
+		_computer = computer;
 	}
 
 	void display(DisplayType display) {
@@ -89,6 +94,9 @@ public:
 				break;
 				case mission:
 					g_campaign.viewCurrent;
+				break;
+				case computerBlow:
+					_computer.draw;
 				break;
 			}
 	}

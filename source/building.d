@@ -22,7 +22,7 @@ public:
 	void setFileName(in string fileName) {
 		_fileName = fileName;
 		import std.path : stripExtension;
-		g_currentProjectName = fileName.to!dstring.stripExtension;
+		g_currentProjectName = fileName.trim.to!dstring.stripExtension;
 		mixin(trace("g_currentProjectName"));
 	}
 	
@@ -38,6 +38,7 @@ public:
 			}
 		+/
 		g_timer.setup(g_campaign._current._time);
+		g_gotTargetDiamonds = false;
 		//g_timer.countDownTimer = g_timer.countDownStartTime;
 		g_inputJex.addToHistory("Game mission reset!");
 	}
@@ -326,26 +327,37 @@ public:
 		auto fileName = g_building.fileName;
 		int id;
 		bool quit = false;
+		immutable totalNFSaves = 10;
+		string makeFn(in int sp) {
+			return buildPath("BackUpSaves",
+									format("%s_%02d.bin", g_building.fileName.stripExtension, sp));
+		}
+		int antifreeze;
 		do {
-			if (id == 100) {
-				id = 0;
-				import std.stdio: writeln;
-				
-				writeln("Warning: You have exceeded 100 back up saves! - writing to id 00");
-
+			if (antifreeze >= totalNFSaves) {
 				quit = true;
 			}
-			fileName = buildPath("BackUpSaves",
-									format("%s_%02d.bin", g_building.fileName.stripExtension, id));
-			id++;
+			fileName = makeFn(id);
+			id += 1;
+			antifreeze += 1;
 		} while(exists(fileName) && quit == false);
 		if (g_building.fileName != "backup.bin") //#bit of a hack
 			g_popLine.set("Save: " ~ g_building.fileName.to!string ~ ", back up: " ~ fileName);
-		import std.file : copy;
+		import std.file : copy, remove, exists;
 		copy(g_building.fileName, fileName);
-
+		if (id < totalNFSaves) {
+			immutable fn = makeFn(id);
+			if (fn.exists)
+				remove(fn);
+		} else {
+			immutable fn = makeFn(0);
+			if (fn.exists)
+				remove(fn);
+		}
 		g_inputJex.addToHistory("Copied '", g_building.fileName, "' to '", fileName, "'");
 		g_inputJex.addToHistory("Save done!");
+		if (quit)
+			writeln("Error, infinite loop detected!");
 		
 		return true;
 	}

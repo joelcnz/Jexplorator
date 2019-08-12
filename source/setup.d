@@ -48,6 +48,7 @@ struct Setup {
 		g_jsounds ~= new JSound("blowup.wav");
 		g_jsounds ~= new JSound("shootJeep.wav");
 		g_jsounds ~= new JSound("hush.wav"); // rocket sound
+		g_jsounds ~= new JSound("pop2.wav"); // g_jsounds[Snd.pop2].playSnd;
 	
 		g_font = new Font;
 		g_font.loadFromFile("DejaVuSans.ttf");
@@ -105,6 +106,12 @@ struct Setup {
 			g_jeepBlowUpLeft[$-1].setTexture = g_texture;
 			g_jeepBlowUpLeft[$-1].textureRect = IntRect(g_locations[i].x, g_locations[i].y, g_spriteSize, g_spriteSize);
 		}
+		g_computerBlowUp.length = 0;
+		foreach(i; TileName.computerBlow1 .. TileName.computerBlow6 + 1) {
+			g_computerBlowUp ~= new Sprite;
+			g_computerBlowUp[$-1].setTexture = g_texture;
+			g_computerBlowUp[$-1].textureRect = IntRect(g_locations[i].x, g_locations[i].y, g_spriteSize, g_spriteSize);
+		}
 
 		g_mode = Mode.edit;
 
@@ -136,6 +143,8 @@ struct Setup {
 		if (! g_building.loadBuilding) { //#load building here! 
 			throw new Exception("File error. Fatal error!");
 		}
+
+		g_fileRootName = _currentBuildingFileName.to!dstring.stripExtension;
 
 		g_window.setFramerateLimit(60);
 

@@ -1,13 +1,6 @@
 import base;
 
 struct Score {
-	/+
-	int _totalDiamonds;
-	
-	void totalDiamonds(int totalDiamonds0) { _totalDiamonds = totalDiamonds0; }
-	int totalDiamonds() { return _totalDiamonds; }
-	+/
-
 	int getGuyDiamonds(PortalSide side) { return g_guys[side].dashBoard.diamonds; }
 
 	int getGuyScore(PortalSide side) { return g_guys[side].dashBoard.score; }

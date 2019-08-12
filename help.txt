@@ -1,20 +1,20 @@
 Help:
-                       h/help - for this help
-                          cls - clear history
-                            t - exit terminal
-                    exit/quit - to exit to OS
-                          cat - list projects
-                     l/load # - load project (see 'cat')
-                  save <name> - save current project
-            d/remove/delete # - delete project (see 'cat')
-                   create # # - start a new project
-                        reset -
-                       go # # - go strait to another screen
-                       info/i - data for debuging
-                bullitproof/b - can shoot each other
-                       hide # - hide player eg hide 1 for p1
-                       race # - set and start a countdown timer
-                     missions - list current building missions
-                   *mission # - start misson
-                    ref <ref> - add verse to current screen
-                        g/gui - Graphical User Interface
+              h/help - for this help
+                cls - clear history
+                  t - exit terminal
+          exit/quit - to exit to OS
+                cat - list projects
+            l/load # - load project (see 'cat')
+        save <name> - save current project
+  d/remove/delete # - delete project (see 'cat')
+          create # # - start a new project
+              reset -
+              go # # - go strait to another screen
+              info/i - data for debuging
+      bullitproof/b - can shoot each other
+              hide # - hide player eg hide 1 for p1
+              race # - set and start a countdown timer
+            missions - list current building missions
+          *mission # - start misson
+          ref <ref> - add verse to current screen
+              g/gui - Graphical User Interface
