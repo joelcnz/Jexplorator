@@ -42,6 +42,18 @@ public:
 				guy.die;
 			}
 		}
+
+		if (jeepHit(null, _scrn, _pos, Shooter.jeep)) {
+			_jbullit = JBullit.terminated;
+			_guyTarget.dashBoard.banner = "Bady blown up & bonus pts"d;
+			_guyTarget.dashBoard.score = _guyTarget.dashBoard.score + 50 * 2;
+		}
+
+		if (computerHit(_pos, scrn)) {
+			_guyTarget.dashBoard.banner = "Computer blown up & bonus pts"d;
+			_guyTarget.dashBoard.score = _guyTarget.dashBoard.score + 30 * 2;
+			_jbullit = JBullit.terminated;
+		}
 	}
 
 	void setPosition() {

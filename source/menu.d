@@ -90,6 +90,7 @@ public:
 					
 					if (nkeys[Number.n3].keyTrigger) {
 						campaignSetup;
+						while(g_keys[Keyboard.Key.Num3].keyPressed) {}
 					}
 				break;
 				case Menu.campaign:

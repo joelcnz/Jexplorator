@@ -23,7 +23,7 @@ struct Setup {
 	 int setup() {
 		import jec: setup;
 
-		g_window = new RenderWindow(VideoMode(640, 480), "Welcome to Jexplorator");
+		g_window = new RenderWindow(VideoMode(800, 600), "Welcome to Joel's Jecsplorator");
 
 		if (int retType = jec.setup != 0) {
 			writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);

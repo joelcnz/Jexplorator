@@ -5,26 +5,34 @@ import base;
 
 class Jeep: Mover {
 private:
+	static _cid = 0;
+	int _id;
 	enum Facing {left, right}
 	Facing _facing, _facingNext;
 	Action _action;
 	int _turnCount, _stunCount, _shootingCount;
 	int _blowUpFrameTiming, _blowUpFrame;
 	JeepBullit _jeepBullit;
+	Vector2f _dirSpc;
 public:
-	@property Facing facing() { return _facing; }
-	@property void facing(Facing facing0) { _facing = facing0; }
+	int id() { return _id; }
+	void id(int id0) { _id = id0; }
 
-	@property Facing facingNext() { return _facingNext; }
-	@property void facingNext(Facing facingNext0) { _facingNext = facingNext0; }
+	Facing facing() { return _facing; }
+	void facing(Facing facing0) { _facing = facing0; }
 
-	@property Action action() { return _action; }
-	@property void action(Action action0) { _action = action0; }
+	Facing facingNext() { return _facingNext; }
+	void facingNext(Facing facingNext0) { _facingNext = facingNext0; }
 
-	@property JeepBullit jeepBullit() { return _jeepBullit; }
-	@property void jeepBullit(JeepBullit jeepBullit0) { _jeepBullit = jeepBullit0; }
+	Action action() { return _action; }
+	void action(Action action0) { _action = action0; }
+
+	JeepBullit jeepBullit() { return _jeepBullit; }
+	void jeepBullit(JeepBullit jeepBullit0) { _jeepBullit = jeepBullit0; }
 
 	this(Vector2f pos0, Vector2i scrn0) {
+		id = _cid;
+		_cid += 1;
 		_pos = pos0;
 		scrn = scrn0;
 		_dir = Vector2f(-g_pixelsx, 0);
@@ -45,7 +53,6 @@ public:
 	}
 
 	void process() {
-
 		version(none) {
 			bool checkForGuyOverLap() {
 					foreach(guy; g_guys) {
@@ -61,10 +68,13 @@ public:
 
 		final switch(_action) {
 			case Action.leftRight:
-				bool checkAccross(Guy guy, float step) {
-					float x = pos.x;
+			//case left:
+				bool checkAcross(Guy guy, float step) {
+					float x = makeSquare(pos.x) + g_spriteSize / 2;
 					while(x >= 0 && x < g_spriteSize * 10) {
 						if (hits(Vector2f(x, pos.y), g_blocks ~ TileName.spikes))
+							return false;
+						if (jeepHit(this, scrn, Vector2f(x, pos.y), Shooter.check))
 							return false;
 						if (x > guy.pos.x &&
 							x < guy.pos.x + g_spriteSize && ! guy.gunDucked)
@@ -80,14 +90,14 @@ public:
 					if (guy.portal.grace == 0 && scrn == guy.portal.scrn && guy.dying == Dying.alive  &&
 						pos.y + 2 >= guy.pos.y && pos.y < guy.pos.y + g_spriteSize) {
 						// left
-						if (checkAccross(guy, -g_spriteSize) == true && _dir.x < 0 && guy.pos.x - g_spriteSize < pos.x) {
+						if (checkAcross(guy, -g_spriteSize) == true && _dir.x < 0 && guy.pos.x - g_spriteSize < pos.x) {
 							_jeepBullit.fire(this, guy, scrn, Vector2f(pos.x, pos.y + 2), Vector2f(dir.x * 2, 0));
 							_jeepBullit.jbullit = JBullit.current;
 
 							_action = Action.shooting;
 						}
 						//right
-						if (checkAccross(guy, g_spriteSize) == true && _dir.x > 0 && guy.pos.x > pos.x + g_spriteSize) {
+						if (checkAcross(guy, g_spriteSize) == true && _dir.x > 0 && guy.pos.x > pos.x + g_spriteSize) {
 							_jeepBullit.fire(this, guy, scrn, Vector2f(pos.x + g_spriteSize, pos.y + 2), Vector2f(dir.x * 2, 0));
 							_jeepBullit.jbullit = JBullit.current;
 
@@ -105,18 +115,21 @@ public:
 					_facingNext = Facing.right;
 					_pos = _pos + Vector2f(g_pixelsx, 0);
 					_dir = Vector2f(g_pixelsx, 0);
-					_turnCount = 10;
 					_action = Action.turning;
-					if (onOtherBefore && onOtherBefore.action != Action.blowingUp &&
+					_turnCount = 10;
+					if (onOtherBefore && onOtherBefore.action != Action.blowingUp && id > onOtherBefore.id &&
 						onOtherBefore.action != Action.destroyed) {
+						_pos = _pos + Vector2f(g_pixelsx, 0);
+						_facing = Facing.right;
+						_facingNext = Facing.left;
+						_action = Action.turning;
 						with(onOtherBefore) {
-							_facing = Facing.right;
-							_facingNext = Facing.left;
+							_facing = Facing.left;
+							_facingNext = Facing.right;
+							_action = Action.turning;
 							_turnCount = 10;
-							onOtherBefore._action = Action.turning;
 							//_pos = _pos + Vector2f(-g_pixelsx, 0);
 							_dir = Vector2f(-g_pixelsx, 0);
-							onOtherBefore = null;
 						}
 					}
 				}
@@ -130,21 +143,27 @@ public:
 					_dir = Vector2f(-g_pixelsx, 0);
 					_turnCount = 10;
 					_action = Action.turning;
-					if (onOtherBefore && onOtherBefore.action != Action.blowingUp &&
+					if (onOtherBefore && onOtherBefore.action != Action.blowingUp && id < onOtherBefore.id &&
 						onOtherBefore.action != Action.destroyed) {
+						_pos = _pos - Vector2f(g_pixelsx, 0);
+						_facing = Facing.right;
+						_facingNext = Facing.left;
+						_action = Action.turning;
+						_turnCount = 10;
 						with(onOtherBefore) {
 							_facing = Facing.left;
 							_facingNext = Facing.right;
-							_turnCount = 10;
+							_action = Action.leftRight;
 							_action = Action.turning;
+							_turnCount = 10;
 							//_pos = _pos + Vector2f(1, 0);
 							_dir = Vector2f(g_pixelsx, 0);
 						}
+						onOtherBefore = null;
 					}
 				}
 				if (! hits(_pos + Vector2f(0, g_spriteSize), g_blocks ~ TileName.ladder) &&
-					! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize), g_blocks ~ TileName.ladder) &&
-					! hitOtherJeep)
+					! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize), g_blocks ~ TileName.ladder) && ! hitOtherJeep)
 					_action = Action.falling;
 			break;
 			case Action.stunned:

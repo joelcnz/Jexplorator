@@ -164,10 +164,10 @@ int main(string[] args) {
 			if (g_missionStage == MissionStage.playing) {
 				g_timer.process;
 
-				//foreach(jeep; g_jeeps)
-				//	if (inScreen(jeep.scrn))
-				//		jeep.process;
-				g_jeeps = g_jeeps.map!((a) { if (inScreen(a.scrn)) a.process; return a; }).array;
+				foreach(jeep; g_jeeps)
+					if (inScreen(jeep.scrn))
+						jeep.process;
+				//g_jeeps = g_jeeps.map!((a) { if (inScreen(a.scrn)) a.process; return a; }).array;
 				//void ifProcess(ref ) {
 				//	if (inScreen(a.scrn)) a.process; return a; }
 				//}
@@ -186,7 +186,7 @@ int main(string[] args) {
 
 		g_window.clear();
 
-		void doComputerBlow() {
+		void doComputerBlowDraw() {
 			foreach(computer; g_computers)
 				if (inScreen(computer.scrn)) {
 					auto screens = getScreens(computer.scrn);
@@ -269,7 +269,7 @@ int main(string[] args) {
 
 				doBullitsDraw;
 
-				foreach(i, ref guy; g_guys) {
+				foreach(ref guy; g_guys) {
 					with(guy) {
 						if (! g_jexTerminal && ! g_doGuiFile)
 							process;
@@ -278,7 +278,7 @@ int main(string[] args) {
 					}
 				}
 
-				doComputerBlow;
+				doComputerBlowDraw;
 				doJeepDraw;
 	//				foreach(jeep; g_jeeps) 
 	//					if (jeep.jeepBullit !is null && jeep.jeepBullit.jbullit == JBullit.alive) {

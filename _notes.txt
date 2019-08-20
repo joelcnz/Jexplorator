@@ -82,6 +82,9 @@ Code:
 
 Trouble shooting \/
 
+19 8 2019 Issue: Jeeps overlapping
+Solution: Place the jeeps from left to right. And not have more than two on the same plain
+
 Issue: Delete with GUI not working!
 Problem: You can't delete the current building file.
 Solution: load a different building, then delete the old one.

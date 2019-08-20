@@ -31,37 +31,17 @@ public:
 				if (_pos.x < 0 || _pos.x > g_spriteSize * 10 || hits(_pos, g_blocks))
 					_bullitState = BullitState.blowingUp;
 
-				if (getPos(_pos) == TileName.computer && _pos.x - makeSquare(_pos.x) > 6 && 
-					_pos.x - makeSquare(_pos.x) < g_spriteSize - 7) {
-					with(g_jsounds[Snd.blowup])
-						setPitch(2),
-						playSnd;
-					g_computers ~= new Computer(_pos, scrn);
-					//with(g_computers[$ - 1])
-					//	g_mouse.setTile(_portal, pos, TileName.computerBlow6, Layer.normal);
+				if (computerHit(_pos, scrn)) {
 					_bullitState = BullitState.blowingUp;
+					_owner.dashBoard.banner = "Computer blown up"d;
+					_owner.dashBoard.score = _owner.dashBoard.score + 30;
 				}
 
 				//#dummist possible error (bullit not hitting the bady)
-				foreach(jeep; g_jeeps) {
-					if (jeep.scrn == _scrn &&
-						jeep.action != Action.blowingUp && jeep.action != Action.destroyed &&
-						_pos.x >= jeep.pos.x && _pos.x < jeep.pos.x + g_spriteSize &&
-						_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + g_spriteSize &&
-						! (jeep.facing.asOriginalType == Facing.right &&
-							_pos.x >= jeep.pos.x && _pos.x < jeep.pos.x + 14 &&
-							_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + 14) &&
-						! (jeep.facing.asOriginalType == Facing.left &&
-							_pos.x >= jeep.pos.x + 18 && _pos.x < jeep.pos.x + 32 &&
-							_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + 14)) {
-						with(g_jsounds[Snd.blowup])
-							setPitch(2),
-							playSnd;
-						jeep.action = Action.blowingUp;
-						_bullitState = BullitState.blowingUp;
-						_owner.dashBoard.banner = "Bady blown up"d;
-						_owner.dashBoard.score = _owner.dashBoard.score + 50;
-					}
+				if (jeepHit(null, _scrn, _pos, Shooter.guy)) {
+					_bullitState = BullitState.blowingUp;
+					_owner.dashBoard.banner = "Bady blown up"d;
+					_owner.dashBoard.score = _owner.dashBoard.score + 50;
 				}
 				if (! g_guys[_owner.other].bullitProof &&
 					g_guys[_owner.other].portal.scrn == _owner.portal.scrn &&

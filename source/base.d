@@ -1,3 +1,4 @@
+//#bit stink with 3 direction states
 //#computerBlow new
 //#new (verse reference)
 //#made template instead of normal functions
@@ -35,6 +36,8 @@ immutable BibleVersion = "esv"; // "kjv";
 enum g_pixelsx = 2,
 	 g_pixelsy = 2;
 
+enum Shooter {guy, jeep, check}
+
 enum Hide {inview, hidden}
 
 enum MissionStatus {current, done} // current - displays text about the mission, done - in game
@@ -66,7 +69,9 @@ void gh(string message = "got here") { // g and h beside each other on the keybo
 enum JBullit {terminated, current}
 
 // for baddys (jeeps)
-enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed}
+//enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed}
+//#bit stink with 3 direction states
+enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed} //, left, right}
 
 enum CPUState {brandNew, rubble}
 bool g_gotTargetDiamonds = false;
@@ -225,7 +230,8 @@ void updateProjectList(in string folder) {
     import std.file, std.string, std.path, std.algorithm, std.range;
 
     string[] list;
-    foreach(i, string name; dirEntries(folder, "*.{bin}", SpanMode.shallow).array.sort!"a.toLower < b.toLower".enumerate(1)) {
+    foreach(i, string name; dirEntries(folder, "*.{bin}", SpanMode.shallow).array.
+													sort!"a.toLower < b.toLower".enumerate(1)) {
         list ~= text(i, ") ", name.stripExtension.baseName);
     }
     g_guiFile.getWedgets[WedgetFile.projects].list(["List of projects:"] ~ list);

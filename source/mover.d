@@ -38,4 +38,41 @@ public:
 
 		return tileNames.canFind(getPos(v, layer));
 	}
+
+	bool jeepHit(Jeep current, Vector2i scrn, Vector2f pos,  Shooter shooter) {
+		foreach(jeep; g_jeeps) {
+			if (jeep !is current && jeep.scrn == scrn &&
+				jeep.action != Action.blowingUp && jeep.action != Action.destroyed &&
+				pos.x >= jeep.pos.x && pos.x < jeep.pos.x + g_spriteSize &&
+				pos.y >= jeep.pos.y && pos.y < jeep.pos.y + g_spriteSize &&
+				! (jeep.facing.asOriginalType == Facing.right &&
+					pos.x >= jeep.pos.x && pos.x < jeep.pos.x + 14 &&
+					pos.y >= jeep.pos.y && pos.y < jeep.pos.y + 14) &&
+				! (jeep.facing.asOriginalType == Facing.left &&
+					pos.x >= jeep.pos.x + 18 && pos.x < jeep.pos.x + 32 &&
+					pos.y >= jeep.pos.y && pos.y < jeep.pos.y + 14)) {
+				if (shooter != Shooter.check) {
+					with(g_jsounds[Snd.blowup])
+						setPitch(2),
+						playSnd;
+					jeep.action = Action.blowingUp;
+				}
+
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool computerHit(Vector2f apos, Vector2i ascrn) {
+		if (getPos(pos) == TileName.computer && pos.x - makeSquare(pos.x) > 6 && 
+			pos.x - makeSquare(pos.x) < g_spriteSize - 7) {
+			with(g_jsounds[Snd.blowup])
+				setPitch(2),
+				playSnd;
+			g_computers ~= new Computer(pos, scrn);
+			return true;
+		}
+		return false;
+	}
 }
