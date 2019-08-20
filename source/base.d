@@ -71,7 +71,7 @@ enum JBullit {terminated, current}
 // for baddys (jeeps)
 //enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed}
 //#bit stink with 3 direction states
-enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed} //, left, right}
+enum Action {leftRight, turning, falling, stunned, shooting, blowingUp, destroyed, left, right}
 
 enum CPUState {brandNew, rubble}
 bool g_gotTargetDiamonds = false;

@@ -36,7 +36,7 @@ public:
 		_pos = pos0;
 		scrn = scrn0;
 		_dir = Vector2f(-g_pixelsx, 0);
-		_action = Action.leftRight;
+		_action = Action.left;
 		_turnCount = 20;
 		_jeepBullit = new JeepBullit;
 	}
@@ -66,39 +66,34 @@ public:
 			}
 		}
 
-		final switch(_action) {
-			case Action.leftRight:
-			//case left:
-				bool checkAcross(Guy guy, float step) {
-					float x = makeSquare(pos.x) + g_spriteSize / 2;
-					while(x >= 0 && x < g_spriteSize * 10) {
-						if (hits(Vector2f(x, pos.y), g_blocks ~ TileName.spikes))
-							return false;
-						if (jeepHit(this, scrn, Vector2f(x, pos.y), Shooter.check))
-							return false;
-						if (x > guy.pos.x &&
-							x < guy.pos.x + g_spriteSize && ! guy.gunDucked)
-							return true;
-						x += step;
-					}
+		bool checkAcross(Guy guy, float step) {
+			float x = makeSquare(pos.x) + g_spriteSize / 2;
+			while(x >= 0 && x < g_spriteSize * 10) {
+				if (hits(Vector2f(x, pos.y), g_blocks ~ TileName.spikes))
+					return false;
+				if (jeepHit(this, scrn, Vector2f(x, pos.y), Shooter.check)) {
+					"jeep in the way".gh;
 					return false;
 				}
+				if (x > guy.pos.x &&
+					x < guy.pos.x + g_spriteSize && ! guy.gunDucked)
+					return true;
+				x += step;
+			}
+			return false;
+		}
 
+		final switch(_action) {
+			case Action.leftRight:
+			case Action.left:
 				auto onOtherBefore = hitOtherJeep;
-				_pos += Vector2f(_dir.x, 0);
+				_pos -= Vector2f(abs(_dir.x), 0);
 				foreach(guy; g_guys) {
 					if (guy.portal.grace == 0 && scrn == guy.portal.scrn && guy.dying == Dying.alive  &&
 						pos.y + 2 >= guy.pos.y && pos.y < guy.pos.y + g_spriteSize) {
 						// left
-						if (checkAcross(guy, -g_spriteSize) == true && _dir.x < 0 && guy.pos.x - g_spriteSize < pos.x) {
+						if (checkAcross(guy, -g_spriteSize) == true && guy.pos.x - g_spriteSize < pos.x) {
 							_jeepBullit.fire(this, guy, scrn, Vector2f(pos.x, pos.y + 2), Vector2f(dir.x * 2, 0));
-							_jeepBullit.jbullit = JBullit.current;
-
-							_action = Action.shooting;
-						}
-						//right
-						if (checkAcross(guy, g_spriteSize) == true && _dir.x > 0 && guy.pos.x > pos.x + g_spriteSize) {
-							_jeepBullit.fire(this, guy, scrn, Vector2f(pos.x + g_spriteSize, pos.y + 2), Vector2f(dir.x * 2, 0));
 							_jeepBullit.jbullit = JBullit.current;
 
 							_action = Action.shooting;
@@ -134,6 +129,28 @@ public:
 					}
 				}
 
+				if (! hits(_pos + Vector2f(0, g_spriteSize), g_blocks ~ TileName.ladder) &&
+					! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize), g_blocks ~ TileName.ladder) && ! hitOtherJeep)
+					_action = Action.falling;
+			break;
+			case Action.right:
+				auto onOtherBefore = hitOtherJeep;
+				_pos += Vector2f(abs(_dir.x), 0);
+				foreach(guy; g_guys) {
+					if (guy.portal.grace == 0 && scrn == guy.portal.scrn && guy.dying == Dying.alive  &&
+						pos.y + 2 >= guy.pos.y && pos.y < guy.pos.y + g_spriteSize) {
+						//right
+						if (checkAcross(guy, g_spriteSize) == true && guy.pos.x > pos.x + g_spriteSize) {
+							_jeepBullit.fire(this, guy, scrn, Vector2f(pos.x + g_spriteSize, pos.y + 2), Vector2f(dir.x * 2, 0));
+							_jeepBullit.jbullit = JBullit.current;
+
+							_action = Action.shooting;
+						}
+					}
+					if (_action == Action.shooting)
+						g_jsounds[Snd.shootJeep].playSnd;
+				}
+
 				// right
 				if (_pos.x + g_spriteSize - 1 >= g_spriteSize * 10 || hits(_pos + Vector2f(g_spriteSize, 0), g_blocks ~ TileName.spikes) ||
 					! hits(_pos + Vector2f(g_spriteSize - 1, g_spriteSize), g_blocks ~ TileName.ladder) ||
@@ -153,7 +170,6 @@ public:
 						with(onOtherBefore) {
 							_facing = Facing.left;
 							_facingNext = Facing.right;
-							_action = Action.leftRight;
 							_action = Action.turning;
 							_turnCount = 10;
 							//_pos = _pos + Vector2f(1, 0);
@@ -168,13 +184,13 @@ public:
 			break;
 			case Action.stunned:
 				if ((_stunCount--) < 0)
-					_action = Action.leftRight;
+					_action = (_facingNext == Facing.right ? Action.right : Action.left);
 			break;
 			case Action.turning:
 				if ((_turnCount--) < 0)
 					_turnCount = 10,
 					_facing = _facingNext,
-					_action = Action.leftRight;
+					_action = (_facing == Facing.right ? Action.right : Action.left);
 			break;
 			case Action.falling:
 				_pos += Vector2f(0, g_pixelsy);
@@ -188,7 +204,7 @@ public:
 			//#shooting
 			case Action.shooting:
 				if (_jeepBullit.jbullit == JBullit.terminated) {
-						_action = Action.leftRight;
+						_action = (_facing == Facing.right ? Action.right : Action.left);
 					}
 			break;
 			case Action.blowingUp:
@@ -223,7 +239,7 @@ public:
 	void draw() {
 		setPosition(_pos);
 		final switch(_action) {
-			case Action.leftRight, Action.falling, Action.turning, Action.stunned, Action.shooting:
+			case Action.leftRight, Action.left, Action.right, Action.falling, Action.turning, Action.stunned, Action.shooting:
 				final switch(_facing) {
 					case Facing.left:
 						g_window.draw(g_jeepLeftGfx[0]);
