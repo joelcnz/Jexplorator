@@ -68,7 +68,7 @@ public:
 
 	MenuSelect process() {
 
-		if (Keyboard.isKeyPressed(Keyboard.Key.LSystem) && Keyboard.isKeyPressed(Keyboard.Key.Escape)) {
+		if (g_keys[SDL_SCANCODE_LGUI].keyPressed && g_keys[SDL_SCANCODE_ESCAPE].keyPressed) {
 			g_window.close;
 		}
 
@@ -78,28 +78,29 @@ public:
 					break;
 				case Menu.main:
 					if (! _firstRun) {
-						if (nkeys[Number.n1].keyTrigger) {
+						if (g_keys[SDL_SCANCODE_1].keyTrigger) {
 							g_gameOver = false;
 
 							return MenuSelect.start;
 						}
-						if (nkeys[Number.n2].keyTrigger) {
+						if (g_keys[SDL_SCANCODE_2].keyTrigger) {
 							return MenuSelect.edit;
 						}
 					}
 					
-					if (nkeys[Number.n3].keyTrigger) {
+					if (g_keys[SDL_SCANCODE_3].keyTrigger) {
 						campaignSetup;
-						while(g_keys[Keyboard.Key.Num3].keyPressed) {}
+						while(g_keys[SDL_SCANCODE_3].keyPressed) { SDL_PumpEvents(); }
 					}
 				break;
 				case Menu.campaign:
-					if (nkeys[Number.n0].keyTrigger && ! _firstRun) {
+					if (g_keys[SDL_SCANCODE_0].keyTrigger && ! _firstRun) {
 						setup;
 						return MenuSelect.start;
 					}
-					foreach(i; 0 .. 10)
-						if (g_keys[Keyboard.Key.Num1 + i].keyTrigger && i < _folderNames.length) {
+					foreach(i; 0 .. 10) {
+						SDL_PumpEvents();
+						if (g_keys[SDL_SCANCODE_1 + i].keyTrigger && i < _folderNames.length) {
 							_firstRun = false;
 							g_campaign.setup(_folderNames[i]);
 							g_campaign.enterPassWord;
@@ -110,10 +111,11 @@ public:
 
 							return MenuSelect.start;
 						}
+					}
 				break;
 			}
 
-		if (nkeys[Number.n0].keyTrigger || g_keys[Keyboard.Key.Escape].keyTrigger) {
+		if (g_keys[SDL_SCANCODE_0].keyTrigger || g_keys[SDL_SCANCODE_ESCAPE].keyTrigger) {
 			g_window.close;
 		}
 

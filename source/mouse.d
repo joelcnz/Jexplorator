@@ -104,9 +104,9 @@ struct MouseInput {
 		if (! g_jexTerminal && ! g_doGuiFile && g_mode == Mode.edit) {
 
 			// keys by them selves
-			if (! Keyboard.isKeyPressed(Keyboard.Key.LSystem) && ! Keyboard.isKeyPressed(Keyboard.Key.RSystem)) {
+			if (! g_keys[SDL_SCANCODE_LGUI].keyPressed && ! g_keys[SDL_SCANCODE_RGUI].keyPressed) {
 
-				if (g_keys[Keyboard.Key.P].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_P].keyTrigger) {
 					_whichGuyStartPos = _whichGuyStartPos == player1 ? player2 : player1;
 					g_popLine.set(_whichGuyStartPos == player1 ? "Left guy Start spot" : "Right guy start spot");
 				}
@@ -114,13 +114,13 @@ struct MouseInput {
 				// get block from panel
 				if (_pos.x >= g_spriteSize && _pos.x < g_spriteSize + _tilesNumSelect.length * g_spriteSize &&
 					_pos.y >= g_spriteSize * 10 + 10 && _pos.y < g_spriteSize * 10 + 10 + g_spriteSize &&
-					(Mouse.isButtonPressed(Mouse.Button.Right) || Keyboard.isKeyPressed(Keyboard.Key.B))) {
+					(Mouse.isButtonPressed(Mouse.Button.Right) || g_keys[SDL_SCANCODE_B].keyPressed)) {
 					int x = cast(int)(_pos.x / g_spriteSize) - 1,
 						y = 0;
 					_currentTile = _tilesNumSelect[x];
 				}
 
-				if (lkeys[Letter.j].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_J].keyTrigger) {
 					if (inBounds(_pos)) {
 						bool add = true;
 						foreach(i, jeep; g_jeeps)
@@ -138,7 +138,7 @@ struct MouseInput {
 					}
 				}
 				
-				if (lkeys[Letter.g].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_G].keyTrigger) {
 					auto tile = getTile(_pos, _layer);
 					
 					int count;
@@ -154,26 +154,25 @@ struct MouseInput {
 					}
 				}
 							
-				//if (Keyboard.isKeyPressed(Keyboard.Key.Num1)) {
-				if (nkeys[Number.n1].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_1].keyTrigger) {
 					with(TileName)
 						_currentTile = _tilesNum1[findNext(_tilesNum1, getTile(_pos, _layer))];
 					_tilesNumSelect = _tilesNum1;
 				}
 		
-				if (nkeys[Number.n2].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_2].keyTrigger) {
 					with(TileName)
 						_currentTile = _tilesNum2[findNext(_tilesNum2, getTile(_pos, _layer))];
 					_tilesNumSelect = _tilesNum2;
 				}
 			
-				if (nkeys[Number.n3].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_3].keyTrigger) {
 					with(TileName)
 						_currentTile = _tilesNum3[findNext(_tilesNum3, getTile(_pos, _layer))];
 					_tilesNumSelect = _tilesNum3;
 				}		
 		
-				if (_pos.y < g_spriteSize * 10 && (Mouse.isButtonPressed(Mouse.Button.Right) || Keyboard.isKeyPressed(Keyboard.Key.B))) {
+				if (_pos.y < g_spriteSize * 10 && (Mouse.isButtonPressed(Mouse.Button.Right) || g_keys[SDL_SCANCODE_B].keyPressed)) {
 					foreach(layer; Layer.back .. Layer.front + 1)
 					if (getTile(_pos, cast(Layer)layer) != TileName.gap && getTile(_pos, cast(Layer)layer) != TileName.darkBrick) {
 								_currentTile = getTile(_pos, cast(Layer)layer);
@@ -183,13 +182,14 @@ struct MouseInput {
 						_currentTile = getTile(_pos, Layer.back);
 				}
 				
-				if (Keyboard.isKeyPressed(Keyboard.Key.W) && Mode.edit) {
+				if (g_keys[SDL_SCANCODE_W].keyPressed && Mode.edit) {
 					setTile(_portal, _pos, TileName.gap, Layer.front);
 					setTile(_portal, _pos, TileName.gap, Layer.normal);
 					setTile(_portal, _pos, TileName.darkBrick, Layer.back);
 				}
 
-				if ((Mouse.isButtonPressed(Mouse.Button.Left) || Keyboard.isKeyPressed(Keyboard.Key.V)) && g_mode == Mode.edit) {
+				if ((Mouse.isButtonPressed(Mouse.Button.Left) || g_keys[SDL_SCANCODE_V].keyPressed) &&
+					g_mode == Mode.edit) {
 					// draw a tile at mouse point
 					final switch(_layer) {
 						case Layer.front:
@@ -206,17 +206,18 @@ struct MouseInput {
 			} // keys by them selfs
 		
 			// System key held down
-			if (Keyboard.isKeyPressed(Keyboard.Key.LSystem) || Keyboard.isKeyPressed(Keyboard.Key.RSystem)) {
+			if (g_keys[SDL_SCANCODE_LGUI].keyPressed || g_keys[SDL_SCANCODE_RGUI]) {
 				void layerMessage() {
 					writeln("Layer set: ", _layer);
 					g_window.display;
-					while(Keyboard.isKeyPressed(Keyboard.Key.Num1) ||
-						Keyboard.isKeyPressed(Keyboard.Key.Num2) ||
-						Keyboard.isKeyPressed(Keyboard.Key.Num3)) {
+					while(g_keys[SDL_SCANCODE_1].keyPressed ||
+						g_keys[SDL_SCANCODE_2].keyPressed ||
+						g_keys[SDL_SCANCODE_3].keyPressed) {
+						SDL_PumpEvents();
 					}
 				}
 
-				if (lkeys[Letter.p].keyTrigger) {
+				if (g_keys[SDL_SCANCODE_P].keyTrigger) {
 					/+
 					auto spot = new RectangleShape;
 					with(spot)
@@ -239,7 +240,7 @@ struct MouseInput {
 					//spot.position = makeSquare(_pos);
 				}
 
-				if (Keyboard.isKeyPressed(Keyboard.Key.Num1)) {
+				if (g_keys[SDL_SCANCODE_1].keyPressed) {
 					_layer = Layer.front;
 					
 					g_window.clear;
@@ -247,7 +248,7 @@ struct MouseInput {
 					layerMessage;
 				}
 
-				if (Keyboard.isKeyPressed(Keyboard.Key.Num2)) {
+				if (g_keys[SDL_SCANCODE_2].keyPressed) {
 					_layer = Layer.normal;
 					
 					g_window.clear;
@@ -255,7 +256,7 @@ struct MouseInput {
 					layerMessage;
 				}
 
-				if (Keyboard.isKeyPressed(Keyboard.Key.Num3)) {
+				if (g_keys[SDL_SCANCODE_3].keyPressed) {
 					_layer = Layer.back;
 					
 					g_window.clear;
@@ -273,7 +274,7 @@ struct MouseInput {
 					g_popLine.set("Building loaded.");
 				}
 +/
-				if (kReturn.keyTrigger) {
+				if (g_keys[SDL_SCANCODE_RETURN].keyTrigger) {
 					g_building.loadBuilding;
 					g_building.resetGame;
 					g_campaign.setBriefing;

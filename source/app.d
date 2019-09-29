@@ -55,6 +55,13 @@ int main(string[] args) {
 		return -1;
 	}
 
+	if (jec.setup != 0) {
+		import std.stdio : writefln;
+
+		writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
+		return -1;
+	}
+
 	if (g_setup.setup != 0) {
 		gh("Aborting...");
 		g_window.close;
@@ -107,17 +114,19 @@ int main(string[] args) {
 			}
 		}
 
-		if (g_keys[Keyboard.Key.LSystem].keyPressed ||
-			g_keys[Keyboard.Key.RSystem].keyPressed) {
-			if (g_keys[Keyboard.Key.Q].keyTrigger)
+		SDL_PumpEvents();
+
+		if (g_keys[SDL_SCANCODE_LGUI].keyPressed ||
+			g_keys[SDL_SCANCODE_RGUI].keyPressed) {
+			if (g_keys[SDL_SCANCODE_Q].keyTrigger)
 				g_window.close;
 		
-			if (g_keys[Keyboard.Key.W].keyTrigger) {
+			if (g_keys[SDL_SCANCODE_A].keyTrigger) {
 				mret = MenuSelect.doLoop;
 				continue;
 			}
 
-			if (g_keys[Keyboard.Key.E].keyTrigger) {
+			if (g_keys[SDL_SCANCODE_E].keyTrigger) {
 				if (g_mode == Mode.edit) {
 					g_mode = Mode.play;
 					foreach(portal; 0 .. 2)
@@ -132,15 +141,15 @@ int main(string[] args) {
 			}
 		}
 
-		if (g_keys[Keyboard.Key.Escape].keyTrigger)
+		if (g_keys[SDL_SCANCODE_ESCAPE].keyTrigger)
 			g_doGuiFile = false;
 			
 		if (! g_jexTerminal && ! g_doGuiFile) {
-			if (g_mode != Mode.play && g_keys[Keyboard.Key.T].keyTrigger) {
+			if (g_mode != Mode.play && g_keys[SDL_SCANCODE_T].keyTrigger) {
 				g_jexTerminal = true;
 			}
 
-			if (g_keys[Keyboard.Key.F].keyTrigger) {
+			if (g_keys[SDL_SCANCODE_F].keyTrigger) {
 				g_window.setVerticalSyncEnabled(true);
 				//writeln("Sync on");
 			} else {
@@ -156,7 +165,7 @@ int main(string[] args) {
 
 		if (g_mode == Mode.play) {
 			if (g_missionStage == MissionStage.briefing) {
-				if (kSpace.keyTrigger) {
+				if (g_keys[SDL_SCANCODE_SPACE].keyTrigger) {
 					g_timer.doStart;
 					g_missionStage = MissionStage.playing;
 				}
@@ -347,9 +356,10 @@ int main(string[] args) {
 
 				if (! g_jexTerminal && ! g_doGuiFile) {
 					with(g_portals[PortalSide.editor]) {
-						if (! (g_keys[Keyboard.Key.LSystem].keyPressed || g_keys[Keyboard.Key.RSystem].keyPressed)) {
+						if (! (g_keys[SDL_SCANCODE_LGUI].keyPressed ||
+							g_keys[SDL_SCANCODE_RGUI].keyPressed)) {
 							if (! showingBible) {
-								if (g_keys[Keyboard.Key.S].keyTrigger) {
+								if (g_keys[SDL_SCANCODE_S].keyTrigger) {
 									g_display.setVerse(g_bible.argReference(
 										g_bible.getReference(
 											g_screens[scrn.y][scrn.x].verseRef.split)));
@@ -359,27 +369,27 @@ int main(string[] args) {
 								}
 							}
 							if (showingBible) {
-								if (g_keys[Keyboard.Key.S].keyTrigger)
+								if (g_keys[SDL_SCANCODE_S].keyTrigger)
 									showingBible = false;
 							}
 						} // if command key not pressed
 
-						if (g_keys[Keyboard.Key.Up].keyTrigger) {
+						if (g_keys[SDL_SCANCODE_UP].keyTrigger) {
 							if (scrn.y > 0)
 								scrn = scrn + Vector2i(0, -1);
 						}
 
-						if (g_keys[Keyboard.Key.Right].keyTrigger) {
+						if (g_keys[SDL_SCANCODE_RIGHT].keyTrigger) {
 							if (scrn.x + 1 < g_scrnDim.x)
 								scrn = scrn + Vector2i(1, 0);
 						}
 
-						if (g_keys[Keyboard.Key.Down].keyTrigger) {
+						if (g_keys[SDL_SCANCODE_DOWN].keyTrigger) {
 							if  (scrn.y + 1 < g_scrnDim.y)
 								scrn = scrn + Vector2i(0, 1);
 						}
 
-						if (g_keys[Keyboard.Key.Left].keyTrigger) {
+						if (g_keys[SDL_SCANCODE_LEFT].keyTrigger) {
 							if  (scrn.x > 0)
 								scrn = scrn + Vector2i(-1, 0);
 						}

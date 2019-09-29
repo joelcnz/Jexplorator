@@ -104,5 +104,5 @@ Jecsplorater:
 7. Get away in a rocket
 8. Take note of the password for the next mission (if not last mission you've just completed)
 9. If you don’t make it, you can try again by pressing [command] + [E] (for edit mode) and press [command] + [return] to start again
-10. To go to next mission, press [command] + [W]
+10. To go to next mission, press [command] + [A]
 11. Repeat from step 2

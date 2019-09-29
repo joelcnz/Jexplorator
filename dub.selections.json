@@ -1,7 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"arsd-official": "4.0.1",
+		"arsd-official": "4.0.3",
+		"derelict-sdl2": "2.1.4",
+		"derelict-util": "2.0.6",
 		"dsfml": "2.1.1"
 	}
 }

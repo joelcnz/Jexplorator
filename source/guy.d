@@ -53,7 +53,7 @@ private:
 	Facing _facing;
 	
 	enum Key {up, right, down, left, shoot}
-	Keyboard.Key[] _keys;
+	ubyte[] _keys;
 	
 	enum Gun {normal, aiming, trigger}
 	Gun _gun;
@@ -121,7 +121,7 @@ public:
 
 	//override void scrn
 
-	this(int id, Portal portal, Keyboard.Key[] keys) { // if (g_keys[ _keys[Key.shoot] g_keys[keys[Key.shoot]].keyTrigger].keyTrigger)
+	this(int id, Portal portal, ubyte[] keys) { // if (g_keys[ _keys[Key.shoot] g_keys[keys[Key.shoot]].keyTrigger].keyTrigger)
 		_id = id;
 
 		_hide = Hide.inview;
@@ -686,13 +686,14 @@ public:
 				_stateUpDown = StateUpDown.falling;
 				_jumping = Jumping.no;
 			}
-			if (! Keyboard.isKeyPressed(_keys[Key.right]) &&
+
+			if (! g_keys[_keys[Key.right]].keyPressed &&
 				! hits(bottomPartLeft, _blocks) &&
 				hits(bottomRight, _blocks)) {
 				moveLeft;
 			}
 
-			if (! g_keys[ _keys[Key.left] ].keyPressed &&
+			if (! g_keys[_keys[Key.left]].keyPressed &&
 				! hits(bottomPartLeft, _blocks) &&
 				hits(bottomLeft, _blocks)) {
 				moveRight;

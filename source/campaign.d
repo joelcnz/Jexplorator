@@ -31,7 +31,8 @@ struct Campaign {
         //g_building.setFileName(folderName);
         import std.file;
         int mid = 1;
-        string fileName;        
+        string fileName;
+        _missions.length = 0;
         while(true) {
             fileName = buildPath(folderName, "mission" ~ mid.to!string ~ ".ini");
             if (! fileName.exists)
@@ -88,6 +89,8 @@ struct Campaign {
                 }
             }
 
+            SDL_PumpEvents();
+
             done = ! g_window.isOpen();
 
             password.process;
@@ -125,6 +128,7 @@ struct Campaign {
 
         if (win) {
             lines = _current._win.split("|");
+            //mixin(traceList("_current._mission _missions.length".split));
             if (_current._mission != _missions.length)
                 lines ~= ["", "Next Mission Password: " ~ _missions[/* next mission */ _current._mission]._password];
         } else

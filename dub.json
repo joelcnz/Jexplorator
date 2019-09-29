@@ -11,6 +11,7 @@
                      "../BibleLib/source"],
     "dependencies": 
     {
+        "derelict-sdl2": "~>2.1.4",
         "dsfml:graphics": "~>2.1",
         "dsfml:audio": "~>2.1",
         "arsd-official:dom": "~>4.0.1"
