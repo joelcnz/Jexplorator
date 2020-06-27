@@ -9,17 +9,15 @@ import std.conv;
 import std.string;
 import std.datetime.stopwatch;
 
-import jec, dini.dini, jmisc;
+import jecsdl, dini.dini, jmisc;
 import bible.base;
 import portal, mouse, guy, building, score, countdown, setup, display;
 import jeep, bullit, mover, jeepbullit, escaped, mission,
     dashboard, menu, infomation, gametext, popbanner, popline, campaign,
 	computer;
 
-import dsfml.graphics;
-import dsfml.audio;
-import dsfml.window;
-
+Image g_texture;
+TTF_Font* g_font;
 bool g_doGuiFile;
 Setup g_setup;
 Info g_info;
@@ -31,7 +29,7 @@ bool g_displayGameText;
 
 PopBanner g_mainPopBanner;
 
-immutable BibleVersion = "esv"; // "kjv";
+immutable BibleVersion = "asv"; //"kjv"; //"esv";
 
 enum g_pixelsx = 2,
 	 g_pixelsy = 2;
@@ -82,7 +80,7 @@ enum BullitState {alive, terminated, blowingUp}
 
 enum GunDucked {notDucked, ducked}
 
-Sprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight, g_computerBlowUp;
+JSprite[] g_jeepLeftGfx, g_jeepRightGfx, g_jeepBlowUpLeft, g_jeepBlowUpRight, g_computerBlowUp;
 
 enum DisplayType {/*escaped,*/ mouseDraw, inputJexDraw, portalNoBorderLayerBackDraw, info,
 	portalNoBorderLayerNormalDraw, editLayer, guyDraw, playBorder, jeepDraw, bullitsDraw,

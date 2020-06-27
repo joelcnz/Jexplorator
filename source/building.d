@@ -1,5 +1,6 @@
 module building;
 
+//#back up files TO DO
 //#bit of a hack
 // Old total diamonds (g_score.totalDiamonds) is not used
 //#Forget g_score total diamonds
@@ -318,47 +319,10 @@ public:
 		}
 
 		fclose(pfile);
-		
-		import std.file: exists;
-		import std.path: buildPath, stripExtension;
-		import std.conv: to;
-		import std.string: format;
 
-		auto fileName = g_building.fileName;
-		int id;
-		bool quit = false;
-		immutable totalNFSaves = 10;
-		string makeFn(in int sp) {
-			return buildPath("BackUpSaves",
-									format("%s_%02d.bin", g_building.fileName.stripExtension, sp));
-		}
-		int antifreeze;
-		do {
-			if (antifreeze >= totalNFSaves) {
-				quit = true;
-			}
-			fileName = makeFn(id);
-			id += 1;
-			antifreeze += 1;
-		} while(exists(fileName) && quit == false);
-		if (g_building.fileName != "backup.bin") //#bit of a hack
-			g_popLine.set("Save: " ~ g_building.fileName.to!string ~ ", back up: " ~ fileName);
-		import std.file : copy, remove, exists;
-		copy(g_building.fileName, fileName);
-		if (id < totalNFSaves) {
-			immutable fn = makeFn(id);
-			if (fn.exists)
-				remove(fn);
-		} else {
-			immutable fn = makeFn(0);
-			if (fn.exists)
-				remove(fn);
-		}
-		g_inputJex.addToHistory("Copied '", g_building.fileName, "' to '", fileName, "'");
-		g_inputJex.addToHistory("Save done!");
-		if (quit)
-			writeln("Error, infinite loop detected!");
-		
+//#back up files TO DO - see JMiscLib.base
+		backUp(_fileName);
+
 		return true;
 	}
 	

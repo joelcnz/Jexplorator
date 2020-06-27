@@ -1,19 +1,23 @@
 {
     "name": "jex",
     "description": "A Poorly Programmed Production. Presenting: Jexplorator!",
-    "copyright": "Copyright © 2013, Jeremy",
-	"lflags-osx" : ["-L../DSFMLlibs"],
-
+	"dependencies": {
+		"bindbc-sdl": "~>0.13.0"
+	},
     "sourcePaths" : ["source",
-                     "../JecLib/source",
+                     "../Jecsdllib/source",
                      "../JMiscLib/source",
                      "../IniLib/source",
                      "../BibleLib/source"],
     "dependencies": 
     {
-        "derelict-sdl2": "~>2.1.4",
-        "dsfml:graphics": "~>2.1",
-        "dsfml:audio": "~>2.1",
+		"bindbc-sdl": "~>0.13.0",
         "arsd-official:dom": "~>4.0.1"
-    }
+    },
+	"versions": [
+		"SDL_2010",
+		"BindSDL_Image",
+		"BindSDL_TTF",
+		"BindSDL_Mixer"
+	]
 }

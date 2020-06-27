@@ -53,7 +53,7 @@ private:
 	Facing _facing;
 	
 	enum Key {up, right, down, left, shoot}
-	ubyte[] _keys;
+	Uint8[] _keys;
 	
 	enum Gun {normal, aiming, trigger}
 	Gun _gun;
@@ -121,7 +121,7 @@ public:
 
 	//override void scrn
 
-	this(int id, Portal portal, ubyte[] keys) { // if (g_keys[ _keys[Key.shoot] g_keys[keys[Key.shoot]].keyTrigger].keyTrigger)
+	this(int id, Portal portal, Uint8[] keys) { // if (g_keys[ _keys[Key.shoot] g_keys[keys[Key.shoot]].keyTrigger].keyTrigger)
 		_id = id;
 
 		_hide = Hide.inview;

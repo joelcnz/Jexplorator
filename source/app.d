@@ -20,9 +20,6 @@ module main;
 
 import base;
 
-//Time timeGuy;
-Clock clock;
-
 dstring[] discList;
 
 void getDiscList(in bool show = false) {
@@ -47,28 +44,11 @@ int main(string[] args) {
 	scope(exit)
 		"\n# #\n# #\n # \n# #\n# #\n".writeln;
 
-	g_font = new Font;
-	g_font.loadFromFile("Fonts/DejaVuSans.ttf");
-	if (! g_font) {
-		import std.stdio;
-		writeln("Font not load");
-		return -1;
-	}
+	setup;
 
-	if (jec.setup != 0) {
-		import std.stdio : writefln;
-
-		writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
-		return -1;
-	}
-
-	if (g_setup.setup != 0) {
-		gh("Aborting...");
-		g_window.close;
-	}
-
-	scope(exit)
-		g_setup.shutDown;
+    scope(exit)
+        SDL_DestroyRenderer(gRenderer),
+        SDL_Quit();
 
 	getDiscList;
 
@@ -83,19 +63,14 @@ int main(string[] args) {
 
 	updateProjectList("");
 
-	while(g_window.isOpen())
-	{
-		Event event;
+	SDL_Event event;
+	bool done;
+    while(! done) {
+		SDL_PumpEvents();
 		
-		while(g_window.pollEvent(event))
-		{
-			if(event.type == event.EventType.Closed)
-			{
-				g_window.close();
-
-				return 0;
-			}
-		}
+        SDL_PollEvent(&event);
+        if(event.type == SDL_QUIT)
+                done = true;
 
 		if (mret == MenuSelect.doLoop) {
 			mret = menus.process;
@@ -109,17 +84,16 @@ int main(string[] args) {
 				case MenuSelect.doLoop:
 					continue;
 				case MenuSelect.quit:
-					g_window.close();
+					//g_window.close();
+					done = true;
 					break;
 			}
 		}
 
-		SDL_PumpEvents();
-
 		if (g_keys[SDL_SCANCODE_LGUI].keyPressed ||
 			g_keys[SDL_SCANCODE_RGUI].keyPressed) {
 			if (g_keys[SDL_SCANCODE_Q].keyTrigger)
-				g_window.close;
+				done = true; //g_window.close;
 		
 			if (g_keys[SDL_SCANCODE_A].keyTrigger) {
 				mret = MenuSelect.doLoop;
