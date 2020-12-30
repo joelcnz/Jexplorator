@@ -1,4 +1,4 @@
-module guistuff;
+module guistuffq;
 
 import base;
 

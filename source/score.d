@@ -6,7 +6,7 @@ struct Score {
 	int getGuyScore(PortalSide side) { return g_guys[side].dashBoard.score; }
 	
 	bool allDiamondsQ() {
-		return getGuyDiamonds(PortalSide.left) + getGuyDiamonds(PortalSide.right) == g_guys[0].dashBoard.totalDiamonds;
+		return getGuyDiamonds(PortalSide.left) + getGuyDiamonds(PortalSide.right) == g_guys[player1].dashBoard.totalDiamonds;
 	}
 
 	bool targetDiamondsQ() {

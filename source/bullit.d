@@ -8,17 +8,18 @@ class Bullit: Mover {
 private:
 	enum BullitState {current, terminated, blowingUp}
 	BullitState _bullitState;
-	RectangleShape _bullitShape;
+	JRectangle _bullitShape;
 	Guy _owner;
 public:
 	@property BullitState bullitState() { return _bullitState; }
 	
-	this(Guy owner, Vector2i scrn, Vector2f pos, Vector2f dir) {
+	this(Guy owner, Vector!int scrn, Vec pos, Vec dir) {
 		_owner = owner;
 		_scrn = scrn;
-		_bullitShape = new RectangleShape();
-		_bullitShape.size = Vector2f(4, 2);
-		_bullitShape.fillColor = Color(230, 230, 230);
+		//_bullitShape = new RectangleShape();
+		//_bullitShape.size = Vec(4, 2);
+		//_bullitShape.fillColor = Color(230, 230, 230);
+		_bullitShape = JRectangle(SDL_Rect(0,0,4,2),BoxStyle.solid,SDL_Color(128,128,128));
 		_pos = pos;
 		_dir = dir;
 		_bullitState = BullitState.current;
@@ -33,14 +34,14 @@ public:
 
 				if (computerHit(_pos, scrn)) {
 					_bullitState = BullitState.blowingUp;
-					_owner.dashBoard.banner = "Computer blown up"d;
+					_owner.dashBoard.banner = "Computer blown up";
 					_owner.dashBoard.score = _owner.dashBoard.score + 30;
 				}
 
 				//#dummist possible error (bullit not hitting the bady)
 				if (jeepHit(null, _scrn, _pos, Shooter.guy)) {
 					_bullitState = BullitState.blowingUp;
-					_owner.dashBoard.banner = "Bady blown up"d;
+					_owner.dashBoard.banner = "Bady blown up";
 					_owner.dashBoard.score = _owner.dashBoard.score + 50;
 				}
 				if (! g_guys[_owner.other].bullitProof &&
@@ -50,7 +51,7 @@ public:
 					g_guys[_owner.other].die;
 					_bullitState = BullitState.blowingUp;
 				}
-				_bullitShape.position = _pos;
+				_bullitShape.pos = _pos;
 			break;
 			case BullitState.blowingUp:
 				_bullitState = BullitState.terminated;
@@ -65,8 +66,9 @@ public:
 	void draw() {
 		final switch(_bullitState) {
 			case BullitState.current:
-				_bullitShape.position = _pos;
-				g_window.draw(_bullitShape);
+				_bullitShape.pos = _pos;
+				//g_window.draw(_bullitShape);
+				_bullitShape.draw(gGraph);
 			break;
 			case BullitState.blowingUp:
 				break;

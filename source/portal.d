@@ -6,43 +6,27 @@ class Portal: Mover {
 private:
 	Sprite _sprite;
 	PortalSide _portalSide;
-	Vector2i _resetPosScrn; //############################
-	RectangleShape _rectangle;
+	Vector!int _resetPosScrn;
+	JRectangle _rectangle;
 	int _grace; // can't get hit
 public:
-	@property Vector2i resetPosScrn() { return _resetPosScrn; }
-	@property void resetPosScrn(Vector2i resetPosScrn0) { _resetPosScrn = resetPosScrn0; }
+	@property Vector!int resetPosScrn() { return _resetPosScrn; }
+	@property void resetPosScrn(Vector!int resetPosScrn0) { _resetPosScrn = resetPosScrn0; }
 
 	@property int grace() { return _grace; }
 	@property void grace(int grace0) { _grace = grace0; }
 
 	this(PortalSide side) {
 		_portalSide = side;
-		_sprite = new Sprite;
-		_sprite.setTexture = g_texture;
 
 		if (side != PortalSide.editor) {
-			_pos = Vector2f(side == PortalSide.left ? 0 : 10 * g_spriteSize, 0);
-			_rectangle = new RectangleShape;
-			with(_rectangle) {
-				position = Vector2f(10 + side * (10 * 32), 10);
-				size = Vector2f(10 * 32 - 20,10 * 32 - 20);
-				fillColor = Color(0,0,0, 0);
-				outlineColor = Color(0,180,255, 64); //Color.Green;
-				outlineThickness = 20;
-				
-				//size = Vector2f(0,0);
-			}
+			_pos = Vec(side == PortalSide.left ? 0 : 10 * g_spriteSize, 0);
+			_rectangle = JRectangle(SDL_Rect(10+side*(10*32),10,10*32-20,10*32-20),
+				BoxStyle.outLine,SDL_Color(0,180,255,64));
 		} else {
-			_pos = Vector2f(0,0);
-			_rectangle = new RectangleShape;
-			with(_rectangle) {
-				position = Vector2f(0 + 10, 10);
-				size = Vector2f(10 * 32 - 20, 10 * 32 - 20);
-				fillColor = Color(0,0,0, 0);
-				outlineColor = Color(64,255,64, 64); //Color.Green;
-				outlineThickness = 20;
-			}
+			_pos = Vec(0,0);
+			_rectangle = JRectangle(SDL_Rect(0+10,10,10*32-20,10*32-20),
+				BoxStyle.outLine,SDL_Color(64,255,64,64));
 		}
 	}
 	
@@ -58,25 +42,20 @@ public:
 			grace = grace - 1;
 	}
 	
-	void drawLayer(Vector2i pos, Layer layer = Layer.normal) {
+	void drawLayer(Vector!int pos, Layer layer = Layer.normal) {
 		foreach(cy; 0 .. 10)
 			foreach(cx; 0 .. 10) {
 				with(g_screens[_scrn.y][_scrn.x].tiles[cy][cx]) {
+					Vec vpos = Vec(pos.x + cx * g_spriteSize, cy * g_spriteSize);
 					final switch(layer) {
 						case Layer.back:
-							_sprite.position = Vector2f(pos.x + cx * g_spriteSize, cy * g_spriteSize);
-							_sprite.textureRect = IntRect(g_locations[tileNameBack].x, g_locations[tileNameBack].y, g_spriteSize, g_spriteSize);
-							g_window.draw(_sprite);
+							gGraph.draw(inf[tileNameBack].image, vpos);
 						break;
 						case Layer.normal:
-							_sprite.position = Vector2f(pos.x + cx * g_spriteSize, cy * g_spriteSize);
-							_sprite.textureRect = IntRect(g_locations[tileName].x, g_locations[tileName].y, g_spriteSize, g_spriteSize);
-							g_window.draw(_sprite);
+							gGraph.draw(inf[tileName].image, vpos);
 						break;
 						case Layer.front:
-							_sprite.position = Vector2f(pos.x + cx * g_spriteSize, cy * g_spriteSize);
-							_sprite.textureRect = IntRect(g_locations[tileNameFront].x, g_locations[tileNameFront].y, g_spriteSize, g_spriteSize);
-							g_window.draw(_sprite);
+							gGraph.draw(inf[tileNameFront].image, vpos);
 						break;
 					}
 				} // with
@@ -95,14 +74,14 @@ public:
 					case Mode.play:
 						if (border == Border.no) {
 							if (_portalSide == PortalSide.left)
-								drawLayer(Vector2i(0,0), Layer.back);
+								drawLayer(Vector!int(0,0), Layer.back);
 						
 							if (_portalSide == PortalSide.right)
-								drawLayer(Vector2i(320,0), Layer.back);
+								drawLayer(Vector!int(320,0), Layer.back);
 						}
 					break;
 					case Mode.edit:
-						drawLayer(Vector2i(0,0), Layer.back);
+						drawLayer(Vector!int(0,0), Layer.back);
 					break;
 				}
 			break;
@@ -111,15 +90,15 @@ public:
 					case Mode.play:
 						if (border == Border.no) {
 							if (_portalSide == PortalSide.left)
-								drawLayer(Vector2i(0,0));
+								drawLayer(Vector!int(0,0));
 						
 							if (_portalSide == PortalSide.right)
-								drawLayer(Vector2i(320,0), Layer.normal);
+								drawLayer(Vector!int(320,0), Layer.normal);
 						}
 					break;
 					case Mode.edit:
 						if (g_layer == Layer.normal) {
-							drawLayer(Vector2i(0,0), Layer.normal);
+							drawLayer(Vector!int(0,0), Layer.normal);
 						}
 					break;
 				}
@@ -129,18 +108,16 @@ public:
 				final switch(g_mode) {
 					case Mode.play:
 						if (_portalSide == PortalSide.left)
-							drawLayer(Vector2i(0, 0), Layer.front);
+							drawLayer(Vector!int(0, 0), Layer.front);
 						if (_portalSide == PortalSide.right)
-							drawLayer(Vector2i(320, 0), Layer.front);
+							drawLayer(Vector!int(320, 0), Layer.front);
 					break;
 					case Mode.edit:
-						drawLayer(Vector2i(0, 0), Layer.front);
+						drawLayer(Vector!int(0, 0), Layer.front);
 					break;
 				}
 		} // switch
-
 		if (border)
-			g_window.draw(_rectangle);
-	}
-	
+			_rectangle.draw(gGraph);
+	}	
 } // portal

@@ -2,10 +2,14 @@
 	"fileVersion": 1,
 	"versions": {
 		"arsd-official": "4.0.4",
-		"bindbc-loader": "0.2.1",
-		"bindbc-sdl": "0.13.0",
+		"bindbc-loader": "0.3.2",
+		"bindbc-opengl": "0.13.0",
+		"bindbc-sdl": "0.19.1",
 		"derelict-sdl2": "2.1.4",
 		"derelict-util": "2.0.6",
-		"dsfml": "2.1.1"
+		"dsfml": "2.1.1",
+		"fmath": "0.0.1",
+		"foxid": "~master",
+		"silly": "1.0.2"
 	}
 }

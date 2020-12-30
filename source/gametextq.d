@@ -1,4 +1,4 @@
-module gametext;
+module gametextq;
 
 import base;
 

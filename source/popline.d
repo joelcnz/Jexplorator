@@ -9,7 +9,7 @@ import base;
 /+
 struct PopLineMan {
     PopLine[] _popLines;
-    Vector2f _pos;
+    Vec _pos;
 
     void add(in string message) {
         Popline pl;
@@ -33,12 +33,12 @@ struct PopLine {
     PopBanner _pban;
     StopWatch _sw;
 
-    void set(in string message) { //}, Vector2f pos) {
-        _pban.setup([message], Vector2f(0, 0), Vector2f(640,24));
+    void set(in string message) { //}, Vec pos) {
+        _pban.setup([message], Vec(0, 0), Vec(640,24));
         _sw.reset;
         _sw.stop;
         _sw.start;
-        g_jsounds[Snd.pop2].playSnd;
+        g_jsounds[Snd.pop2].play(false);
     }
 
     void process() {

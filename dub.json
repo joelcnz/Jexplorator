@@ -1,23 +1,15 @@
 {
-    "name": "jex",
-    "description": "A Poorly Programmed Production. Presenting: Jexplorator!",
 	"dependencies": {
-		"bindbc-sdl": "~>0.13.0"
+		"arsd-official:dom": "~>8.5.2",
+		"foxid": "~master"
 	},
-    "sourcePaths" : ["source",
-                     "../Jecsdllib/source",
-                     "../JMiscLib/source",
-                     "../IniLib/source",
-                     "../BibleLib/source"],
-    "dependencies": 
-    {
-		"bindbc-sdl": "~>0.13.0",
-        "arsd-official:dom": "~>4.0.1"
-    },
-	"versions": [
-		"SDL_2010",
-		"BindSDL_Image",
-		"BindSDL_TTF",
-		"BindSDL_Mixer"
+	"description": "A Poorly Programmed Production. Presenting: Jexplorator!",
+	"name": "jex",
+	"sourcePaths": [
+		"source",
+		"../JecFoxid",
+		"../JMiscLib/source",
+		"../IniLib/source",
+		"../BibleLib/source"
 	]
 }

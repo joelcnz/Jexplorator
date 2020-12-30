@@ -71,27 +71,23 @@ struct Campaign {
     void enterPassWord() {
         int fontSize = 12;
         auto password = new InputJex(
-            /* position */ Vector2f(0, 0),
+            /* position */ Vec(0, 0),
             /* font size */ fontSize,
             /* header */ "Enter password: ",
             /* Type (oneLine, or history) */ InputType.oneLine);
-        password.setColour(Color.White);
+        password.setColour(Color(255,255,255));
 
         bool done = false;
         while(! done) {
-            Event event;
-		
-            while(g_window.pollEvent(event))
-            {
-                if(event.type == event.EventType.Closed)
-                {
-                    g_window.close();
-                }
+            FPS.start();
+            while(gFEvent.update) {
+                if(gFEvent.isQuit) 
+                    done = true;
             }
 
             SDL_PumpEvents();
 
-            done = ! g_window.isOpen();
+            //done = ! g_window.isOpen();
 
             password.process;
 
@@ -104,16 +100,21 @@ struct Campaign {
                     }
             }
 
-            g_window.clear;
-            password.draw;
-            g_window.display;
+            gGraph.clear(); // Clear screen
+
+            password.draw(gGraph);
+
+            //Update screen
+            gGraph.drawning(); // Swap buffers
+
+            FPS.rate();
         }
         setBriefing;
     }
 
     void setBriefing() {
         auto lines = _current._start.split("|");
-        _briefing.setup(lines, Vector2f(0, 0), Vector2f(640, lines.length * 18 + 4));
+        _briefing.setup(lines, Vec(0, 0), Vec(640, lines.length * 18 + 4));
         g_missionStage = MissionStage.briefing;
 
         g_building.setFileName = _current._building;
@@ -134,7 +135,7 @@ struct Campaign {
         } else
             lines = _current._lose.split("|");
 
-        _report.setup(lines, Vector2f(0, 0), Vector2f(640, lines.length * 18));
+        _report.setup(lines, Vec(0, 0), Vec(640, lines.length * 18));
     }
 
     void viewCurrent() {
@@ -146,7 +147,7 @@ struct Campaign {
             break;
             case report:
                 _report.draw;
-            break;
+             break;
         }
     }
 }

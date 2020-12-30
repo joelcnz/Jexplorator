@@ -23,7 +23,7 @@ public:
 	void setFileName(in string fileName) {
 		_fileName = fileName;
 		import std.path : stripExtension;
-		g_currentProjectName = fileName.trim.to!dstring.stripExtension;
+		g_currentProjectName = fileName.trim.stripExtension;
 		mixin(trace("g_currentProjectName"));
 	}
 	
@@ -48,15 +48,15 @@ public:
 		g_gameOver = false;
 
 		import std.file;
-		g_inputJex.addToHistory(text(`Loading "`, fileName.trim, `" Building...`).to!dstring);
+		g_inputJex.addToHistory(text(`Loading "`, fileName.trim, `" Building...`));
 		if (! exists(_fileName)) {
-			g_inputJex.addToHistory(text(`File "`, fileName.trim, `" does not exist!`).to!dstring);
+			g_inputJex.addToHistory(text(`File "`, fileName.trim, `" does not exist!`));
 			return false;
 		}
 
 		//#for if you load a smaller project from a bigger one
 		foreach(portal; g_portals)
-			portal.scrn = Vector2i(0,0);
+			portal.scrn = Vector!int(0,0);
 		g_jeeps.length = 0;
 
 		foreach(guy; g_guys)
@@ -76,7 +76,7 @@ public:
 		int ver;
 		fread(&ver, 1, ver.sizeof, pfile); // read version
 
-		g_inputJex.addToHistory(text("Version: ", ver).to!dstring);
+		g_inputJex.addToHistory(text("Version: ", ver));
 
 		switch(ver) {
 			default:
@@ -85,7 +85,7 @@ public:
 			case 10:
 				fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
 				fread(&iy, 1, iy.sizeof, pfile);
-				g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
+				g_portals[PortalSide.editor].scrn = Vector!int(ix, iy);
 				writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
 				
 				foreach(i, guy; g_guys) {
@@ -94,22 +94,22 @@ public:
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 2 ST postion in screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						resetPos = Vector2f(fx, fy);
+						resetPos = Vec(fx, fy);
 						writeln("ST position screen (resetPos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 3 ST which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.resetPosScrn = Vector2i(ix, iy);
+						portal.resetPosScrn = Vector!int(ix, iy);
 						writeln("ST which screen: (portal.resetPosScrn)", ix, ' ', iy);
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 4 place on the screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						pos = Vector2f(fx, fy);
+						pos = Vec(fx, fy);
 						writeln("guy place on screen (pos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 5 which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.scrn = Vector2i(ix, iy);
+						portal.scrn = Vector!int(ix, iy);
 						writeln("Which screen: (portal.scrn)", ix, ' ', iy);
 						
 						// 6
@@ -134,7 +134,7 @@ public:
 
 				fread(&ix, 1, ix.sizeof, pfile); // how many screens width
 				fread(&iy, 1, iy.sizeof, pfile); // how many screens height
-				g_scrnDim = Vector2i(ix, iy);
+				g_scrnDim = Vector!int(ix, iy);
 				g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
 				foreach(sy; 0 .. g_scrnDim.y)
 					foreach(sx; 0 .. g_scrnDim.x) {
@@ -183,7 +183,7 @@ public:
 					
 					fread(&ix, 1, ix.sizeof, pfile);
 					fread(&iy, 1, iy.sizeof, pfile);
-					g_jeeps ~= new Jeep(Vector2f(fx, fy), Vector2i(ix, iy)); //, g_portals[0], g_portals[1]);
+					g_jeeps ~= new Jeep(Vec(fx, fy), Vector!int(ix, iy)); //, g_portals[0], g_portals[1]);
 					
 					with(g_jeeps[$-1]) {
 						fread(&ix, 1, ix.sizeof, pfile);
@@ -201,7 +201,7 @@ public:
 		
 		//resetGame;
 		
-		g_inputJex.addToHistory("Building loaded!"d);
+		g_inputJex.addToHistory("Building loaded!");
 		
 		return true;
 	}
@@ -212,7 +212,7 @@ public:
 		//	setFileName(backFileName);
 		//scope(exit)
 		//	setFileName(oldFileName);
-		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Building...`).to!dstring);
+		g_inputJex.addToHistory(text(`Saving "`, _fileName.trim, `" Building...`));
 		import std.string;
 		FILE* pfile = stdc.fopen(toStringz(_fileName), "wb");
 		int ver = 10; // version
@@ -327,7 +327,7 @@ public:
 	}
 	
 	bool createMap(int width, int height) {		
-		g_scrnDim = Vector2i(width, height);
+		g_scrnDim = Vector!int(width, height);
 		g_screens = new Screen[][](height, width);
 		
 		g_screens.length = g_scrnDim.y;
@@ -405,8 +405,8 @@ public:
 				fread(&scx, 1, scx.sizeof, pfile); // which screen
 				fread(&scy, 1, scy.sizeof, pfile);
 				
-				guy.pos = Vector2f(gx, gy);
-				guy.portal.scrn = Vector2i(scx, scy);
+				guy.pos = Vec(gx, gy);
+				guy.portal.scrn = Vector!int(scx, scy);
 			}
 			
 			fread(&g_scrnDim.x, 1, g_scrnDim.x.sizeof, pfile); // how many screens width
@@ -441,8 +441,8 @@ public:
 				fread(&scx, 1, scx.sizeof, pfile); // which screen
 				fread(&scy, 1, scy.sizeof, pfile);
 				
-				guy.pos = Vector2f(gx, gy);
-				guy.portal.scrn = Vector2i(scx, scy);
+				guy.pos = Vec(gx, gy);
+				guy.portal.scrn = Vector!int(scx, scy);
 			}
 			
 			int dummy;
@@ -479,7 +479,7 @@ public:
 			int edx, edy;
 			fread(&edx, 1, edx.sizeof, pfile); 
 			fread(&edy, 1, edy.sizeof, pfile); 
-			g_portals[PortalSide.editor].scrn = Vector2i(edx, edy);
+			g_portals[PortalSide.editor].scrn = Vector!int(edx, edy);
 			
 			float gx, gy;
 			int scx, scy;
@@ -490,8 +490,8 @@ public:
 				fread(&scx, 1, scx.sizeof, pfile); // which screen
 				fread(&scy, 1, scy.sizeof, pfile);
 				
-				guy.resetPos = Vector2f(gx, gy);
-				guy.portal.resetPosScrn = Vector2i(scx, scy);
+				guy.resetPos = Vec(gx, gy);
+				guy.portal.resetPosScrn = Vector!int(scx, scy);
 			}
 			resetGame;
 			
@@ -528,7 +528,7 @@ public:
 		case 6:
 			fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
 			fread(&iy, 1, iy.sizeof, pfile); 
-			g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
+			g_portals[PortalSide.editor].scrn = Vector!int(ix, iy);
 			writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
 			
 			foreach(i, guy; g_guys) {
@@ -537,22 +537,22 @@ public:
 					
 					fread(&fx, 1, fx.sizeof, pfile); // 2 ST postion in screen
 					fread(&fy, 1, fy.sizeof, pfile);
-					resetPos = Vector2f(fx, fy);
+					resetPos = Vec(fx, fy);
 					writeln("ST position screen (resetPos): ", fx, ' ', fy);
 					
 					fread(&ix, 1, ix.sizeof, pfile); // 3 ST which screen
 					fread(&iy, 1, iy.sizeof, pfile);
-					portal.resetPosScrn = Vector2i(ix, iy);
+					portal.resetPosScrn = Vector!int(ix, iy);
 					writeln("ST which screen: (portal.resetPosScrn)", ix, ' ', iy);
 					
 					fread(&fx, 1, fx.sizeof, pfile); // 4 place on the screen
 					fread(&fy, 1, fy.sizeof, pfile);
-					pos = Vector2f(fx, fy);
+					pos = Vec(fx, fy);
 					writeln("guy place on screen (pos): ", fx, ' ', fy);
 					
 					fread(&ix, 1, ix.sizeof, pfile); // 5 which screen
 					fread(&iy, 1, iy.sizeof, pfile);
-					portal.scrn = Vector2i(ix, iy);
+					portal.scrn = Vector!int(ix, iy);
 					writeln("Which screen: (portal.scrn)", ix, ' ', iy);
 					
 					// 6
@@ -576,7 +576,7 @@ public:
 			
 			fread(&ix, 1, ix.sizeof, pfile); // how many screens width
 			fread(&iy, 1, iy.sizeof, pfile); // how many screens height
-			g_scrnDim = Vector2i(ix, iy);
+			g_scrnDim = Vector!int(ix, iy);
 			g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
 			foreach(sy; 0 .. g_scrnDim.y)
 			foreach(sx; 0 .. g_scrnDim.x) {
@@ -598,7 +598,7 @@ public:
 			case 7:
 				fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
 				fread(&iy, 1, iy.sizeof, pfile); 
-				g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
+				g_portals[PortalSide.editor].scrn = Vector!int(ix, iy);
 				writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
 				
 				foreach(i, guy; g_guys) {
@@ -607,22 +607,22 @@ public:
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 2 ST postion in screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						resetPos = Vector2f(fx, fy);
+						resetPos = Vec(fx, fy);
 						writeln("ST position screen (resetPos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 3 ST which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.resetPosScrn = Vector2i(ix, iy);
+						portal.resetPosScrn = Vector!int(ix, iy);
 						writeln("ST which screen: (portal.resetPosScrn)", ix, ' ', iy);
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 4 place on the screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						pos = Vector2f(fx, fy);
+						pos = Vec(fx, fy);
 						writeln("guy place on screen (pos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 5 which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.scrn = Vector2i(ix, iy);
+						portal.scrn = Vector!int(ix, iy);
 						writeln("Which screen: (portal.scrn)", ix, ' ', iy);
 						
 						// 6
@@ -646,7 +646,7 @@ public:
 				
 				fread(&ix, 1, ix.sizeof, pfile); // how many screens width
 				fread(&iy, 1, iy.sizeof, pfile); // how many screens height
-				g_scrnDim = Vector2i(ix, iy);
+				g_scrnDim = Vector!int(ix, iy);
 				g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
 				foreach(sy; 0 .. g_scrnDim.y)
 				foreach(sx; 0 .. g_scrnDim.x) {
@@ -675,7 +675,7 @@ public:
 					
 					fread(&ix, 1, ix.sizeof, pfile);
 					fread(&iy, 1, iy.sizeof, pfile);
-					g_jeeps ~= new Jeep(Vector2f(fx, fy), Vector2i(ix, iy)); //, g_portals[0], g_portals[1]);
+					g_jeeps ~= new Jeep(Vec(fx, fy), Vector!int(ix, iy)); //, g_portals[0], g_portals[1]);
 					
 					with(g_jeeps[$-1]) {
 						fread(&ix, 1, ix.sizeof, pfile);
@@ -692,7 +692,7 @@ public:
 			case 8:
 				fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
 				fread(&iy, 1, iy.sizeof, pfile);
-				g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
+				g_portals[PortalSide.editor].scrn = Vector!int(ix, iy);
 				writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
 				
 				foreach(i, guy; g_guys) {
@@ -701,22 +701,22 @@ public:
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 2 ST postion in screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						resetPos = Vector2f(fx, fy);
+						resetPos = Vec(fx, fy);
 						writeln("ST position screen (resetPos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 3 ST which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.resetPosScrn = Vector2i(ix, iy);
+						portal.resetPosScrn = Vector!int(ix, iy);
 						writeln("ST which screen: (portal.resetPosScrn)", ix, ' ', iy);
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 4 place on the screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						pos = Vector2f(fx, fy);
+						pos = Vec(fx, fy);
 						writeln("guy place on screen (pos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 5 which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.scrn = Vector2i(ix, iy);
+						portal.scrn = Vector!int(ix, iy);
 						writeln("Which screen: (portal.scrn)", ix, ' ', iy);
 						
 						// 6
@@ -744,7 +744,7 @@ public:
 				
 				fread(&ix, 1, ix.sizeof, pfile); // how many screens width
 				fread(&iy, 1, iy.sizeof, pfile); // how many screens height
-				g_scrnDim = Vector2i(ix, iy);
+				g_scrnDim = Vector!int(ix, iy);
 				g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
 				foreach(sy; 0 .. g_scrnDim.y)
 					foreach(sx; 0 .. g_scrnDim.x) {
@@ -773,7 +773,7 @@ public:
 					
 					fread(&ix, 1, ix.sizeof, pfile);
 					fread(&iy, 1, iy.sizeof, pfile);
-					g_jeeps ~= new Jeep(Vector2f(fx, fy), Vector2i(ix, iy)); //, g_portals[0], g_portals[1]);
+					g_jeeps ~= new Jeep(Vec(fx, fy), Vector!int(ix, iy)); //, g_portals[0], g_portals[1]);
 					
 					with(g_jeeps[$-1]) {
 						fread(&ix, 1, ix.sizeof, pfile);
@@ -790,7 +790,7 @@ public:
 			case 9:
 				fread(&ix, 1, ix.sizeof, pfile); // 1 which screen editor
 				fread(&iy, 1, iy.sizeof, pfile);
-				g_portals[PortalSide.editor].scrn = Vector2i(ix, iy);
+				g_portals[PortalSide.editor].scrn = Vector!int(ix, iy);
 				writeln("Portal screen editor (g_portals[PortalSide.editor].scrn): ", ix, ' ', iy);
 				
 				foreach(i, guy; g_guys) {
@@ -799,22 +799,22 @@ public:
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 2 ST postion in screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						resetPos = Vector2f(fx, fy);
+						resetPos = Vec(fx, fy);
 						writeln("ST position screen (resetPos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 3 ST which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.resetPosScrn = Vector2i(ix, iy);
+						portal.resetPosScrn = Vector!int(ix, iy);
 						writeln("ST which screen: (portal.resetPosScrn)", ix, ' ', iy);
 						
 						fread(&fx, 1, fx.sizeof, pfile); // 4 place on the screen
 						fread(&fy, 1, fy.sizeof, pfile);
-						pos = Vector2f(fx, fy);
+						pos = Vec(fx, fy);
 						writeln("guy place on screen (pos): ", fx, ' ', fy);
 						
 						fread(&ix, 1, ix.sizeof, pfile); // 5 which screen
 						fread(&iy, 1, iy.sizeof, pfile);
-						portal.scrn = Vector2i(ix, iy);
+						portal.scrn = Vector!int(ix, iy);
 						writeln("Which screen: (portal.scrn)", ix, ' ', iy);
 						
 						// 6
@@ -842,7 +842,7 @@ public:
 				
 				fread(&ix, 1, ix.sizeof, pfile); // how many screens width
 				fread(&iy, 1, iy.sizeof, pfile); // how many screens height
-				g_scrnDim = Vector2i(ix, iy);
+				g_scrnDim = Vector!int(ix, iy);
 				g_screens = new Screen[][](g_scrnDim.y, g_scrnDim.x);
 				foreach(sy; 0 .. g_scrnDim.y)
 					foreach(sx; 0 .. g_scrnDim.x) {
@@ -878,7 +878,7 @@ public:
 					
 					fread(&ix, 1, ix.sizeof, pfile);
 					fread(&iy, 1, iy.sizeof, pfile);
-					g_jeeps ~= new Jeep(Vector2f(fx, fy), Vector2i(ix, iy)); //, g_portals[0], g_portals[1]);
+					g_jeeps ~= new Jeep(Vec(fx, fy), Vector!int(ix, iy)); //, g_portals[0], g_portals[1]);
 					
 					with(g_jeeps[$-1]) {
 						fread(&ix, 1, ix.sizeof, pfile);

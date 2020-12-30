@@ -4,21 +4,21 @@ import base;
 
 abstract class Mover {
 protected:
-	Vector2f _pos, _dir;
-	Vector2i _scrn;
+	Vec _pos, _dir;
+	Vector!int _scrn;
 public:
 	@property {
 		auto pos() { return _pos; }
-		void pos(Vector2f pos0) { _pos = pos0; }
+		void pos(Vec pos0) { _pos = pos0; }
 	
 		auto dir() { return _dir; }
-		void dir(Vector2f dir0) { _dir = dir0; }
+		void dir(Vec dir0) { _dir = dir0; }
 
 		auto scrn() { return _scrn; }
-		void scrn(Vector2i scrn0) { _scrn = scrn0; }
+		void scrn(Vector!int scrn0) { _scrn = scrn0; }
 	}
 
-	TileName getPos(in Vector2f v, Layer layer = Layer.normal) {
+	TileName getPos(in Vec v, Layer layer = Layer.normal) {
 		if (v.x >= 0 && v.y >= 0 && v.x < g_spriteSize * 10 && v.y < g_spriteSize * 10) {
 			TileName tile;
 			if (layer == Layer.normal)
@@ -33,13 +33,13 @@ public:
 			return TileName.gap;
 	}
 
-	bool hits(in Vector2f v, in TileName[] tileNames, Layer layer = Layer.normal) {
+	bool hits(in Vec v, in TileName[] tileNames, Layer layer = Layer.normal) {
 		import std.algorithm: canFind;
 
 		return tileNames.canFind(getPos(v, layer));
 	}
 
-	bool jeepHit(Jeep current, Vector2i scrn, Vector2f pos,  Shooter shooter) {
+	bool jeepHit(Jeep current, Vector!int scrn, Vec pos,  Shooter shooter) {
 		foreach(jeep; g_jeeps) {
 			if (jeep !is current && jeep.scrn == scrn &&
 				jeep.action != Action.blowingUp && jeep.action != Action.destroyed &&
@@ -53,8 +53,8 @@ public:
 					pos.y >= jeep.pos.y && pos.y < jeep.pos.y + 14)) {
 				if (shooter != Shooter.check) {
 					with(g_jsounds[Snd.blowup])
-						setPitch(2),
-						playSnd;
+						//setPitch(2),
+						play(false);
 					jeep.action = Action.blowingUp;
 				}
 
@@ -64,12 +64,12 @@ public:
 		return false;
 	}
 
-	bool computerHit(Vector2f apos, Vector2i ascrn) {
+	bool computerHit(Vec apos, Vector!int ascrn) {
 		if (getPos(pos) == TileName.computer && pos.x - makeSquare(pos.x) > 6 && 
 			pos.x - makeSquare(pos.x) < g_spriteSize - 7) {
 			with(g_jsounds[Snd.blowup])
-				setPitch(2),
-				playSnd;
+				//setPitch(2),
+				play(false);
 			g_computers ~= new Computer(pos, scrn);
 			return true;
 		}

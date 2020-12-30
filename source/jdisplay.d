@@ -1,6 +1,6 @@
 import base;
 
-struct Display {
+struct JDisplay {
 private:
 	Portal _portal;
 	Layer _layer;
@@ -71,7 +71,7 @@ public:
 					g_mouse.draw;
 				break;
 				case inputJexDraw:
-					g_inputJex.draw;
+					g_inputJex.draw(gGraph);
 				break;
 				case portalNoBorderLayerBackDraw:
 					_portal.draw(Border.no, Layer.back);
@@ -89,7 +89,7 @@ public:
 					_portal.draw(Border.yes);
 				break;
 				case viewVerse:
-					g_letterBase.draw;
+					g_letterBase.draw(gGraph);
 					//displayGameText(_verse);
 				break;
 				case mission:

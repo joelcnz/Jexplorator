@@ -19,7 +19,8 @@ To run the game:
 ./jex
 
 Problems:
-
+25 10 2020 Bady bullit doesn't get erased when not in screen
+25 10 2020 Trouble with testing with editing (like being stuck with debriefing aways there and having to start a new campain then load a different building)
 
 Please read:
 Don't save over test.bin. Run the game, load a level, use [P] to place players to save.
@@ -29,29 +30,29 @@ Enter ‘cat’ for list of projects
 Enter ‘l 1’ for arena level
 Enter ’t’ to go out of the terminal
 Click for full screen, can be faster
-Press [command] + [E] and play
+Press [ctrl] + [E] and play
 
 Mouse (edit):
 S - Show verse(s), if any
-LSystem + P - place where the guys popup (see key P)
+ctrl + P - place where the guys popup (see key P)
 B - Select type of tile from mouse position. For paint brush (right click if you have a mouse plugged in - - the track pad doesn’t work)
 V - Put current tile down at mouse cursor position
 J - Jeep (add and remove)
-LSystem + 1 for front painting layer
-LSystem + 2 for normal painting layer
-LSystem + 3 for back painting layer
+ctrl + 1 for front painting layer
+ctrl + 2 for normal painting layer
+ctrl + 3 for back painting layer
 W - wipe layers (dark brick for back layer)
 G - count the number of tiles the cursor is over
 Num1, Num2 & Num3 - choose which tiles
-LSystem + L - load current project
-LSystem + S - save current project
-E - toggle edit/play
-LSystem + Return - start mission.
+ctrl + L - load current project
+ctrl + S - save current project
+ctrl + E - toggle edit/play
+*ctrl + Return - start mission.
 P - toggle between guys
 
-LSystem + esc to quit
+ctrl + esc to quit
 
-t - for terminal
+ctrl + t - for terminal
 
 Guys:
 Left player - A - left, D right, W - up (tap), S - down (tap)
@@ -104,5 +105,5 @@ Jecsplorater:
 7. Get away in a rocket
 8. Take note of the password for the next mission (if not last mission you've just completed)
 9. If you don’t make it, you can try again by pressing [command] + [E] (for edit mode) and press [command] + [return] to start again
-10. To go to next mission, press [command] + [A]
+10. To go to next mission, press [ctrl] + [A]
 11. Repeat from step 2

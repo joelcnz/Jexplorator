@@ -6,7 +6,7 @@ class Computer : Mover {
     CPUState _cpuState;
     int _blowUpFrameTiming, _blowUpFrame;
 
-    this(Vector2f pos, Vector2i scrn0) {
+    this(Vec pos, Vector!int scrn0) {
         super.scrn = scrn0;
         super.pos = makeSquare(pos);
         setTile(scrn, pos, TileName.computerBlow6);
@@ -27,6 +27,6 @@ class Computer : Mover {
     }
 
     void draw() {
-        g_window.draw(g_computerBlowUp[_blowUpFrame]);
+        gGraph.draw(g_computerBlowUp[_blowUpFrame].image, g_computerBlowUp[_blowUpFrame].position);
     }
 }

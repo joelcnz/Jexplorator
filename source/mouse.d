@@ -13,7 +13,9 @@ import base;
 
 struct MouseInput {
 	Sprite _drawBrush;
-	Vector2f _pos;
+	Vec _currentBrushPos;
+	int mx,my;
+	Vec _pos;
 	Portal _portal;
 	TileName _currentTile;
 	TileName[] _tiles;
@@ -22,20 +24,20 @@ struct MouseInput {
 	TileName[] _tilesNum3;
 	TileName[] _tilesNumSelect;
 	Layer _layer;
-	RectangleShape _square;
-	RectangleShape _squareBlack;
+	JRectangle _square,
+		_squareSolid;
 	int _whichGuyStartPos;
 
 	auto pos() { return _pos; }
 
 	this(ref Portal portal) {
-		_drawBrush = new Sprite;
-		_drawBrush.position = Vector2f(0, g_spriteSize * 10 + 10);
-		_drawBrush.setTexture = g_texture;
+		_drawBrush = new Sprite();
+		_drawBrush = inf[TileName.brick];
+		_currentBrushPos = Vec(0, g_spriteSize * 10 + 10);
 		_portal = portal;
 		_layer = Layer.normal;
 		with(_portal) {
-			scrn = Vector2i(0,0);
+			scrn = Vector!int(0,0);
 		}
 		foreach(tile; TileName.brick .. TileName.end) //#May not use
 			_tiles ~= tile;
@@ -46,21 +48,26 @@ struct MouseInput {
 			_tilesNum3 = [ladder, computer, diamond, rail, hanger, rocket];
 		_currentTile = TileName.brick;
 
-		_square = new RectangleShape;
+		_square = JRectangle(SDL_Rect(0,0,cast(int)g_spriteSize,cast(int)g_spriteSize),
+			BoxStyle.outLine,SDL_Color(255,255,255));
+		_squareSolid = JRectangle(SDL_Rect(2,2,cast(int)g_spriteSize-4,cast(int)g_spriteSize-4),
+			BoxStyle.solid,SDL_Color(0,0,255,64));
+		/+
 		_squareBlack = new RectangleShape;
 		with(_square) {
-			size = Vector2f(g_spriteSize, g_spriteSize);
+			size = Vec(g_spriteSize, g_spriteSize);
 			//fillColor = Color(0,0,0, 0);
 			fillColor = Color(128,128,128, 128);
 			outlineColor = Color(255,255,255, 180);
 			outlineThickness = 2;
 		}
 		with(_squareBlack) {
-			size = Vector2f(g_spriteSize - 4, g_spriteSize - 4);
+			size = Vec(g_spriteSize - 4, g_spriteSize - 4);
 			fillColor = Color(0,0,0, 0);
 			outlineColor = Color(0,0,0, 180);
 			outlineThickness = 2;
 		}
+		+/
 	}
 	
 	int countTiles(TileName tile, Layer layer) {
@@ -99,12 +106,14 @@ struct MouseInput {
 	}
 	
 	void process() {
-		_pos = Mouse.getPosition(g_window);
+		SDL_PumpEvents();
+		SDL_GetMouseState(&mx, &my);
+		_pos = Vec(mx,my);
 
 		if (! g_jexTerminal && ! g_doGuiFile && g_mode == Mode.edit) {
 
 			// keys by them selves
-			if (! g_keys[SDL_SCANCODE_LGUI].keyPressed && ! g_keys[SDL_SCANCODE_RGUI].keyPressed) {
+			if (! g_keys[SDL_SCANCODE_LCTRL].keyPressed && ! g_keys[SDL_SCANCODE_RCTRL].keyPressed) {
 
 				if (g_keys[SDL_SCANCODE_P].keyTrigger) {
 					_whichGuyStartPos = _whichGuyStartPos == player1 ? player2 : player1;
@@ -112,10 +121,10 @@ struct MouseInput {
 				}
 			
 				// get block from panel
-				if (_pos.x >= g_spriteSize && _pos.x < g_spriteSize + _tilesNumSelect.length * g_spriteSize &&
-					_pos.y >= g_spriteSize * 10 + 10 && _pos.y < g_spriteSize * 10 + 10 + g_spriteSize &&
-					(Mouse.isButtonPressed(Mouse.Button.Right) || g_keys[SDL_SCANCODE_B].keyPressed)) {
-					int x = cast(int)(_pos.x / g_spriteSize) - 1,
+				if (_pos.X >= g_spriteSize && _pos.X < g_spriteSize + _tilesNumSelect.length * g_spriteSize &&
+					_pos.Y >= g_spriteSize * 10 + 10 && _pos.Y < g_spriteSize * 10 + 10 + g_spriteSize &&
+					g_keys[SDL_SCANCODE_B].keyPressed) {
+					int x = cast(int)(_pos.X / g_spriteSize) - 1,
 						y = 0;
 					_currentTile = _tilesNumSelect[x];
 				}
@@ -125,8 +134,8 @@ struct MouseInput {
 						bool add = true;
 						foreach(i, jeep; g_jeeps)
 							if (inScreen(jeep.scrn))
-								if (_pos.x >= jeep.pos.x && _pos.x < jeep.pos.x + g_spriteSize &&
-									_pos.y >= jeep.pos.y && _pos.y < jeep.pos.y + g_spriteSize) {
+								if (_pos.x >= jeep.pos.X && _pos.x < jeep.pos.x + g_spriteSize &&
+									_pos.y >= jeep.pos.Y && _pos.y < jeep.pos.y + g_spriteSize) {
 									g_jeeps = g_jeeps[0 .. i] ~ g_jeeps[i + 1 .. $];
 									add = false;
 									break;
@@ -172,9 +181,9 @@ struct MouseInput {
 					_tilesNumSelect = _tilesNum3;
 				}		
 		
-				if (_pos.y < g_spriteSize * 10 && (Mouse.isButtonPressed(Mouse.Button.Right) || g_keys[SDL_SCANCODE_B].keyPressed)) {
+				if (_pos.Y < g_spriteSize * 10 && g_keys[SDL_SCANCODE_B].keyPressed) {
 					foreach(layer; Layer.back .. Layer.front + 1)
-					if (getTile(_pos, cast(Layer)layer) != TileName.gap && getTile(_pos, cast(Layer)layer) != TileName.darkBrick) {
+						if (getTile(_pos, cast(Layer)layer) != TileName.gap && getTile(_pos, cast(Layer)layer) != TileName.darkBrick) {
 								_currentTile = getTile(_pos, cast(Layer)layer);
 								break;
 							}
@@ -188,7 +197,8 @@ struct MouseInput {
 					setTile(_portal, _pos, TileName.darkBrick, Layer.back);
 				}
 
-				if ((Mouse.isButtonPressed(Mouse.Button.Left) || g_keys[SDL_SCANCODE_V].keyPressed) &&
+				//gEvent.type == SDL_MOUSEBUTTONDOWN
+				if (g_keys[SDL_SCANCODE_V].keyPressed &&
 					g_mode == Mode.edit) {
 					// draw a tile at mouse point
 					final switch(_layer) {
@@ -206,10 +216,10 @@ struct MouseInput {
 			} // keys by them selfs
 		
 			// System key held down
-			if (g_keys[SDL_SCANCODE_LGUI].keyPressed || g_keys[SDL_SCANCODE_RGUI]) {
+			if (g_keys[SDL_SCANCODE_LCTRL].keyPressed || g_keys[SDL_SCANCODE_RCTRL].keyPressed) {
 				void layerMessage() {
 					writeln("Layer set: ", _layer);
-					g_window.display;
+					gGraph.drawning();
 					while(g_keys[SDL_SCANCODE_1].keyPressed ||
 						g_keys[SDL_SCANCODE_2].keyPressed ||
 						g_keys[SDL_SCANCODE_3].keyPressed) {
@@ -221,7 +231,7 @@ struct MouseInput {
 					/+
 					auto spot = new RectangleShape;
 					with(spot)
-						spot.size = Vector2f(g_spriteSize, g_spriteSize),
+						spot.size = Vec(g_spriteSize, g_spriteSize),
 						fillColor = Color(255,255,255, 255),
 						outlineColor = Color(0,0,0, 0),
 						outlineThickness = 0;
@@ -243,7 +253,11 @@ struct MouseInput {
 				if (g_keys[SDL_SCANCODE_1].keyPressed) {
 					_layer = Layer.front;
 					
-					g_window.clear;
+					//g_window.clear;
+					//SDL_SetRenderDrawColor(gRenderer, 0, 0, 0,0);
+					//SDL_RenderClear( gRenderer );
+					gGraph.clear();
+
 					g_portals[PortalSide.editor].draw(Border.no, Layer.front);
 					layerMessage;
 				}
@@ -251,7 +265,10 @@ struct MouseInput {
 				if (g_keys[SDL_SCANCODE_2].keyPressed) {
 					_layer = Layer.normal;
 					
-					g_window.clear;
+					//SDL_SetRenderDrawColor(gRenderer, 0, 0, 0,0);
+					//SDL_RenderClear( gRenderer );
+					gGraph.clear();
+
 					g_portals[PortalSide.editor].draw(Border.no, Layer.normal);
 					layerMessage;
 				}
@@ -259,7 +276,10 @@ struct MouseInput {
 				if (g_keys[SDL_SCANCODE_3].keyPressed) {
 					_layer = Layer.back;
 					
-					g_window.clear;
+					//SDL_SetRenderDrawColor(gRenderer, 0, 0, 0,0);
+					//SDL_RenderClear( gRenderer );
+					gGraph.clear();
+
 					g_portals[PortalSide.editor].draw(Border.no, Layer.back);
 					layerMessage;
 				}
@@ -292,11 +312,11 @@ struct MouseInput {
 		} // if ! terminal
 	}
 	
-	void setTile(Portal portal, Vector2f vec, TileName tile, Layer layer = Layer.normal) {
+	void setTile(Portal portal, Vec vec, TileName tile, Layer layer = Layer.normal) {
 		if (vec.x >= 0 && vec.x < 320 &&
 			vec.y >= 0 && vec.y < 320)
 			with(portal) { //#this is the difference from the other setTile
-			with(g_screens[scrn.y][scrn.x].tiles[cast(size_t)(vec.y / g_spriteSize)][cast(size_t)(vec.x / g_spriteSize)])
+			with(g_screens[scrn.y][scrn.x].tiles[cast(size_t)(vec.Y / g_spriteSize)][cast(size_t)(vec.x / g_spriteSize)])
 					if (layer == Layer.normal)
 						tileName = tile;
 					else if (layer == Layer.front)
@@ -306,11 +326,11 @@ struct MouseInput {
 				}
 	}
 	
-	TileName getTile(Vector2f vec, Layer layer = Layer.normal) {
+	TileName getTile(Vec vec, Layer layer = Layer.normal) {
 		if (vec.x >= 0 && vec.x < 320 &&
 			vec.y >= 0 && vec.y < 320)
 			with(_portal) {
-				with(g_screens[scrn.y][scrn.x].tiles[cast(size_t)(vec.y / g_spriteSize)][cast(size_t)(vec.x / g_spriteSize)])
+				with(g_screens[scrn.Y][scrn.X].tiles[cast(size_t)(vec.Y / g_spriteSize)][cast(size_t)(vec.x / g_spriteSize)])
 					final switch(layer) {
 						case Layer.back:
 							return tileNameBack;
@@ -327,6 +347,7 @@ struct MouseInput {
 	void draw() {
 		if (g_doGuiFile)
 			return;
+		
 		if (_pos.x >= 0 && _pos.y >= 0 && _pos.x < 10 * g_spriteSize && _pos.y < 10 * g_spriteSize) {
 			foreach(y; 0 .. 10)
 				foreach(x; 0 .. 10) {
@@ -334,28 +355,39 @@ struct MouseInput {
 					z = makeSquare(_pos.x);
 					c = makeSquare(_pos.y);
 					if (x * g_spriteSize == z || y * g_spriteSize == c) {
+						_square.pos = Vec(x * g_spriteSize,y * g_spriteSize);
+						_square.draw(gGraph);
+						_squareSolid.pos = _square.pos + Vec(2,2);
+						gWin.blendMode = BlendMode.blend;
+						_squareSolid.draw(gGraph);
+						gWin.blendMode = BlendMode.none;
+						/+
 						with(_square) {
-							position = Vector2f(x * g_spriteSize + 2, y * g_spriteSize + 2);
+							position = Vec(x * g_spriteSize + 2, y * g_spriteSize + 2);
 							g_window.draw(_square);
 						}
 						with(_squareBlack) {
-							position = Vector2f(x * g_spriteSize + 4, y * g_spriteSize + 4);
+							position = Vec(x * g_spriteSize + 4, y * g_spriteSize + 4);
 							g_window.draw(_squareBlack);
 						}
+						+/
 					}
 				}
 		}
 
-		_drawBrush.textureRect = IntRect(g_locations[_currentTile].x, g_locations[_currentTile].y, g_spriteSize, g_spriteSize);
-		g_window.draw(_drawBrush);
+		////_drawBrush.textureRect = IntRect(g_locations[_currentTile].x, g_locations[_currentTile].y, g_spriteSize, g_spriteSize);
+		_drawBrush = inf[_currentTile];
+		//g_window.draw(_drawBrush);
+		gGraph.draw(_drawBrush.image,_currentBrushPos);
 
 		//#more work here (non drawing stuff here)
 		// Selection bar
-		Sprite select = new Sprite(g_texture);
+		//Sprite select = new Sprite();
 		foreach(x, tile; _tilesNumSelect) {
-			select.textureRect = IntRect(g_locations[tile].x, g_locations[tile].y, g_spriteSize, g_spriteSize);
-			select.position = Vector2f(g_spriteSize + x * g_spriteSize, g_spriteSize*10+10);
-			g_window.draw(select);
+			//select.textureRect = IntRect(g_locations[tile].x, g_locations[tile].y, g_spriteSize, g_spriteSize);
+			//select.position = Vec(g_spriteSize + x * g_spriteSize, g_spriteSize*10+10);
+			//g_window.draw(select);
+			gGraph.draw(inf[tile].image, Vec(g_spriteSize + x * g_spriteSize, g_spriteSize*10+10));
 		}
 
 		if (_pos.x >= g_spriteSize && _pos.x < g_spriteSize + _tilesNumSelect.length * g_spriteSize &&
@@ -363,12 +395,13 @@ struct MouseInput {
 
 			//#(highlite for picking brush) not working!
 			// It gets here!
-			//writeln(Vector2f(_pos.x + g_spriteSize, g_spriteSize * 10 + 2).makeSquare);
-			_square.position = Vector2f(_pos.x, g_spriteSize * 10).makeSquare + Vector2f(2, 10 + 2);
-			g_window.draw(_square);
+			//writeln(Vec(_pos.x + g_spriteSize, g_spriteSize * 10 + 2).makeSquare);
+			//_square.position = Vec(_pos.X, g_spriteSize * 10).makeSquare + Vec(2, 10 + 2);
 
-			_squareBlack.position = Vector2f(_pos.x, g_spriteSize * 10).makeSquare + Vector2f(4, 10 + 4);
-			g_window.draw(_squareBlack);
+			//g_window.draw(_square);
+
+			//_squareBlack.position = Vec(_pos.x, g_spriteSize * 10).makeSquare + Vec(4, 10 + 4);
+			//g_window.draw(_squareBlack);
 		}
 	}
 }

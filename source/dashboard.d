@@ -21,18 +21,19 @@ Score points:
 struct DashBoard {
 private:
 	static int _totalDiamonds;
-	Text[] _lines;
+	Font _font;
+	JText[] _lines;
 	int _score;
 	int _diamonds;
 	Guy _guy;
-	dstring _banner;
+	string _banner;
 public:
 	@property {
 		static int totalDiamonds() { return _totalDiamonds; }
 		static void totalDiamonds(int totalDiamonds0) { _totalDiamonds = totalDiamonds0; }
 
-		dstring banner() { return _banner; }
-		void banner(dstring banner0) { _banner = banner0; }
+		string banner() { return _banner; }
+		void banner(string banner0) { _banner = banner0; }
 
 		int score() { return _score; }
 		void score(int score0) { _score = score0; }
@@ -44,26 +45,28 @@ public:
 	@disable this();
 
 	this(Guy guy) {
+		_font = new Font();
+		_font.load(g_fontFileName,16);
 		_guy = guy;
 		foreach(i; 0 .. 4) {
-			_lines ~= new Text("", g_font, 16);
-			_lines[$ - 1].position = Vector2f((_guy.id == 0 ? 0 : 320), 320 + i * 16);
+			_lines ~= JText("", _font);
+			_lines[$ - 1].position = Vec((_guy.id == 0 ? 0 : 320), 320 + i * 16);
 		}
-		banner = "Game started"d;
+		banner = "Game started";
 	}
 
 	void process() {
 		import std.conv: text;
 		int i;
-		_lines[i++].setString = _banner;
-		_lines[i++].setString = text("Score: ", score).to!dstring;
-		_lines[i++].setString = text("Diamonds ", diamonds, " of ", totalDiamonds).to!dstring;
+		_lines[i++].text = _banner;
+		_lines[i++].text = text("Score: ", score);
+		_lines[i++].text = text("Diamonds ", diamonds, " of ", totalDiamonds);
 		//version(timeStuff) _lines[i++].setString = text("Time: ", countDownTimer).to!dstring;
 	}
 
 	void draw() {
 		foreach(line; _lines) {
-			g_window.draw(line);
+			line.draw(gGraph);
 		}
 	}
 }

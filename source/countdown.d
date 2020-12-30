@@ -10,7 +10,8 @@ import base;
 struct CountDown {
 private:
 	float _countUpTimer, _countDownTimer, _countDownStartTime; // g_countStartDownTime - g_countDownTime -- or some thing
-	Text _timeGoingUp, _timeGoingDown;
+	Font _font;
+	JText _timeGoingUp, _timeGoingDown;
 public:
 	@property {
 		auto countDownTimer() { return _countDownTimer; }
@@ -24,17 +25,25 @@ public:
 	}
 
 	void setup(int totalSeconds = 10_000) {
-		_timeGoingUp = new Text(""d, g_font, 10);
-		_timeGoingUp.position(Vector2f(0, 480 - 20)); // 10 * g_spriteSize + 10));
-		_timeGoingDown = new Text(""d, g_font, 10);
-		_timeGoingDown.position(Vector2f(0, 480 - 10)); // 10 * g_spriteSize + 10 + 10));
-		g_clock = new Clock(); // starts the clock
+		_font = new Font();
+		_font.load(g_fontFileName, 10);
+		_timeGoingUp = JText("", _font);
+		_timeGoingUp.position = Vec(0, 480 - 20); // 10 * g_spriteSize + 10));
+		_timeGoingDown = JText("", _font);
+		_timeGoingDown.position = Vec(0, 480 - 10); // 10 * g_spriteSize + 10 + 10));
+		//g_clock = new Clock(); // starts the clock
+		doStart();
 		countDownTimer = 0;
 		countDownStartTime = totalSeconds;
 	}
 
+	~this() {
+		destroy(_font);
+	}
+
 	void doStart() {
-		g_clock.restart();
+		g_clock.reset();
+		g_clock.start;
 	}
 
 	float getTimeLeft() {
@@ -43,10 +52,10 @@ public:
 
 	void process() {
 		//_countUpTimer = g_clock.getElapsedTime.asSeconds;
-		_countUpTimer = g_clock.getElapsedTime.total!"seconds";
+		_countUpTimer = g_clock.peek().total!"seconds";
 		_countDownTimer = _countDownStartTime - _countUpTimer;
-		_timeGoingUp.setString = text("Timer: ", cast(int)(_countUpTimer)).to!dstring;
-		_timeGoingDown.setString = text("Time Left: ", cast(int)(_countDownTimer)).to!dstring;
+		_timeGoingUp.text = text("Timer: ", cast(int)(_countUpTimer));
+		_timeGoingDown.text = text("Time Left: ", cast(int)(_countDownTimer));
 		//if (_countDownTimer > -1 && _countDownTimer < 1) {
 		if (cast(int)_countDownTimer == 0 && g_gameOver == false) {
 			writeln("Game over!");
@@ -61,7 +70,7 @@ public:
 	}
 
 	void draw() {
-		g_window.draw(_timeGoingUp);
-		g_window.draw(_timeGoingDown);
+		_timeGoingUp.draw(gGraph);
+		_timeGoingDown.draw(gGraph);
 	}
 }

@@ -20,7 +20,7 @@ module main;
 
 import base;
 
-dstring[] discList;
+string[] discList;
 
 void getDiscList(in bool show = false) {
 	import std.range;
@@ -30,13 +30,13 @@ void getDiscList(in bool show = false) {
 	import std.string;
 
 	if (show)
-		g_inputJex.addToHistory("List of building files"d);
+		g_inputJex.addToHistory("List of building files");
 	discList.length = 0;
 	foreach(i, string name; dirEntries(".", "*.{bin}", SpanMode.shallow).
 			array.sort!"a.toLower < b.toLower".enumerate(1)) {
-		discList ~= name.to!dstring;
+		discList ~= name;
 		if (show)
-			g_inputJex.addToHistory(text(i, " - ", name.trim).to!dstring);
+			g_inputJex.addToHistory(text(i, " - ", name.trim));
 	}
 }
 
@@ -44,16 +44,16 @@ int main(string[] args) {
 	scope(exit)
 		"\n# #\n# #\n # \n# #\n# #\n".writeln;
 
-	setup;
-
+	Setup doSetup;
+	doSetup.setup();
     scope(exit)
-        SDL_DestroyRenderer(gRenderer),
-        SDL_Quit();
+        close;
 
 	getDiscList;
 
-	auto blackPlastic = new RectangleShape;
-	blackPlastic.size = Vector2f(320, 320);
+	//auto blackPlastic = new RectangleShape;
+	//blackPlastic.size = Vec(320, 320);
+	auto blackPlastic = JRectangle(SDL_Rect(320,320,0,0), BoxStyle.solid, SDL_Color(0,0,0));
 
 	Menus menus;
 	menus.setup;
@@ -63,14 +63,15 @@ int main(string[] args) {
 
 	updateProjectList("");
 
-	SDL_Event event;
 	bool done;
     while(! done) {
-		SDL_PumpEvents();
-		
-        SDL_PollEvent(&event);
-        if(event.type == SDL_QUIT)
-                done = true;
+		FPS.start();
+		while(gFEvent.update) {
+			if(gFEvent.isQuit) 
+				done = true;
+		}
+
+		SDL_PumpEvents();		
 
 		if (mret == MenuSelect.doLoop) {
 			mret = menus.process;
@@ -84,16 +85,15 @@ int main(string[] args) {
 				case MenuSelect.doLoop:
 					continue;
 				case MenuSelect.quit:
-					//g_window.close();
 					done = true;
 					break;
 			}
 		}
 
-		if (g_keys[SDL_SCANCODE_LGUI].keyPressed ||
-			g_keys[SDL_SCANCODE_RGUI].keyPressed) {
+		if (g_keys[SDL_SCANCODE_LCTRL].keyPressed ||
+			g_keys[SDL_SCANCODE_RCTRL].keyPressed) {
 			if (g_keys[SDL_SCANCODE_Q].keyTrigger)
-				done = true; //g_window.close;
+				done = true;
 		
 			if (g_keys[SDL_SCANCODE_A].keyTrigger) {
 				mret = MenuSelect.doLoop;
@@ -102,13 +102,15 @@ int main(string[] args) {
 
 			if (g_keys[SDL_SCANCODE_E].keyTrigger) {
 				if (g_mode == Mode.edit) {
+					g_missionStage = MissionStage.playing;
 					g_mode = Mode.play;
 					foreach(portal; 0 .. 2)
 						g_portals[portal].grace = g_graceStartTime;
 					g_timer.doStart;
 				}
-				else
+				else {					
 					g_mode = Mode.edit;
+				}
 
 				//g_inputJex.addToHistory(g_mode.to!dstring);
 				//writeln(g_mode);
@@ -124,10 +126,10 @@ int main(string[] args) {
 			}
 
 			if (g_keys[SDL_SCANCODE_F].keyTrigger) {
-				g_window.setVerticalSyncEnabled(true);
+				//g_window.setVerticalSyncEnabled(true);
 				//writeln("Sync on");
 			} else {
-				g_window.setVerticalSyncEnabled(false);
+				//g_window.setVerticalSyncEnabled(false);
 				//writeln("Sync off");
 			}
 		}
@@ -150,6 +152,7 @@ int main(string[] args) {
 				foreach(jeep; g_jeeps)
 					if (inScreen(jeep.scrn))
 						jeep.process;
+
 				//g_jeeps = g_jeeps.map!((a) { if (inScreen(a.scrn)) a.process; return a; }).array;
 				//void ifProcess(ref ) {
 				//	if (inScreen(a.scrn)) a.process; return a; }
@@ -166,8 +169,7 @@ int main(string[] args) {
 		//	portal.process;
 		g_portals[0 .. 2] = g_portals[0 .. 2].map!((a) { a.process; return a; }).array;
 		//g_portals[0 .. 2] = g_portals[0 .. 2].each!(a => a.process).array; //#each - not work
-
-		g_window.clear();
+		gGraph.clear(); // Clear screen
 
 		void doComputerBlowDraw() {
 			foreach(computer; g_computers)
@@ -178,10 +180,10 @@ int main(string[] args) {
 						g_display.display(DisplayType.computerBlow);
 					}
 					if (screens[PortalSide.right]) {
-						g_computerBlowUp[computer._blowUpFrame].position = g_computerBlowUp[computer._blowUpFrame].position + Vector2f(320, 0);
+						g_computerBlowUp[computer._blowUpFrame].position = g_computerBlowUp[computer._blowUpFrame].position + Vec(320, 0);
 						g_display.setComputer(computer);
 						g_display.display(DisplayType.computerBlow);
-						g_computerBlowUp[computer._blowUpFrame].position = g_computerBlowUp[computer._blowUpFrame].position - Vector2f(320, 0);
+						g_computerBlowUp[computer._blowUpFrame].position = g_computerBlowUp[computer._blowUpFrame].position - Vec(320, 0);
 					}
 				}
 		}
@@ -199,9 +201,9 @@ int main(string[] args) {
 						g_display.display(DisplayType.jeepBullitDraw);
 					}
 					if (screens[PortalSide.right] && g_mode != Mode.edit) {
-						jeep.pos = jeep.pos + Vector2f(320, 0);
+						jeep.pos = jeep.pos + Vec(320, 0);
 						if (jeep.jeepBullit !is null)
-							jeep.jeepBullit.pos = jeep.jeepBullit.pos + Vector2f(320, 0);
+							jeep.jeepBullit.pos = jeep.jeepBullit.pos + Vec(320, 0);
 						
 						g_display.setJeep(jeep);
 						g_display.display(DisplayType.jeepDraw);
@@ -209,10 +211,10 @@ int main(string[] args) {
 						g_display.setJeepBullit(jeep.jeepBullit);
 						g_display.display(DisplayType.jeepBullitDraw);
 
-						jeep.pos = jeep.pos + Vector2f(-320, 0);
+						jeep.pos = jeep.pos + Vec(-320, 0);
 
 						if (jeep.jeepBullit !is null)
-							jeep.jeepBullit.pos = jeep.jeepBullit.pos + Vector2f(-320, 0);
+							jeep.jeepBullit.pos = jeep.jeepBullit.pos + Vec(-320, 0);
 					}
 				}
 			}
@@ -227,15 +229,15 @@ int main(string[] args) {
 						g_display.display(DisplayType.bullitsDraw);
 					}
 					if (screens[PortalSide.right] && g_mode != Mode.edit) {
-						bullit.pos = bullit.pos + Vector2f(320, 0);
+						bullit.pos = bullit.pos + Vec(320, 0);
 						g_display.setBullit(bullit);
 						g_display.display(DisplayType.bullitsDraw);
-						bullit.pos = bullit.pos + Vector2f(-320, 0);
+						bullit.pos = bullit.pos + Vec(-320, 0);
 					}
 				}
 		}
 
-		// Display
+		// JDisplay
 		break1: final switch(g_mode) {
 			case Mode.play:
 				//Draw back layer
@@ -269,12 +271,10 @@ int main(string[] args) {
 	//						g_display.display(DisplayType.jeepBullitDraw);
 	//					}
 	//				}
-
 				//Draw front layer
 				foreach(ref portal; g_portals[0 .. 2]) {
 					portal.draw(Border.no, Layer.front);
 				}
-
 //				g_mainPopBanner.draw;
 			break;
 			case Mode.edit:
@@ -293,7 +293,7 @@ int main(string[] args) {
 				}
 			+/
 				if (g_doGuiFile) {
-					Point pnt = Point(g_mouse.pos.x, g_mouse.pos.y);
+					auto pnt = Vec(g_mouse.pos.x, g_mouse.pos.y);
 					g_guiFile.process(pnt);
 					g_guiConfirm.process(pnt);
 					if (g_stateConfirm == StateConfirm.yes) {
@@ -316,8 +316,8 @@ int main(string[] args) {
 							break;
 						}
 					}
-					g_guiFile.draw;
-					g_guiConfirm.draw;
+					g_guiFile.draw(gGraph);
+					g_guiConfirm.draw(gGraph);
 
 					break break1;
 				}
@@ -330,16 +330,16 @@ int main(string[] args) {
 
 				if (! g_jexTerminal && ! g_doGuiFile) {
 					with(g_portals[PortalSide.editor]) {
-						if (! (g_keys[SDL_SCANCODE_LGUI].keyPressed ||
-							g_keys[SDL_SCANCODE_RGUI].keyPressed)) {
+						if (! (g_keys[SDL_SCANCODE_LCTRL].keyPressed ||
+							g_keys[SDL_SCANCODE_RCTRL].keyPressed)) {
 							if (! showingBible) {
 								if (g_keys[SDL_SCANCODE_S].keyTrigger) {
 									g_display.setVerse(g_bible.argReference(
-										g_bible.getReference(
-											g_screens[scrn.y][scrn.x].verseRef.split)));
+										g_bible.argReferenceToArgs(
+											g_screens[scrn.y][scrn.x].verseRef)));
 									
 									g_doLetUpdate = showingBible = true;
-									writeln("Verse(s): ", g_screens[scrn.y][scrn.x].verseRef.split);
+									writeln("Verse(s): ", g_screens[scrn.y][scrn.x].verseRef);
 								}
 							}
 							if (showingBible) {
@@ -350,22 +350,22 @@ int main(string[] args) {
 
 						if (g_keys[SDL_SCANCODE_UP].keyTrigger) {
 							if (scrn.y > 0)
-								scrn = scrn + Vector2i(0, -1);
+								scrn = scrn + Vector!int(0, -1);
 						}
 
 						if (g_keys[SDL_SCANCODE_RIGHT].keyTrigger) {
 							if (scrn.x + 1 < g_scrnDim.x)
-								scrn = scrn + Vector2i(1, 0);
+								scrn = scrn + Vector!int(1, 0);
 						}
 
 						if (g_keys[SDL_SCANCODE_DOWN].keyTrigger) {
 							if  (scrn.y + 1 < g_scrnDim.y)
-								scrn = scrn + Vector2i(0, 1);
+								scrn = scrn + Vector!int(0, 1);
 						}
 
 						if (g_keys[SDL_SCANCODE_LEFT].keyTrigger) {
 							if  (scrn.x > 0)
-								scrn = scrn + Vector2i(-1, 0);
+								scrn = scrn + Vector!int(-1, 0);
 						}
 					}
 				}
@@ -375,22 +375,23 @@ int main(string[] args) {
 		g_popLine.process;
 		
 		// just draw border
-		if (g_mode == Mode.play)
+		if (g_mode == Mode.play) {
 			foreach(ref portal; g_portals[0 .. 2]) {
 				g_display.setPortal(portal);
 				g_display.display(DisplayType.playBorder);
 			}
+		}
 		
 		if (g_jexTerminal) {
-			int processValue(dstring s) {
-				string result = s.to!string;
+			int processValue(string s) {
+				string result = s;
 				import std.regex;
 				auto pattern = regex(`([^-0-9]*)([-0-9]+)(.*)`); //#no I didn't do this my self
 				//auto pattern = regex(`([^-0-9]*)([-0-9]+)`); //'(.*)' taken out
 				auto m = result.matchFirst(pattern);
 
 				if (! result.length || ! m[2].length) {
-					g_inputJex.addToHistory("Input error, no value! Defaulting to '1'"d);
+					g_inputJex.addToHistory("Input error, no value! Defaulting to '1'");
 					return 1;
 				} else {
 					return m[2].to!int;
@@ -409,7 +410,7 @@ int main(string[] args) {
 					}
 					else
 						textStr = "default";
-					dstring str = textStr;
+					string str = textStr;
 					if (str != "Joel" &&
 						str != "Sean" &&
 					    str != "Jade")
@@ -435,7 +436,7 @@ int main(string[] args) {
 							auto verseRef = dargs[1 .. $].to!(string[]).join(" ");
 
 							g_screens[sy][sx].verseRef = verseRef;
-							auto getVerses = g_bible.argReference(g_bible.getReference(verseRef.split));
+							auto getVerses = g_bible.argReference(g_bible.argReferenceToArgs(verseRef));
 							string[] verses;
 							if (getVerses.length)
 								verses = getVerses.split('\n')[0 .. $ - 1];
@@ -451,9 +452,9 @@ int main(string[] args) {
 								g_timer.setup(timer);
 								if (timer == 0) { //#What ever can the problem here b!?
 									g_timer.setup(10_000);
-									g_inputJex.addToHistory("Count down timer is reset"d);
+									g_inputJex.addToHistory("Count down timer is reset");
 								} else {
-									g_inputJex.addToHistory(text("Race set (", timer, " seconds)").to!dstring);
+									g_inputJex.addToHistory(text("Race set (", timer, " seconds)"));
 								}
 							}
 						break;
@@ -474,11 +475,11 @@ int main(string[] args) {
 							if (g_guys[0].bullitProof) {
 								g_guys[0].bullitProof = false;
 								g_guys[1].bullitProof = false;
-								g_inputJex.addToHistory("Bullit proof off! (can shoot each other)"d);
+								g_inputJex.addToHistory("Bullit proof off! (can shoot each other)");
 							} else {
 								g_guys[0].bullitProof = true;
 								g_guys[1].bullitProof = true;
-								g_inputJex.addToHistory("Bullit proof on! (can't shoot each other)"d);
+								g_inputJex.addToHistory("Bullit proof on! (can't shoot each other)");
 							}
 						break;
 						case "reset":
@@ -488,7 +489,7 @@ int main(string[] args) {
 						case "Joel":
 						case "Sean":
 						case "Jade":
-							g_inputJex.addToHistory("Hello " ~ str ~ ", how are you?"d);
+							g_inputJex.addToHistory("Hello " ~ str ~ ", how are you?");
 							break;
 							case "t":
 								g_jexTerminal = false;
@@ -502,11 +503,11 @@ int main(string[] args) {
 									int sdx, sdy; // screens dimentions
 									sdx = processValue(dargs[1]); //dargs[1].to!int;
 									sdy = processValue(dargs[2]); //dargs[2].to!int;
-									addToHistory(format("Creating: width=%s, height=%s, Total: %s", sdx, sdy, sdx * sdy).to!dstring);
+									addToHistory(format("Creating: width=%s, height=%s, Total: %s", sdx, sdy, sdx * sdy));
 									if (g_building.createMap(sdx, sdy))
-										addToHistory("Creating done"d);
+										addToHistory("Creating done");
 									g_building.setFileName("test.bin");
-									addToHistory("building set to 'test.bin'"d);
+									addToHistory("building set to 'test.bin'");
 								}
 							break;
 							case "go":
@@ -516,10 +517,10 @@ int main(string[] args) {
 									sdy = processValue(dargs[2]); //dargs[2].to!int;
 									if (sdx >= 0 && sdx < g_scrnDim.x &&
 										sdy >= 0 && sdy < g_scrnDim.y) {
-										g_portals[PortalSide.editor].scrn = Vector2i(sdx,sdy);
-										addToHistory(format("Screen: %s %s", sdx, sdy).to!dstring);
+										g_portals[PortalSide.editor].scrn = Vector!int(sdx,sdy);
+										addToHistory(format("Screen: %s %s", sdx, sdy));
 									} else
-										addToHistory("Invalid input"d);
+										addToHistory("Invalid input");
 								} // if == 3
 							break;
 							case "cat":
@@ -530,62 +531,62 @@ int main(string[] args) {
 								if (dargs.length == 2 && dargs[1][0].isDigit) {
 									g_building.setFileName("backup.bin");
 									g_building.saveBuilding;
-									addToHistory("Back up saved (backup.bin)"d);
+									addToHistory("Back up saved (backup.bin)");
 
 									//int select = dargs[1].to!int - 1;
 									//int select = processValue(dargs[1].to!string).to!int - 1;
 									int select = processValue(dargs[1]) - 1;
 									if (select >= 0 && select < discList.length) {
-										addToHistory(text("Loading as: ", discList[select]).to!dstring);
-										g_building.setFileName(discList[select].to!string);
+										addToHistory(text("Loading as: ", discList[select]));
+										g_building.setFileName(discList[select]);
 									} else {
-										addToHistory(text(select + 1, " is invaild input.").to!dstring);
+										addToHistory(text(select + 1, " is invaild input."));
 									}
 									if (! g_building.loadBuilding)
-										addToHistory(text("Failed loading: ", g_building.fileName).to!dstring);
+										addToHistory(text("Failed loading: ", g_building.fileName));
 								}
 							break;
 							case "s", "save":
 								if (dargs.length == 2) {
-									g_building.setFileName(dargs[1].to!string ~ ".bin");
+									g_building.setFileName(dargs[1] ~ ".bin");
 									g_building.saveBuilding;
 								}
 							break;
-							case "d", "remove", "delete":
+							case "", "remove", "delete":
 								g_building.setFileName("backup.bin");
 								addToHistory("Deleted is saved to backup.bin");
 								g_building.saveBuilding;
 							int select = processValue(dargs[1]) - 1;
 								if (select >= 0 && select < discList.length) {
-									addToHistory(text("Removing: ", discList[select]).to!dstring);
+									addToHistory(text("Removing: ", discList[select]));
 									import std.file;
-									remove(discList[select].to!string);
+									remove(discList[select]);
 								}
 							break;
 							case "info", "i":
 								//#why do I need to put format in instead of text (the ': ' gets removed with text)
 								foreach(i, guy; g_guys)
 									with(guy) {
-										addToHistory(text((i == 0 ? "Left" : "Right"), " Guy \\/").to!dstring);
-										addToHistory(text("ST position screen (resetPos): ", resetPos).to!dstring);
-										addToHistory(format("ST which screen (portal.resetScrn): %s", portal.resetPosScrn).to!dstring);
-										addToHistory(text("guy place on screen (pos): ", pos).to!dstring);
-										addToHistory(format("Which screen [portal.scrn]: %s", portal.scrn).to!dstring);
-										addToHistory(text("Diamonds (diamonds): ", dashBoard.diamonds).to!dstring);
+										addToHistory(text((i == 0 ? "Left" : "Right"), " Guy \\/"));
+										addToHistory(text("ST position screen (resetPos): ", resetPos));
+										addToHistory(format("ST which screen (portal.resetScrn): %s", portal.resetPosScrn));
+										addToHistory(text("guy place on screen (pos): ", pos));
+										addToHistory(format("Which screen [portal.scrn]: %s", portal.scrn));
+										addToHistory(text("Diamonds (diamonds): ", dashBoard.diamonds));
 										import std.range;
-										addToHistory("-".replicate(7).to!dstring);
+										addToHistory("-".replicate(7));
 									}
-								addToHistory("Other stuff \\/"d);
-								addToHistory(text("Building: ", g_building.fileName).to!dstring);
-								addToHistory(text("g_scrnDim: ", g_scrnDim).to!dstring);
+								addToHistory("Other stuff \\/");
+								addToHistory(text("Building: ", g_building.fileName));
+								addToHistory(text("g_scrnDim: ", g_scrnDim));
 								//#here
 								addToHistory(text("Screen name: ",
 									g_screens[g_portals[PortalSide.editor].scrn.y][
-											g_portals[PortalSide.editor].scrn.x].verseRef).to!dstring);
+											g_portals[PortalSide.editor].scrn.x].verseRef));
 							break;
 							case "exit", "quit":
-                                addToHistory("Exiting to OS..."d, terminal);
-								g_window.close();
+                                addToHistory("Exiting to OS...", terminal);
+								done = true;
 							break;
 					}
 					textStr = "";
@@ -601,12 +602,13 @@ int main(string[] args) {
 		if (g_popLine._pban.show)
 			g_popLine.draw;
 		
-		if (g_mode == Mode.play)
+		if (g_mode == Mode.play) {
 			foreach(g; g_guys) {
 				if (g.escapeStatus == GuyEscapeStatus.outOfTime) {
 					g.banner.draw;
 				}
 			}
+		}
 
 		if (g_mode == Mode.play && g_displayGameText == true) {
 			g_display.display(DisplayType.viewVerse);
@@ -625,8 +627,8 @@ int main(string[] args) {
 
 			foreach(i, p; g_guys) {
 				if (p.hide == Hide.hidden) {
-					blackPlastic.position = Vector2f(i * 320, 0);
-					g_window.draw(blackPlastic);
+					blackPlastic.pos = Vec(cast(int)i * 320, 0);
+					blackPlastic.draw(gGraph);
 				}
 			}
 
@@ -651,26 +653,29 @@ int main(string[] args) {
 				g_display.display(DisplayType.viewVerse);
 		}
 
-	    g_window.display();
+		//Update screen
+		gGraph.drawning(); // Swap buffers
+
+		FPS.rate();
 	}
 
 	return 0;
 }
 
 void save() {
-	g_building.setFileName(g_fileRootName.to!string ~ ".bin");
+	g_building.setFileName(g_fileRootName ~ ".bin");
 	g_building.saveBuilding;
-	g_currentProjectName = g_fileRootName.to!dstring;
+	g_currentProjectName = g_fileRootName;
 	updateProjectList("");
 }
 
 void load() {
 	g_building.setFileName("backup.bin");
 	g_building.saveBuilding;
-	jx.addToHistory("Back up saved (backup.bin)"d);
-	g_building.setFileName(g_fileRootName.to!string ~ ".bin");
+	jx.addToHistory("Back up saved (backup.bin)");
+	g_building.setFileName(g_fileRootName ~ ".bin");
 	if (! g_building.loadBuilding)
-		jx.addToHistory(text("Failed loading: ", g_building.fileName ~ ".bin").to!dstring);
+		jx.addToHistory(text("Failed loading: ", g_building.fileName ~ ".bin"));
 	else
 		g_currentProjectName = g_fileRootName;
 	updateProjectList("");
@@ -686,20 +691,30 @@ void del() {
 	g_building.saveBuilding;
 	import std.file;
 	try
-		remove(g_fileRootName.to!string ~ ".bin");
+		remove(g_fileRootName ~ ".bin");
 	catch(Exception e)
 		jx.addToHistory("Removing file failier");
 	updateProjectList("");
 }
 
 void changeName() {
+	scope(success) {
+		//g_currentProjectName = g_fileRootName;
+		g_building.setFileName(g_currentProjectName ~ ".bin");
+		updateProjectList("");
+	}
 	import std.file : rename;
 
 	try
-		rename(g_currentProjectName.to!string ~ ".bin", g_fileRootName.to!string ~ ".bin");
+		rename(g_currentProjectName ~ ".bin", g_fileRootName ~ ".bin");
 	catch(Exception e)
 		jx.addToHistory("Renaming file failier: ", e.msg);
-	//g_currentProjectName = g_fileRootName;
-	g_building.setFileName(g_currentProjectName.to!string ~ ".bin");
-	updateProjectList("");
+}
+
+void close() {
+	destroy(gGraph);
+	destroy(loader);
+
+	destroy(window);
+	sdlDestroy();
 }

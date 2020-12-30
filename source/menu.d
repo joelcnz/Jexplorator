@@ -4,16 +4,16 @@ struct Menus {
 private:
 	bool _firstRun = true;
 	string[] _mainMenu;
-	Text[] _lines;
+	JText[] _lines;
 	string[] _folderNames;
 	Menu _menu;
 public:
 	void setupDisplay(in string[] lines) {
-
 		_lines.length = 0;
 		foreach(i, line; lines) {
-			_lines ~= new Text(line, g_font, 16);
-			_lines[$ - 1].position = Vector2f(100, 100 + i * 16);
+			_lines ~= JText(line, gFont);
+			_lines[$ - 1].setSize = 12;
+			_lines[$ - 1].position = Vec(100, 100 + i * 12);
 		}
 	}
 
@@ -68,8 +68,8 @@ public:
 
 	MenuSelect process() {
 
-		if (g_keys[SDL_SCANCODE_LGUI].keyPressed && g_keys[SDL_SCANCODE_ESCAPE].keyPressed) {
-			g_window.close;
+		if (g_keys[SDL_SCANCODE_LCTRL].keyPressed && g_keys[SDL_SCANCODE_ESCAPE].keyPressed) {
+			return MenuSelect.quit;
 		}
 
 		with(MenuSelect)
@@ -116,21 +116,22 @@ public:
 			}
 
 		if (g_keys[SDL_SCANCODE_0].keyTrigger || g_keys[SDL_SCANCODE_ESCAPE].keyTrigger) {
-			g_window.close;
+			return MenuSelect.quit;
 		}
 
-		g_window.clear;
+		gGraph.clear();
 
 		draw;
 
-		g_window.display;
+		gGraph.drawning(); // Swap buffers
 
 		return MenuSelect.doLoop;
 	}
 
 	void draw() {
 		foreach(line; _lines) {
-			g_window.draw(line);
+			//g_window.draw(line);
+			line.draw(gGraph);
 		}
 	}
 }
